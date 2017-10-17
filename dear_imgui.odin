@@ -2,11 +2,11 @@
  *  @Name:     dear_imgui
  *  
  *  @Author:   Mikkel Hjortshoej
- *  @Email:    hjortshoej@handmade.network
+ *  @Email:    hoej@northwolfprod.com
  *  @Creation: 10-05-2017 21:11:30
  *
  *  @Last By:   Mikkel Hjortshoej
- *  @Last Time: 15-10-2017 22:12:58
+ *  @Last Time: 17-10-2017 22:07:59
  *  
  *  @Description:
  *      Wrapper for Dear ImGui 1.49.
@@ -608,7 +608,7 @@ foreign cimgui {
 
 /////// Text
 text :: proc           (fmt_: string, args: ...any) {
-    im_text(_make_text_string(fmt_, ...args));
+    im_text_unformatted(_make_text_string(fmt_, ...args));
 }
 text_colored :: proc   (col : Vec4, fmt_: string, args: ...any) {
     im_text_colored(col, _make_text_string(fmt_, ...args));
@@ -633,7 +633,7 @@ foreign cimgui {
     im_label_text :: proc   (label : Cstring, fmt_ : Cstring) #link_name "igLabelText" ---;
     im_bullet_text :: proc  (fmt_ : Cstring)                  #link_name "igBulletText" ---;
 
-    im_text_unformatted :: proc(text : Cstring, text_end : Cstring) #link_name "igTextUnformatted" ---;
+    im_text_unformatted :: proc(text : Cstring, text_end : Cstring = nil) #link_name "igTextUnformatted" ---;
     bullet :: proc         ()                                   #link_name "igBullet" ---;
 }
 
@@ -1134,13 +1134,23 @@ get_mouse_drag_delta :: proc(button : i32 = 0, lock_threshold : f32 = -1.0) -> V
     return out;
 }
 
+get_clipboard_text :: proc() -> string {
+    c_str := im_get_clipboard_text();
+    o_str := strings.to_odin_string(cast(^u8)c_str);
+    return o_str;
+}
+
+set_clipboard_text :: proc(text : string) {
+    im_set_clipboard_text(Cstring(&text[0]));
+}
+
 foreign cimgui {
     // Helpers functions to access functions pointers in  ::GetIO()
     mem_alloc :: proc         (sz : u64 /*size_t*/) -> rawptr #link_name "igMemAlloc" ---;
     mem_free :: proc          (ptr : rawptr)                  #link_name "igMemFree" ---;
-    //@TODO(Hoej): Figure out if these should be wrapped
-    get_clipboard_text :: proc() -> Cstring                   #link_name "igGetClipboardText" ---;
-    set_clipboard_text :: proc(text : Cstring)                #link_name "igSetClipboardText" ---;
+
+    im_get_clipboard_text :: proc() -> Cstring                   #link_name "igGetClipboardText" ---;
+    im_set_clipboard_text :: proc(text : Cstring)                #link_name "igSetClipboardText" ---;
 
     // Internal state access - if you want to share ImGui state between modules (e.g. DLL) or allocate it yourself
     get_version :: proc        () -> Cstring                                                                                     #link_name "igGetVersion" ---;
