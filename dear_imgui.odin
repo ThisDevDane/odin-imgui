@@ -6,7 +6,7 @@
  *  @Creation: 10-05-2017 21:11:30
  *
  *  @Last By:   Mikkel Hjortshoej
- *  @Last Time: 17-10-2017 22:07:59
+ *  @Last Time: 29-10-2017 22:54:18
  *  
  *  @Description:
  *      Wrapper for Dear ImGui 1.49.
@@ -508,7 +508,7 @@ foreign cimgui {
     set_scroll_y :: proc           (scroll_y : f32)                    #link_name "igSetScrollY" ---;
     set_scroll_here :: proc        (center_y_ratio : f32)              #link_name "igSetScrollHere" ---;
     set_scroll_from_pos_y :: proc  (pos_y : f32, center_y_ratio : f32) #link_name "igSetScrollFromPosY" ---;
-    set_keyboard_focus_here :: proc(offset : i32)                      #link_name "igSetKeyboardFocusHere" ---;
+    set_keyboard_focus_here :: proc(offset : i32 = 0)                  #link_name "igSetKeyboardFocusHere" ---;
 
     set_state_storage :: proc      (tree : ^GuiStorage) #link_name "igSetStateStorage" ---;
     get_state_storage :: proc      () -> ^GuiStorage    #link_name "igGetStateStorage" ---;
@@ -586,9 +586,9 @@ foreign cimgui {
     im_columns :: proc(count : i32, id : Cstring, border : bool)  #link_name "igColumns" ---;
     next_column :: proc      ()                                   #link_name "igNextColumn" ---;
     get_column_index :: proc () -> i32                            #link_name "igGetColumnIndex" ---;
-    get_column_offset :: proc(column_index : i32) -> f32          #link_name "igGetColumnOffset" ---;
+    get_column_offset :: proc(column_index : i32 = -1) -> f32     #link_name "igGetColumnOffset" ---;
     set_column_offset :: proc(column_index : i32, offset_x : f32) #link_name "igSetColumnOffset" ---;
-    get_column_width :: proc (column_index : i32) -> f32          #link_name "igGetColumnWidth" ---;
+    get_column_width :: proc (column_index : i32 = -1) -> f32     #link_name "igGetColumnWidth" ---;
     get_columns_count :: proc() -> i32                            #link_name "igGetColumnsCount" ---;
 
     // ID scopes
@@ -936,12 +936,12 @@ collapsing_header_ex :: proc(label : string, p_open : ^bool, flags : GuiTreeNode
 }
 
 // Widgets: Selectable / Lists
-selectable :: proc(label : string, selected : bool, flags : GuiSelectableFlags, size : Vec2) -> bool {
+selectable :: proc(label : string, selected : bool = false, flags : GuiSelectableFlags = 0, size : Vec2 = Vec2{0,0}) -> bool {
     foreign cimgui im_selectable :: proc(label : Cstring, selected : bool, flags : GuiSelectableFlags, size : Vec2) -> bool #link_name "igSelectable" ---;
     return im_selectable(_make_label_string(label), selected, flags, size);
 }
 
-selectable_ex :: proc(label : string, p_selected : ^bool, flags : GuiSelectableFlags, size : Vec2) -> bool {
+selectable :: proc(label : string, p_selected : ^bool, flags : GuiSelectableFlags = 0, size : Vec2 = Vec2{0,0}) -> bool {
     foreign cimgui im_selectable_ex :: proc(label : Cstring, p_selected : ^bool, flags : GuiSelectableFlags, size : Vec2) -> bool #link_name "igSelectableEx" ---;
     return im_selectable_ex(_make_label_string(label), p_selected, flags, size);
 }
