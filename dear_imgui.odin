@@ -6,13 +6,14 @@
  *  @Creation: 10-05-2017 21:11:30
  *
  *  @Last By:   Mikkel Hjortshoej
- *  @Last Time: 12-11-2017 17:08:27
+ *  @Last Time: 12-11-2017 22:20:01
  *  
  *  @Description:
- *      Wrapper for Dear ImGui 1.49.
+ *      Wrapper for Dear ImGui 1.52
  */
 foreign import "cimgui.lib";
 import "core:fmt.odin";
+import "core:mem.odin";
 import "core:math.odin";
 import "core:strings.odin"; //@TODO(Hoej): remove the need for
 
@@ -416,14 +417,11 @@ _MISC_BUF_SIZE         :: 1024;
 
 //TODO(Hoej): Handle when a "\x00" is passed
 
-@(thread_local)
-_text_buf        : [_TEXT_BUF_SIZE       ]u8;
-@(thread_local)
-_label_buf       : [_LABEL_BUF_SIZE      ]u8;
-@(thread_local)
-_display_fmt_buf : [_DISPLAY_FMT_BUF_SIZE]u8;
-@(thread_local)
-_misc_buf        : [_MISC_BUF_SIZE       ]u8;
+@(thread_local) _text_buf        : [_TEXT_BUF_SIZE       ]u8;
+@(thread_local) _label_buf       : [_LABEL_BUF_SIZE      ]u8;
+@(thread_local) _display_fmt_buf : [_DISPLAY_FMT_BUF_SIZE]u8;
+@(thread_local) _misc_buf        : [_MISC_BUF_SIZE       ]u8;
+
 _make_text_string :: proc       (fmt_: string, args: ...any) -> Cstring {
     s := fmt.bprintf(_text_buf[..], fmt_, ...args);
     _text_buf[len(s)] = 0;
@@ -468,48 +466,44 @@ foreign cimgui {
 
 
 // Window
-begin :: proc (name : string, open : ^bool = nil, flags : GuiWindowFlags = 0) -> bool {
-    return im_begin(_make_label_string(name), open, flags);
-}
-
-begin_child :: proc (str_id : string, size : Vec2 = Vec2{0,0}, border : bool = true, extra_flags : GuiWindowFlags = 0) -> bool {
-    return im_begin_child(_make_label_string(str_id), size, border, extra_flags);
-}
+begin                         :: proc (name : string, open : ^bool = nil, flags : GuiWindowFlags = 0) -> bool                                    { return im_begin(_make_label_string(name), open, flags); }
+begin_child                   :: proc (str_id : string, size : Vec2 = Vec2{0,0}, border : bool = true, extra_flags : GuiWindowFlags = 0) -> bool { return im_begin_child(_make_label_string(str_id), size, border, extra_flags); }
+get_content_region_max        :: proc() -> Vec2                                                                                                  { res : Vec2 = ---; im_get_content_region_max(&res); return res; }
+get_content_region_avail      :: proc() -> Vec2                                                                                                  { res : Vec2 = ---; im_get_content_region_avail(&res); return res; }
+get_window_content_region_min :: proc() -> Vec2                                                                                                  { res : Vec2 = ---; im_get_window_content_region_min(&res); return res; }
+get_window_content_region_max :: proc() -> Vec2                                                                                                  { res : Vec2 = ---; im_get_window_content_region_max(&res); return res; }
+get_window_pos                :: proc() -> Vec2                                                                                                  { res : Vec2 = ---; im_get_window_pos(&res); return res; }
+get_window_size               :: proc() -> Vec2                                                                                                  { res : Vec2 = ---; im_get_content_region_max(&res); return res; }
     
 @(default_calling_convention="c")
 foreign cimgui {
-    @(link_name = "igBegin")                       im_begin                        :: proc(name : Cstring, p_open : ^bool, flags : GuiWindowFlags) -> bool ---;
-    @(link_name = "igEnd")                         end                             :: proc() ---;
-    @(link_name = "igBeginChild")                  im_begin_child                  :: proc(str_id : Cstring, size : Vec2, border : bool, extra_flags : GuiWindowFlags) -> bool ---;
-    @(link_name = "igEndChild")                    end_child                       :: proc() ---;
-    @(link_name = "igGetContentRegionMax")         get_content_region_max          :: proc(out : ^Vec2) ---; // TODO(Hoej): Wrap
-    @(link_name = "igGetContentRegionAvail")       get_content_region_avail        :: proc(out : ^Vec2) ---; // TODO(Hoej): Wrap
-    @(link_name = "igGetContentRegionAvailWidth")  get_content_region_avail_width  :: proc() -> f32 ---;
-    @(link_name = "igGetWindowContentRegionMin")   get_window_content_region_min   :: proc(out : ^Vec2) ---; // TODO(Hoej): Wrap
-    @(link_name = "igGetWindowContentRegionMax")   get_window_content_region_max   :: proc(out : ^Vec2) ---; // TODO(Hoej): Wrap
-    @(link_name = "igGetWindowContentRegionWidth") get_window_content_region_width :: proc() -> f32 ---;
-    @(link_name = "igGetWindowDrawList")           get_window_draw_list            :: proc() -> ^DrawList ---;
-    @(link_name = "igGetWindowPos")                get_window_pos                  :: proc(out : ^Vec2) ---; // TODO(Hoej): Wrap
-    @(link_name = "igGetWindowSize")               get_window_size                 :: proc(out : ^Vec2) ---; // TODO(Hoej): Wrap
-    @(link_name = "igGetWindowWidth")              get_window_width                :: proc() -> f32 ---;
-    @(link_name = "igGetWindowHeight")             get_window_height               :: proc() -> f32 ---;
-    @(link_name = "igIsWindowCollapsed")           is_window_collapsed             :: proc() -> bool ---;
-    @(link_name = "igIsWindowAppearing")           is_window_appearing             :: proc() -> bool ---;
-    @(link_name = "igSetWindowFontScale")          set_window_font_scale           :: proc(scale : f32) ---;
+    @(link_name = "igBegin")                       im_begin                         :: proc(name : Cstring, p_open : ^bool, flags : GuiWindowFlags) -> bool ---;
+    @(link_name = "igEnd")                         end                              :: proc() ---;
+    @(link_name = "igBeginChild")                  im_begin_child                   :: proc(str_id : Cstring, size : Vec2, border : bool, extra_flags : GuiWindowFlags) -> bool ---;
+    @(link_name = "igEndChild")                    end_child                        :: proc() ---;
+    @(link_name = "igGetContentRegionMax")         im_get_content_region_max        :: proc(out : ^Vec2) ---;
+    @(link_name = "igGetContentRegionAvail")       im_get_content_region_avail      :: proc(out : ^Vec2) ---;
+    @(link_name = "igGetContentRegionAvailWidth")  get_content_region_avail_width   :: proc() -> f32 ---;
+    @(link_name = "igGetWindowContentRegionMin")   im_get_window_content_region_min :: proc(out : ^Vec2) ---;
+    @(link_name = "igGetWindowContentRegionMax")   im_get_window_content_region_max :: proc(out : ^Vec2) ---;
+    @(link_name = "igGetWindowContentRegionWidth") get_window_content_region_width  :: proc() -> f32 ---;
+    @(link_name = "igGetWindowDrawList")           get_window_draw_list             :: proc() -> ^DrawList ---;
+    @(link_name = "igGetWindowPos")                im_get_window_pos                :: proc(out : ^Vec2) ---;
+    @(link_name = "igGetWindowSize")               im_get_window_size               :: proc(out : ^Vec2) ---;
+    @(link_name = "igGetWindowWidth")              get_window_width                 :: proc() -> f32 ---;
+    @(link_name = "igGetWindowHeight")             get_window_height                :: proc() -> f32 ---;
+    @(link_name = "igIsWindowCollapsed")           is_window_collapsed              :: proc() -> bool ---;
+    @(link_name = "igIsWindowAppearing")           is_window_appearing              :: proc() -> bool ---;
+    @(link_name = "igSetWindowFontScale")          set_window_font_scale            :: proc(scale : f32) ---;
 }
 
-set_window_collapsed   :: proc (name : string, collapsed : bool, cond : GuiSetCond) {
-    im_set_window_collapsed(_make_label_string(name), collapsed, cond);
-}
-set_window_size        :: proc (name : string, size : Vec2, cond : GuiSetCond) {
-    im_set_window_size(_make_label_string(name), size, cond);
-}
-set_window_focus       :: proc (name : string) {
-    im_set_window_focus(_make_label_string(name));
-}
-set_window_pos :: proc (name : string, pos : Vec2, cond : GuiSetCond) {
-    im_set_window_pos(_make_label_string(name), pos, cond);
-}
+set_window_collapsed  :: proc (name : string, collapsed : bool, cond : GuiSetCond) { im_set_window_collapsed(_make_label_string(name), collapsed, cond); }
+set_window_size       :: proc (name : string, size : Vec2, cond : GuiSetCond)      { im_set_window_size(_make_label_string(name), size, cond); }
+set_window_focus      :: proc (name : string)                                      { im_set_window_focus(_make_label_string(name)); }
+set_window_pos        :: proc (name : string, pos : Vec2, cond : GuiSetCond)       { im_set_window_pos(_make_label_string(name), pos, cond); }
+get_cursor_pos        :: proc () -> Vec2                                           { res : Vec2 = ---; im_get_cursor_pos(&res); return res; }
+get_cursor_start_pos  :: proc () -> Vec2                                           { res : Vec2 = ---; im_get_cursor_start_pos(&res); return res; }
+get_cursor_screen_pos :: proc () -> Vec2                                           { res : Vec2 = ---; im_get_cursor_screen_pos(&res); return res;}
 
 @(default_calling_convention="c")
 foreign cimgui {
@@ -579,14 +573,14 @@ foreign cimgui {
     @(link_name = "igUnindent")                      unindent                           :: proc (indent_w : f32 = 0.0) ---;
     @(link_name = "igBeginGroup")                    begin_group                        :: proc () ---;
     @(link_name = "igEndGroup")                      end_group                          :: proc () ---;
-    @(link_name = "igGetCursorPos")                  get_cursor_pos                     :: proc (pOut : ^Vec2) ---;
+    @(link_name = "igGetCursorPos")                  im_get_cursor_pos                  :: proc (pOut : ^Vec2) ---;
     @(link_name = "igGetCursorPosX")                 get_cursor_pos_x                   :: proc () -> f32 ---;
     @(link_name = "igGetCursorPosY")                 get_cursor_pos_y                   :: proc () -> f32 ---;
     @(link_name = "igSetCursorPos")                  set_cursor_pos                     :: proc (local_pos : Vec2) ---;
     @(link_name = "igSetCursorPosX")                 set_cursor_pos_x                   :: proc (x : f32) ---;
     @(link_name = "igSetCursorPosY")                 set_cursor_pos_y                   :: proc (y : f32) ---;
-    @(link_name = "igGetCursorStartPos")             get_cursor_start_pos               :: proc (pOut : ^Vec2) ---;
-    @(link_name = "igGetCursorScreenPos")            get_cursor_screen_pos              :: proc (pOut : ^Vec2) ---;
+    @(link_name = "igGetCursorStartPos")             im_get_cursor_start_pos            :: proc (pOut : ^Vec2) ---;
+    @(link_name = "igGetCursorScreenPos")            im_get_cursor_screen_pos           :: proc (pOut : ^Vec2) ---;
     @(link_name = "igSetCursorScreenPos")            set_cursor_screen_pos              :: proc (pos : Vec2) ---;
     @(link_name = "igAlignTextToFramePadding")       align_text_to_frame_padding        :: proc () ---;
     @(link_name = "igGetTextLineHeight")             get_text_line_height               :: proc () -> f32 ---;
@@ -595,9 +589,7 @@ foreign cimgui {
 }
 
 //Columns
-columns :: proc          (count : i32, id : string = "", border : bool = true) {
-    im_columns(count, _make_label_string(id), border);
-}
+columns :: proc (count : i32, id : string = "", border : bool = true) { im_columns(count, _make_label_string(id), border); }
 
 @(default_calling_convention="c")
 foreign cimgui {
@@ -632,6 +624,7 @@ text_disabled    :: proc (fmt_: string, args: ...any)                   { im_tex
 text_wrapped     :: proc (fmt_: string, args: ...any)                   { im_text_wrapped(_make_text_string(fmt_, ...args)); }
 label_text       :: proc (label : string, fmt_ : string, args : ...any) { im_label_text(_make_label_string(label), _make_text_string(fmt_, ...args)); }
 bullet_text      :: proc (fmt_: string, args: ...any)                   { im_bullet_text(_make_text_string(fmt_, ...args)); }
+
 @(default_calling_convention="c")
 foreign cimgui {
     @(link_name = "igText")            im_text             :: proc(fmt: Cstring) ---; 
@@ -657,9 +650,11 @@ radio_buttons    :: proc (label : string, active : bool) -> bool                
 radio_button     :: proc (label : string, v : ^i32, v_button : i32) -> bool                                                                                                                                           { return im_radio_button(_make_label_string(label), v, v_button); }
 combo            :: proc (label : string, current_item : ^i32, items : []string, height_in_items : i32 = -1) -> bool {
     data := make([]^u8, len(items)); defer free(data);
+    buf : [1024]u8;
     for item, idx in items {
-        data[idx] = strings.new_c_string(item);
-    } //@TODO(Hoej): Change this to stack buffers.
+        str := fmt.bprintf(buf[..], "%s\x00", item);
+        mem.copy(data[idx], &buf[0], len(str));
+    }
     return im_combo(_make_label_string(label), current_item, &data[0], i32(len(items)), height_in_items); 
 }
 plot_histogram   :: proc (label : string, values : []f32, overlay_text : string = "\x00", scale_min : f32 = math.F32_MAX, scale_max : f32 = math.F32_MAX, graph_size : Vec2 = Vec2{0,0}, stride : i32 = size_of(f32)) { im_plot_histogram(_make_label_string(label), &values[0], i32(len(values)), 0, _make_misc_string(overlay_text), scale_min, scale_max, graph_size, stride); }
@@ -687,7 +682,7 @@ foreign cimgui {
 }
 
 // Widgets: Drags (tip: ctrl+click on a drag box to input text)
-drag_float :: proc(label : string, v : ^f32, v_speed : f32 = 1, v_min : f32 = 0, v_max : f32 = 0, display_format : string = "%.3f", power : f32 = 1)            { im_drag_float(_make_label_string(label), v, v_speed, v_min, v_max, _make_display_fmt_string(display_format), power); }
+drag_float :: proc(label : string, v : ^f32,    v_speed : f32 = 1, v_min : f32 = 0, v_max : f32 = 0, display_format : string = "%.3f", power : f32 = 1)         { im_drag_float(_make_label_string(label), v, v_speed, v_min, v_max, _make_display_fmt_string(display_format), power); }
 drag_float :: proc(label : string, v : ^[2]f32, v_speed : f32 = 1, v_min : f32 = 0, v_max : f32 = 0, display_format : string = "%.3f", power : f32 = 1) -> bool { return im_drag_float2(_make_label_string(label), &v[0], v_speed, v_min, v_max, _make_display_fmt_string(display_format), power); }
 drag_float :: proc(label : string, v : ^[3]f32, v_speed : f32 = 1, v_min : f32 = 0, v_max : f32 = 0, display_format : string = "%.3f", power : f32 = 1) -> bool { return im_drag_float3(_make_label_string(label), &v[0], v_speed, v_min, v_max, _make_display_fmt_string(display_format), power); }
 drag_float :: proc(label : string, v : ^[4]f32, v_speed : f32 = 1, v_min : f32 = 0, v_max : f32 = 0, display_format : string = "%.3f", power : f32 = 1) -> bool { return im_drag_float4(_make_label_string(label), &v[0], v_speed, v_min, v_max, _make_display_fmt_string(display_format), power); }
@@ -697,7 +692,7 @@ drag_float_range :: proc(label : string, v_current_min, v_current_max : ^f32, v_
     mdf := _make_misc_string(display_format_max);
     return im_drag_float_range(id, v_current_min, v_current_max, v_speed, v_min, v_max, df, mdf, power);
 }
-drag_int :: proc(label : string, v : ^i32, v_speed : f32 = 1, v_min : i32 = 0, v_max : i32 = 0, display_format : string = "%d")    { im_drag_int(_make_label_string(label), v, v_speed, v_min, v_max, _make_display_fmt_string(display_format)); }
+drag_int :: proc(label : string, v : ^i32,    v_speed : f32 = 1, v_min : i32 = 0, v_max : i32 = 0, display_format : string = "%d") { im_drag_int(_make_label_string(label), v, v_speed, v_min, v_max, _make_display_fmt_string(display_format)); }
 drag_int :: proc(label : string, v : ^[2]i32, v_speed : f32 = 1, v_min : i32 = 0, v_max : i32 = 0, display_format : string = "%d") { im_drag_int2(_make_label_string(label), &v[0], v_speed, v_min, v_max, _make_display_fmt_string(display_format)); }
 drag_int :: proc(label : string, v : ^[3]i32, v_speed : f32 = 1, v_min : i32 = 0, v_max : i32 = 0, display_format : string = "%d") { im_drag_int3(_make_label_string(label), &v[0], v_speed, v_min, v_max, _make_display_fmt_string(display_format)); }
 drag_int :: proc(label : string, v : ^[4]i32, v_speed : f32 = 1, v_min : i32 = 0, v_max : i32 = 0, display_format : string = "%d") { im_drag_int4(_make_label_string(label), &v[0], v_speed, v_min, v_max, _make_display_fmt_string(display_format)); }
