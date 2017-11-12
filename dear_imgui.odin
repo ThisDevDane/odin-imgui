@@ -6,7 +6,7 @@
  *  @Creation: 10-05-2017 21:11:30
  *
  *  @Last By:   Mikkel Hjortshoej
- *  @Last Time: 12-11-2017 23:59:05
+ *  @Last Time: 13-11-2017 00:51:15
  *  
  *  @Description:
  *      Wrapper for Dear ImGui 1.52
@@ -507,10 +507,10 @@ foreign cimgui {
     @(link_name = "igSetWindowFontScale")          set_window_font_scale            :: proc(scale : f32) ---;
 }
 
-set_window_collapsed  :: proc (name : string, collapsed : bool, cond : SetCond) { im_set_window_collapsed(_make_label_string(name), collapsed, cond); }
-set_window_size       :: proc (name : string, size : Vec2, cond : SetCond)      { im_set_window_size(_make_label_string(name), size, cond); }
+set_window_collapsed  :: proc (name : string, collapsed : bool, cond : SetCond)    { im_set_window_collapsed(_make_label_string(name), collapsed, cond); }
+set_window_size       :: proc (name : string, size : Vec2, cond : SetCond)         { im_set_window_size(_make_label_string(name), size, cond); }
 set_window_focus      :: proc (name : string)                                      { im_set_window_focus(_make_label_string(name)); }
-set_window_pos        :: proc (name : string, pos : Vec2, cond : SetCond)       { im_set_window_pos(_make_label_string(name), pos, cond); }
+set_window_pos        :: proc (name : string, pos : Vec2, cond : SetCond)          { im_set_window_pos(_make_label_string(name), pos, cond); }
 get_cursor_pos        :: proc () -> Vec2                                           { res : Vec2 = ---; im_get_cursor_pos(&res); return res; }
 get_cursor_start_pos  :: proc () -> Vec2                                           { res : Vec2 = ---; im_get_cursor_start_pos(&res); return res; }
 get_cursor_screen_pos :: proc () -> Vec2                                           { res : Vec2 = ---; im_get_cursor_screen_pos(&res); return res;}
@@ -651,19 +651,14 @@ foreign cimgui {
 button           :: proc (label : string, size : Vec2 = Vec2{0, 0}) -> bool                                                                                                                                           { return im_button(_make_label_string(label), size); }
 small_button     :: proc (label : string) -> bool                                                                                                                                                                     { return im_small_button(_make_label_string(label)); }
 invisible_button :: proc (str_id : string, size : Vec2) -> bool                                                                                                                                                       { return im_invisible_button(_make_label_string(str_id), size);}
-//TODO(Hoej): Do we really need wrappers?
-image            :: proc (user_texture_id : TextureID, size : Vec2, uv0 : Vec2 = Vec2{0, 0}, uv1 : Vec2 = Vec2{1, 1}, tint_col : Vec4 = Vec4{1, 1, 1, 1}, border_col : Vec4 = Vec4{0, 0, 0, 0})                       { im_image(user_texture_id, size, uv0, uv1, tint_col, border_col); }
-image_button     :: proc (user_texture_id : TextureID, size : Vec2, uv0 : Vec2 = Vec2{0, 0}, uv1 : Vec2 = Vec2{1, 1}, frame_padding : i32 = -1, bg_col : Vec4 = Vec4{0, 0, 0, 0}, tint_col : Vec4 = Vec4{1, 1, 1, 1}) { im_image_button(user_texture_id, size, uv0, uv1, frame_padding, bg_col, tint_col) }
 checkbox         :: proc (label : string, v : ^bool) -> bool                                                                                                                                                          { return im_checkbox(_make_label_string(label), v); }
 checkbox_flags   :: proc (label : string, flags : ^u32, flags_value : u32) -> bool                                                                                                                                    { return im_checkbox_flags(_make_label_string(label), flags, flags_value); }
 radio_buttons    :: proc (label : string, active : bool) -> bool                                                                                                                                                      { return im_radio_buttons_bool(_make_label_string(label), active); }
 radio_button     :: proc (label : string, v : ^i32, v_button : i32) -> bool                                                                                                                                           { return im_radio_button(_make_label_string(label), v, v_button); }
 combo            :: proc (label : string, current_item : ^i32, items : []string, height_in_items : i32 = -1) -> bool {
     data := make([]^u8, len(items)); defer free(data);
-    buf : [1024]u8;
     for item, idx in items {
-        str := fmt.bprintf(buf[..], "%s\x00", item);
-        mem.copy(data[idx], &buf[0], len(str));
+        data[idx] = strings.new_c_string(item);
     }
     return im_combo(_make_label_string(label), current_item, &data[0], i32(len(items)), height_in_items); 
 }
@@ -675,8 +670,8 @@ foreign cimgui {
     @(link_name = "igButton")          im_button             :: proc (label : Cstring, size : Vec2) -> bool ---;
     @(link_name = "igSmallButton")     im_small_button       :: proc(label : Cstring) -> bool ---;
     @(link_name = "igInvisibleButton") im_invisible_button   :: proc(str_id : Cstring, size : Vec2) -> bool ---;
-    @(link_name = "igImage")           im_image              :: proc(user_texture_id : TextureID, size : Vec2, uv0 : Vec2, uv1 : Vec2, tint_col : Vec4, border_col : Vec4) ---;
-    @(link_name = "igImageButton")     im_image_button       :: proc(user_texture_id : TextureID, size : Vec2, uv0 : Vec2, uv1 : Vec2, frame_padding : i32, bg_col : Vec4, tint_col : Vec4) -> bool ---;
+    @(link_name = "igImage")           image                 :: proc(user_texture_id : TextureID, size : Vec2, uv0 : Vec2 = Vec2{0, 0}, uv1 : Vec2 = Vec2{1, 1}, tint_col : Vec4 = Vec4{1, 1, 1, 1}, border_col : Vec4 = Vec4{0, 0, 0, 0}) ---;
+    @(link_name = "igImageButton")     image_button          :: proc(user_texture_id : TextureID, size : Vec2, uv0 : Vec2 = Vec2{0, 0}, uv1 : Vec2 = Vec2{1, 1}, frame_padding : i32 = -1, bg_col : Vec4 = Vec4{0, 0, 0, 0}, tint_col : Vec4 = Vec4{1, 1, 1, 1}) -> bool ---;
     @(link_name = "igCheckbox")        im_checkbox           :: proc(label : Cstring, v : ^bool) -> bool ---;
     @(link_name = "igCheckboxFlags")   im_checkbox_flags     :: proc(label : Cstring, flags : ^u32, flags_value : u32) -> bool ---;
     @(link_name = "igRadioButtonBool") im_radio_buttons_bool :: proc(label : Cstring, active : bool) -> bool ---;
