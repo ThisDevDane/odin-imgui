@@ -1,5 +1,5 @@
 # odin-dear imgui
-![scrshot](https://i.imgur.com/eW0bZAU.png)
+![scrshot](https://i.imgur.com/nOA6iSl.png)
 This is a (work in progress) wrapper for [dear imgui v1.52](https://github.com/ocornut/imgui) (based on [cimgui](https://github.com/Extrawurst/cimgui)).
 
 Notes:
