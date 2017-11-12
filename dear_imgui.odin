@@ -6,7 +6,7 @@
  *  @Creation: 10-05-2017 21:11:30
  *
  *  @Last By:   Mikkel Hjortshoej
- *  @Last Time: 11-11-2017 17:25:16
+ *  @Last Time: 12-11-2017 17:08:27
  *  
  *  @Description:
  *      Wrapper for Dear ImGui 1.49.
@@ -723,8 +723,8 @@ foreign cimgui {
 }
 
 // Widgets: Input with Keyboard
-input_text           :: proc(label : string, buf : []u8, flags : GuiInputTextFlags = 0, callback : gui_text_edit_callback = nil, user_data : rawptr = nil) -> bool              { return im_input_text(_make_label_string(label), Cstring(&buf[0]), u64(len(buf)), flags, callback, user_data); }
-input_text_multiline :: proc(label : string, buf : []u8, size : Vec2, flags : GuiInputTextFlags = 0, callback : gui_text_edit_callback = nil, user_data : rawptr = nil) -> bool { return im_input_text_multiline(_make_label_string(label), Cstring(&buf[0]), u64(len(buf)), size, flags, callback, user_data); }
+input_text           :: proc(label : string, buf : []u8, flags : GuiInputTextFlags = 0, callback : gui_text_edit_callback = nil, user_data : rawptr = nil) -> bool              { return im_input_text(_make_label_string(label), Cstring(&buf[0]), uint(len(buf)), flags, callback, user_data); }
+input_text_multiline :: proc(label : string, buf : []u8, size : Vec2, flags : GuiInputTextFlags = 0, callback : gui_text_edit_callback = nil, user_data : rawptr = nil) -> bool { return im_input_text_multiline(_make_label_string(label), Cstring(&buf[0]), uint(len(buf)), size, flags, callback, user_data); }
 input_float          :: proc(label : string, v : ^f32, step : f32 = 0, step_fast : f32 = 0, decimal_precision : i32 = -1, extra_flags : GuiInputTextFlags = 0) -> bool          { return im_input_float(_make_label_string(label), v, step, step_fast, decimal_precision, extra_flags); }
 input_float          :: proc(label : string, v : ^[2]f32, decimal_precision : i32 = -1, extra_flags : GuiInputTextFlags = 0) -> bool                                            { return im_input_float2(_make_label_string(label), &v[0], decimal_precision, extra_flags); }
 input_float          :: proc(label : string, v : ^[3]f32, decimal_precision : i32 = -1, extra_flags : GuiInputTextFlags = 0) -> bool                                            { return im_input_float3(_make_label_string(label), &v[0], decimal_precision, extra_flags); }
@@ -736,8 +736,8 @@ input_int            :: proc(label : string, v : ^[4]i32, extra_flags : GuiInput
 
 @(default_calling_convention="c")
 foreign cimgui {
-    @(link_name = "igInputText")          im_input_text           :: proc(label : Cstring, buf : Cstring, buf_size : u64 /*size_t*/, flags : GuiInputTextFlags, callback : gui_text_edit_callback, user_data : rawptr) -> bool ---;
-    @(link_name = "igInputTextMultiline") im_input_text_multiline :: proc(label : Cstring, buf : Cstring, buf_size : u64 /*size_t*/, size : Vec2, flags : GuiInputTextFlags, callback : gui_text_edit_callback, user_data : rawptr) -> bool ---;
+    @(link_name = "igInputText")          im_input_text           :: proc(label : Cstring, buf : Cstring, buf_size : uint /*size_t*/, flags : GuiInputTextFlags, callback : gui_text_edit_callback, user_data : rawptr) -> bool ---;
+    @(link_name = "igInputTextMultiline") im_input_text_multiline :: proc(label : Cstring, buf : Cstring, buf_size : uint /*size_t*/, size : Vec2, flags : GuiInputTextFlags, callback : gui_text_edit_callback, user_data : rawptr) -> bool ---;
     @(link_name = "igInputFloat")         im_input_float          :: proc(label : Cstring, v : ^f32, step : f32, step_fast : f32, decimal_precision : i32, extra_flags : GuiInputTextFlags) -> bool ---;
     @(link_name = "igInputFloat2")        im_input_float2         :: proc(label : Cstring, v : ^f32, decimal_precision : i32, extra_flags : GuiInputTextFlags) -> bool ---;
     @(link_name = "igInputFloat3")        im_input_float3         :: proc(label : Cstring, v : ^f32, decimal_precision : i32, extra_flags : GuiInputTextFlags) -> bool ---;
@@ -994,7 +994,7 @@ set_clipboard_text :: proc(text : string) {
 @(default_calling_convention="c")
 foreign cimgui {
     // Helpers functions to access functions pointers in  ::GetIO()
-    @(link_name = "igMemAlloc")          mem_alloc             :: proc(sz : u64 /*size_t*/) -> rawptr ---;
+    @(link_name = "igMemAlloc")          mem_alloc             :: proc(sz : uint /*size_t*/) -> rawptr ---;
     @(link_name = "igMemFree")           mem_free              :: proc(ptr : rawptr) ---;
 
     @(link_name = "igGetClipboardText")  im_get_clipboard_text :: proc() -> Cstring ---;
@@ -1002,7 +1002,7 @@ foreign cimgui {
 
     // Internal state access - if you want to share ImGui state between modules (e.g. DLL) or allocate it yourself
     @(link_name = "igGetVersion")        get_version           :: proc() -> Cstring ---;
-    @(link_name = "igCreateContext")     create_context        :: proc(malloc_fn : proc(size : u64 /*size_t*/) -> rawptr, free_fn : proc(data : rawptr)) -> ^GuiContext ---;
+    @(link_name = "igCreateContext")     create_context        :: proc(malloc_fn : proc(size : uint /*size_t*/) -> rawptr, free_fn : proc(data : rawptr)) -> ^GuiContext ---;
     @(link_name = "igDestroyContext")    destroy_context       :: proc(ctx : ^GuiContext) ---;
     @(link_name = "igGetCurrentContext") get_current_context   :: proc() -> ^GuiContext ---;
     @(link_name = "igSetCurrentContext") set_current_context   :: proc(ctx : ^GuiContext) ---;
@@ -1024,7 +1024,7 @@ foreign cimgui {
     @(link_name = "ImFontAtlas_AddFontDefault")                       font_atlas_add_font_default                           :: proc(atlas : ^FontAtlas, font_cfg : ^FontConfig ) -> ^Font ---;
 
     @(link_name = "ImFontAtlas_AddFontFromFileTTF")                   im_font_atlas_add_font_from_file_ttf                  :: proc(atlas : ^FontAtlas, filename : Cstring, size_pixels : f32, font_cfg : ^FontConfig, glyph_ranges : ^Wchar) -> ^Font  ---;
-    @(link_name = "ImFontAtlas_AddFontFromMemoryTTF")                 font_atlas_add_font_from_memory_ttf                   :: proc(atlas : ^FontAtlas, ttf_data : rawptr, ttf_size : i32, size_pixels : f32, font_cfg : ^FontConfig, glyph_ranges : ^Wchar) -> ^Font ---;
+    @(link_name = "ImFontAtlas_AddFontFromMemoryTTF")                 font_atlas_add_font_from_memory_ttf                   :: proc(atlas : ^FontAtlas, ttf_data : rawptr, ttf_size : i32, size_pixels : f32, font_cfg : ^FontConfig = nil, glyph_ranges : ^Wchar = nil) -> ^Font ---;
     @(link_name = "ImFontAtlas_AddFontFromMemoryCompressedTTF")       font_atlas_add_font_from_memory_compressed_ttf        :: proc(atlas : ^FontAtlas, compressed_ttf_data : rawptr, compressed_ttf_size : i32, size_pixels : f32, font_cfg : ^FontConfig, glyph_ranges : ^Wchar) -> ^Font ---;
     @(link_name = "ImFontAtlas_AddFontFromMemoryCompressedBase85TTF") font_atlas_add_font_from_memory_compressed_base85_ttf :: proc(atlas : ^FontAtlas, compressed_ttf_data_base85 : Cstring, size_pixels : f32, font_cfg : ^FontConfig, glyph_ranges : ^Wchar) -> ^Font ---;
     @(link_name = "ImFontAtlas_ClearTexData")                         font_atlas_clear_tex_data                             :: proc(atlas : ^FontAtlas) ---;
