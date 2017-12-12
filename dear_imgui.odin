@@ -6,7 +6,7 @@
  *  @Creation: 10-05-2017 21:11:30
  *
  *  @Last By:   Mikkel Hjortshoej
- *  @Last Time: 13-11-2017 00:51:15
+ *  @Last Time: 26-11-2017 20:30:04
  *  
  *  @Description:
  *      Wrapper for Dear ImGui 1.52
@@ -603,14 +603,14 @@ columns :: proc (count : i32, id : string = "", border : bool = true) { im_colum
 
 @(default_calling_convention="c")
 foreign cimgui {
-    @(link_name = "igColumns")         im_columns        :: proc(count : i32, id : Cstring, border : bool)  ---;
-    @(link_name = "igNextColumn")      next_column       :: proc      ()  ---;
+    @(link_name = "igColumns")         im_columns        :: proc (count : i32, id : Cstring, border : bool)  ---;
+    @(link_name = "igNextColumn")      next_column       :: proc ()  ---;
     @(link_name = "igGetColumnIndex")  get_column_index  :: proc () -> i32  ---;
     @(link_name = "igGetColumnWidth")  get_column_width  :: proc (column_index : i32 = -1) -> f32  ---;
     @(link_name = "igSetColumnWidth")  set_column_width  :: proc (column_index : i32 = -1, width : f32) -> f32  ---;
-    @(link_name = "igGetColumnOffset") get_column_offset :: proc(column_index : i32 = -1) -> f32  ---;
-    @(link_name = "igSetColumnOffset") set_column_offset :: proc(column_index : i32, offset_x : f32)  ---;
-    @(link_name = "igGetColumnsCount") get_columns_count :: proc() -> i32  ---;
+    @(link_name = "igGetColumnOffset") get_column_offset :: proc (column_index : i32 = -1) -> f32  ---;
+    @(link_name = "igSetColumnOffset") set_column_offset :: proc (column_index : i32, offset_x : f32)  ---;
+    @(link_name = "igGetColumnsCount") get_columns_count :: proc () -> i32  ---;
 
     // ID scopes
     // If you are creating widgets in a loop you most likely want to push a unique identifier so ImGui can differentiate them
