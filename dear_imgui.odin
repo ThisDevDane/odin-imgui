@@ -6,7 +6,7 @@
  *  @Creation: 10-05-2017 21:11:30
  *
  *  @Last By:   Mikkel Hjortshoej
- *  @Last Time: 26-11-2017 20:30:04
+ *  @Last Time: 13-12-2017 01:07:48
  *  
  *  @Description:
  *      Wrapper for Dear ImGui 1.52
@@ -515,6 +515,8 @@ get_cursor_pos        :: proc () -> Vec2                                        
 get_cursor_start_pos  :: proc () -> Vec2                                           { res : Vec2 = ---; im_get_cursor_start_pos(&res); return res; }
 get_cursor_screen_pos :: proc () -> Vec2                                           { res : Vec2 = ---; im_get_cursor_screen_pos(&res); return res;}
 
+
+
 @(default_calling_convention="c")
 foreign cimgui {
     @(link_name = "igSetNextWindowPos")              set_next_window_pos                :: proc (pos : Vec2, cond : SetCond = 0, pivot : Vec2 = Vec2{0, 0}) ---;
@@ -524,10 +526,10 @@ foreign cimgui {
     @(link_name = "igSetNextWindowContentWidth")     set_next_window_content_width      :: proc (width : f32) ---;
     @(link_name = "igSetNextWindowCollapsed")        set_next_window_collapsed          :: proc (collapsed : bool, cond : SetCond = 0) ---;
     @(link_name = "igSetNextWindowFocus")            set_next_window_focus              :: proc () ---;
-    @(link_name = "igSetWindowPos")                  set_window_pos                     :: proc (pos : Vec2, cond : SetCond = 0) ---;
-    @(link_name = "igSetWindowSize")                 set_window_size                    :: proc (size : Vec2, cond : SetCond = 0) ---;
-    @(link_name = "igSetWindowCollapsed")            set_window_collapsed               :: proc (collapsed : bool, cond : SetCond = 0) ---;
-    @(link_name = "igSetWindowFocus")                set_window_focus                   :: proc () ---;
+    @(link_name = "igSetWindowPos")                  set_window_pos_                    :: proc (pos : Vec2, cond : SetCond = 0) ---;
+    @(link_name = "igSetWindowSize")                 set_window_size_                    :: proc (size : Vec2, cond : SetCond = 0) ---;
+    @(link_name = "igSetWindowCollapsed")            set_window_collapsed_               :: proc (collapsed : bool, cond : SetCond = 0) ---;
+    @(link_name = "igSetWindowFocus")                set_window_focus_                   :: proc () ---;
     @(link_name = "igSetWindowPosByName")            im_set_window_pos                  :: proc (name : Cstring, pos : Vec2, cond : SetCond = 0) ---;
     @(link_name = "igSetWindowSize2")                im_set_window_size                 :: proc (name : Cstring, size : Vec2, cond : SetCond = 0) ---;
     @(link_name = "igSetWindowCollapsed2")           im_set_window_collapsed            :: proc (name : Cstring, collapsed : bool, cond : SetCond = 0) ---;
@@ -548,20 +550,37 @@ foreign cimgui {
     // Parameters stacks (shared)
     @(link_name = "igPushFont")                      push_font                          :: proc (font : ^Font) ---;
     @(link_name = "igPopFont")                       pop_font                           :: proc () ---;
-    @(link_name = "igPushStyleColorU32")             push_style_color                   :: proc (idx : Color, col : u32) ---;
-    @(link_name = "igPushStyleColor")                push_style_color                   :: proc (idx : Color, col : Vec4) ---;
+    @(link_name = "igPushStyleColorU32")             push_style_colorU32                :: proc (idx : Color, col : u32) ---;
+    @(link_name = "igPushStyleColor")                push_style_color_                  :: proc (idx : Color, col : Vec4) ---;
+}
+
+push_style_color :: proc[push_style_color_, push_style_colorU32];
+
+@(default_calling_convention="c")
+foreign cimgui {
     @(link_name = "igPopStyleColor")                 pop_style_color                    :: proc (count : i32 = 1) ---;
-    @(link_name = "igPushStyleVar")                  push_style_var                     :: proc (idx : StyleVar, val : f32) ---;
-    @(link_name = "igPushStyleVarVec")               push_style_var                     :: proc (idx : StyleVar, val : Vec2) ---;
+    @(link_name = "igPushStyleVar")                  push_style_var_                    :: proc (idx : StyleVar, val : f32) ---;
+    @(link_name = "igPushStyleVarVec")               push_style_var_vec                 :: proc (idx : StyleVar, val : Vec2) ---;
+}
+
+push_style_var :: proc[push_style_var_, push_style_var_vec];
+
+@(default_calling_convention="c")
+foreign cimgui {
     @(link_name = "igPopStyleVar")                   pop_style_var                      :: proc (count : i32 = 1) ---;
     @(link_name = "igGetStyleColorVec4")             get_style_color_vec4               :: proc (idx : Color) ---;
     @(link_name = "igGetFont")                       get_font                           :: proc () -> ^Font ---;
     @(link_name = "igGetFontSize")                   get_font_size                      :: proc () -> f32 ---;
     @(link_name = "igGetFontTexUvWhitePixel")        get_font_tex_uv_white_pixel        :: proc (pOut : ^Vec2) ---;
-    @(link_name = "igGetColorU32")                   get_color_u32                      :: proc (idx : Color, alpha_mul : f32 = 1.0) -> u32 ---;
-    @(link_name = "igGetColorU32Vec")                get_color_u32                      :: proc (col : ^Vec4) -> u32 ---;
-    @(link_name = "igGetColorU32U32c")               get_color_u32                      :: proc (col : u32) -> u32 ---;
+    @(link_name = "igGetColorU32")                   get_color_u32_                     :: proc (idx : Color, alpha_mul : f32 = 1.0) -> u32 ---;
+    @(link_name = "igGetColorU32Vec")                get_color_u32_vec                  :: proc (col : ^Vec4) -> u32 ---;
+    @(link_name = "igGetColorU32U32c")               get_color_u32_u32                  :: proc (col : u32) -> u32 ---;
+}
 
+get_color_u32 :: proc[get_color_u32_, get_color_u32_vec, get_color_u32_u32];
+
+@(default_calling_convention="c")
+foreign cimgui {
     // Parameters stacks (current window)
     @(link_name = "igPushItemWidth")                 push_item_width                    :: proc (item_width : f32) ---;
     @(link_name = "igPopItemWidth")                  pop_item_width                     :: proc () ---;
@@ -616,15 +635,18 @@ foreign cimgui {
     // If you are creating widgets in a loop you most likely want to push a unique identifier so ImGui can differentiate them
     // You can also use "##extra" within your widget name to distinguish them from each others (see 'Programmer Guide')
     //@TODO(Hoej): Figure out what to do here
-    @(link_name = "igPushIdStr")       push_id :: proc (str_id : Cstring)  ---;
-    @(link_name = "igPushIdStrRange")  push_id :: proc (str_begin : Cstring, str_end : Cstring)  ---;
-    @(link_name = "igPushIdPtr")       push_id :: proc (ptr_id : rawptr)  ---;
-    @(link_name = "igPushIdInt")       push_id :: proc (int_id : i32)  ---;
-    @(link_name = "igPopId")           pop_id  :: proc ()  ---;
-    @(link_name = "igGetIdStr")        get_id  :: proc (str_id : Cstring) -> GuiId  ---;
-    @(link_name = "igGetIdStrRange")   get_id  :: proc (str_begin : Cstring, str_end : Cstring) -> GuiId  ---;
-    @(link_name = "igGetIdPtr")        get_id  :: proc (ptr_id : rawptr) -> GuiId  ---;
+    @(link_name = "igPushIdStr")       push_id_str       :: proc (str_id : Cstring)  ---;
+    @(link_name = "igPushIdStrRange")  push_id_str_range :: proc (str_begin : Cstring, str_end : Cstring)  ---;
+    @(link_name = "igPushIdPtr")       push_id_ptr       :: proc (ptr_id : rawptr)  ---;
+    @(link_name = "igPushIdInt")       push_id_int       :: proc (int_id : i32)  ---;
+    @(link_name = "igPopId")           pop_id            :: proc ()  ---;
+    @(link_name = "igGetIdStr")        get_id_str        :: proc (str_id : Cstring) -> GuiId  ---;
+    @(link_name = "igGetIdStrRange")   get_id_str_range  :: proc (str_begin : Cstring, str_end : Cstring) -> GuiId  ---;
+    @(link_name = "igGetIdPtr")        get_id_ptr        :: proc (ptr_id : rawptr) -> GuiId  ---;
 }
+
+push_id :: proc[push_id_str, push_id_str_range, push_id_ptr, push_id_int];
+get_id :: proc[get_id_str, get_id_str_range, get_id_ptr];
 
 /////// Widgtes: Text
 text_unformatted :: proc (fmt_: string)                                 { im_text_unformatted(_make_text_string(fmt_)); }
@@ -686,21 +708,25 @@ foreign cimgui {
     @(link_name = "igProgressBar")     im_progress_bar       :: proc(fraction : f32, size_arg : ^Vec2, overlay : Cstring) ---;
 }
 
+drag_float :: proc[drag_float1, drag_float2, drag_float3, drag_float4];
+
 // Widgets: Drags (tip: ctrl+click on a drag box to input text)
-drag_float :: proc(label : string, v : ^f32,    v_speed : f32 = 1, v_min : f32 = 0, v_max : f32 = 0, display_format : string = "%.3f", power : f32 = 1)         { im_drag_float(_make_label_string(label), v, v_speed, v_min, v_max, _make_display_fmt_string(display_format), power); }
-drag_float :: proc(label : string, v : ^[2]f32, v_speed : f32 = 1, v_min : f32 = 0, v_max : f32 = 0, display_format : string = "%.3f", power : f32 = 1) -> bool { return im_drag_float2(_make_label_string(label), &v[0], v_speed, v_min, v_max, _make_display_fmt_string(display_format), power); }
-drag_float :: proc(label : string, v : ^[3]f32, v_speed : f32 = 1, v_min : f32 = 0, v_max : f32 = 0, display_format : string = "%.3f", power : f32 = 1) -> bool { return im_drag_float3(_make_label_string(label), &v[0], v_speed, v_min, v_max, _make_display_fmt_string(display_format), power); }
-drag_float :: proc(label : string, v : ^[4]f32, v_speed : f32 = 1, v_min : f32 = 0, v_max : f32 = 0, display_format : string = "%.3f", power : f32 = 1) -> bool { return im_drag_float4(_make_label_string(label), &v[0], v_speed, v_min, v_max, _make_display_fmt_string(display_format), power); }
+drag_float1 :: proc(label : string, v : ^f32,    v_speed : f32 = 1, v_min : f32 = 0, v_max : f32 = 0, display_format : string = "%.3f", power : f32 = 1)         { im_drag_float(_make_label_string(label), v, v_speed, v_min, v_max, _make_display_fmt_string(display_format), power); }
+drag_float2 :: proc(label : string, v : ^[2]f32, v_speed : f32 = 1, v_min : f32 = 0, v_max : f32 = 0, display_format : string = "%.3f", power : f32 = 1) -> bool { return im_drag_float2(_make_label_string(label), &v[0], v_speed, v_min, v_max, _make_display_fmt_string(display_format), power); }
+drag_float3 :: proc(label : string, v : ^[3]f32, v_speed : f32 = 1, v_min : f32 = 0, v_max : f32 = 0, display_format : string = "%.3f", power : f32 = 1) -> bool { return im_drag_float3(_make_label_string(label), &v[0], v_speed, v_min, v_max, _make_display_fmt_string(display_format), power); }
+drag_float4 :: proc(label : string, v : ^[4]f32, v_speed : f32 = 1, v_min : f32 = 0, v_max : f32 = 0, display_format : string = "%.3f", power : f32 = 1) -> bool { return im_drag_float4(_make_label_string(label), &v[0], v_speed, v_min, v_max, _make_display_fmt_string(display_format), power); }
 drag_float_range :: proc(label : string, v_current_min, v_current_max : ^f32, v_speed, v_min, v_max : f32, display_format, display_format_max : string, power : f32) -> bool {
     id  := _make_label_string(label);
     df  := _make_display_fmt_string(display_format);
     mdf := _make_misc_string(display_format_max);
     return im_drag_float_range(id, v_current_min, v_current_max, v_speed, v_min, v_max, df, mdf, power);
 }
-drag_int :: proc(label : string, v : ^i32,    v_speed : f32 = 1, v_min : i32 = 0, v_max : i32 = 0, display_format : string = "%d") { im_drag_int(_make_label_string(label), v, v_speed, v_min, v_max, _make_display_fmt_string(display_format)); }
-drag_int :: proc(label : string, v : ^[2]i32, v_speed : f32 = 1, v_min : i32 = 0, v_max : i32 = 0, display_format : string = "%d") { im_drag_int2(_make_label_string(label), &v[0], v_speed, v_min, v_max, _make_display_fmt_string(display_format)); }
-drag_int :: proc(label : string, v : ^[3]i32, v_speed : f32 = 1, v_min : i32 = 0, v_max : i32 = 0, display_format : string = "%d") { im_drag_int3(_make_label_string(label), &v[0], v_speed, v_min, v_max, _make_display_fmt_string(display_format)); }
-drag_int :: proc(label : string, v : ^[4]i32, v_speed : f32 = 1, v_min : i32 = 0, v_max : i32 = 0, display_format : string = "%d") { im_drag_int4(_make_label_string(label), &v[0], v_speed, v_min, v_max, _make_display_fmt_string(display_format)); }
+
+drag_int :: proc[drag_int1, drag_int2, drag_int3, drag_int4];
+drag_int1 :: proc(label : string, v : ^i32,    v_speed : f32 = 1, v_min : i32 = 0, v_max : i32 = 0, display_format : string = "%d") { im_drag_int(_make_label_string(label), v, v_speed, v_min, v_max, _make_display_fmt_string(display_format)); }
+drag_int2 :: proc(label : string, v : ^[2]i32, v_speed : f32 = 1, v_min : i32 = 0, v_max : i32 = 0, display_format : string = "%d") { im_drag_int2(_make_label_string(label), &v[0], v_speed, v_min, v_max, _make_display_fmt_string(display_format)); }
+drag_int3 :: proc(label : string, v : ^[3]i32, v_speed : f32 = 1, v_min : i32 = 0, v_max : i32 = 0, display_format : string = "%d") { im_drag_int3(_make_label_string(label), &v[0], v_speed, v_min, v_max, _make_display_fmt_string(display_format)); }
+drag_int4 :: proc(label : string, v : ^[4]i32, v_speed : f32 = 1, v_min : i32 = 0, v_max : i32 = 0, display_format : string = "%d") { im_drag_int4(_make_label_string(label), &v[0], v_speed, v_min, v_max, _make_display_fmt_string(display_format)); }
 drag_int_range :: proc(label : string, v_current_min, v_current_max : ^i32, v_speed, v_min, v_max : i32, display_format, display_format_max : string) -> bool {
     id  := _make_label_string(label);
     df  := _make_display_fmt_string(display_format);
@@ -725,14 +751,18 @@ foreign cimgui {
 // Widgets: Input with Keyboard
 input_text           :: proc(label : string, buf : []u8, flags : InputTextFlags = 0, callback : text_edit_callback = nil, user_data : rawptr = nil) -> bool              { return im_input_text(_make_label_string(label), Cstring(&buf[0]), uint(len(buf)), flags, callback, user_data); }
 input_text_multiline :: proc(label : string, buf : []u8, size : Vec2, flags : InputTextFlags = 0, callback : text_edit_callback = nil, user_data : rawptr = nil) -> bool { return im_input_text_multiline(_make_label_string(label), Cstring(&buf[0]), uint(len(buf)), size, flags, callback, user_data); }
-input_float          :: proc(label : string, v : ^f32, step : f32 = 0, step_fast : f32 = 0, decimal_precision : i32 = -1, extra_flags : InputTextFlags = 0) -> bool          { return im_input_float(_make_label_string(label), v, step, step_fast, decimal_precision, extra_flags); }
-input_float          :: proc(label : string, v : ^[2]f32, decimal_precision : i32 = -1, extra_flags : InputTextFlags = 0) -> bool                                            { return im_input_float2(_make_label_string(label), &v[0], decimal_precision, extra_flags); }
-input_float          :: proc(label : string, v : ^[3]f32, decimal_precision : i32 = -1, extra_flags : InputTextFlags = 0) -> bool                                            { return im_input_float3(_make_label_string(label), &v[0], decimal_precision, extra_flags); }
-input_float          :: proc(label : string, v : ^[4]f32, decimal_precision : i32 = -1, extra_flags : InputTextFlags = 0) -> bool                                            { return im_input_float4(_make_label_string(label), &v[0], decimal_precision, extra_flags); }
-input_int            :: proc(label : string, v : ^i32, step : i32 = 0, step_fast : i32 = 0, extra_flags : InputTextFlags = 0) -> bool                                        { return im_input_int(_make_label_string(label), v, step, step_fast, extra_flags); }
-input_int            :: proc(label : string, v : ^[2]i32, extra_flags : InputTextFlags = 0) -> bool                                                                          { return im_input_int2(_make_label_string(label), &v[0], extra_flags); }
-input_int            :: proc(label : string, v : ^[3]i32, extra_flags : InputTextFlags = 0) -> bool                                                                          { return im_input_int3(_make_label_string(label), &v[0], extra_flags); }
-input_int            :: proc(label : string, v : ^[4]i32, extra_flags : InputTextFlags = 0) -> bool                                                                          { return im_input_int4(_make_label_string(label), &v[0], extra_flags); }
+
+input_float          :: proc[input_float1, input_float2, input_float3, input_float4];
+input_float1         :: proc(label : string, v : ^f32, step : f32 = 0, step_fast : f32 = 0, decimal_precision : i32 = -1, extra_flags : InputTextFlags = 0) -> bool          { return im_input_float(_make_label_string(label), v, step, step_fast, decimal_precision, extra_flags); }
+input_float2         :: proc(label : string, v : ^[2]f32, decimal_precision : i32 = -1, extra_flags : InputTextFlags = 0) -> bool                                            { return im_input_float2(_make_label_string(label), &v[0], decimal_precision, extra_flags); }
+input_float3         :: proc(label : string, v : ^[3]f32, decimal_precision : i32 = -1, extra_flags : InputTextFlags = 0) -> bool                                            { return im_input_float3(_make_label_string(label), &v[0], decimal_precision, extra_flags); }
+input_float4         :: proc(label : string, v : ^[4]f32, decimal_precision : i32 = -1, extra_flags : InputTextFlags = 0) -> bool                                            { return im_input_float4(_make_label_string(label), &v[0], decimal_precision, extra_flags); }
+
+input_int            :: proc[input_int1, input_int2, input_int3, input_int4];
+input_int1           :: proc(label : string, v : ^i32, step : i32 = 0, step_fast : i32 = 0, extra_flags : InputTextFlags = 0) -> bool                                        { return im_input_int(_make_label_string(label), v, step, step_fast, extra_flags); }
+input_int2           :: proc(label : string, v : ^[2]i32, extra_flags : InputTextFlags = 0) -> bool                                                                          { return im_input_int2(_make_label_string(label), &v[0], extra_flags); }
+input_int3           :: proc(label : string, v : ^[3]i32, extra_flags : InputTextFlags = 0) -> bool                                                                          { return im_input_int3(_make_label_string(label), &v[0], extra_flags); }
+input_int4           :: proc(label : string, v : ^[4]i32, extra_flags : InputTextFlags = 0) -> bool                                                                          { return im_input_int4(_make_label_string(label), &v[0], extra_flags); }
 
 @(default_calling_convention="c")
 foreign cimgui {
@@ -749,17 +779,20 @@ foreign cimgui {
 }
 
 // Widgets: Sliders (tip: ctrl+click on a slider to input text)
-slider_float  :: proc(label : string, v : ^f32, v_min : f32, v_max : f32, display_format : string = "%.3f", power : f32 = 1) -> bool               { return im_slider_float(_make_label_string(label), v, v_min, v_max, _make_display_fmt_string(display_format), power); }
-slider_float  :: proc(label : string, v : ^[2]f32, v_min : f32, v_max : f32, display_format : string = "%.3f", power : f32 = 1) -> bool            { return im_slider_float2(_make_label_string(label), &v[0], v_min, v_max, _make_display_fmt_string(display_format), power); }
-slider_float  :: proc(label : string, v : ^[3]f32, v_min : f32, v_max : f32, display_format : string = "%.3f", power : f32 = 1) -> bool            { return im_slider_float2(_make_label_string(label), &v[0], v_min, v_max, _make_display_fmt_string(display_format), power); }
-slider_float  :: proc(label : string, v : ^[4]f32, v_min : f32, v_max : f32, display_format : string = "%.3f", power : f32 = 1) -> bool            { return im_slider_float2(_make_label_string(label), &v[0], v_min, v_max, _make_display_fmt_string(display_format), power); }
-slider_angle  :: proc(label : string, v_rad : ^f32, v_degrees_min : f32, v_degrees_max : f32) -> bool                                              { return im_slider_angle(_make_label_string(label),v_rad, v_degrees_min, v_degrees_max); }
-slider_int    :: proc(label : string, v : ^i32, v_min : i32, v_max : i32, display_format : string = "%d") -> bool                                  { return im_slider_int(_make_label_string(label), v, v_min, v_max, _make_display_fmt_string(display_format)); }
-slider_int    :: proc(label : string, v : ^[2]i32, v_min : i32, v_max : i32, display_format : string = "%d") -> bool                               { return im_slider_int2(_make_label_string(label), &v[0], v_min, v_max, _make_display_fmt_string(display_format)); }
-slider_int    :: proc(label : string, v : ^[3]i32, v_min : i32, v_max : i32, display_format : string = "%d") -> bool                               { return im_slider_int3(_make_label_string(label), &v[0], v_min, v_max, _make_display_fmt_string(display_format)); }
-slider_int    :: proc(label : string, v : ^[4]i32, v_min : i32, v_max : i32, display_format : string = "%d") -> bool                               { return im_slider_int4(_make_label_string(label), &v[0], v_min, v_max, _make_display_fmt_string(display_format)); }
-vslider_float :: proc(label : string, size : Vec2, v : ^f32, v_min : f32 , v_max : f32, display_format : string = "%.3f", power : f32 = 1) -> bool { return im_vslider_float(_make_label_string(label), size, v, v_min, v_max, _make_display_fmt_string(display_format), power); }
-vslider_int   :: proc(label : string, size : Vec2, v : ^i32, v_min : i32, v_max : i32, display_format : string = "%d") -> bool                     { return im_vslider_int(_make_label_string(label), size, v, v_min, v_max, _make_display_fmt_string(display_format)); }
+slider_float   :: proc[slider_float1, slider_float2, slider_float3, slider_float4];
+slider_float1  :: proc(label : string, v : ^f32, v_min : f32, v_max : f32, display_format : string = "%.3f", power : f32 = 1) -> bool               { return im_slider_float(_make_label_string(label), v, v_min, v_max, _make_display_fmt_string(display_format), power); }
+slider_float2  :: proc(label : string, v : ^[2]f32, v_min : f32, v_max : f32, display_format : string = "%.3f", power : f32 = 1) -> bool            { return im_slider_float2(_make_label_string(label), &v[0], v_min, v_max, _make_display_fmt_string(display_format), power); }
+slider_float3  :: proc(label : string, v : ^[3]f32, v_min : f32, v_max : f32, display_format : string = "%.3f", power : f32 = 1) -> bool            { return im_slider_float2(_make_label_string(label), &v[0], v_min, v_max, _make_display_fmt_string(display_format), power); }
+slider_float4  :: proc(label : string, v : ^[4]f32, v_min : f32, v_max : f32, display_format : string = "%.3f", power : f32 = 1) -> bool            { return im_slider_float2(_make_label_string(label), &v[0], v_min, v_max, _make_display_fmt_string(display_format), power); }
+slider_angle   :: proc(label : string, v_rad : ^f32, v_degrees_min : f32, v_degrees_max : f32) -> bool                                              { return im_slider_angle(_make_label_string(label),v_rad, v_degrees_min, v_degrees_max); }
+
+slider_int     :: proc[slider_int1, slider_int2, slider_int3, slider_int4];
+slider_int1    :: proc(label : string, v : ^i32, v_min : i32, v_max : i32, display_format : string = "%d") -> bool                                  { return im_slider_int(_make_label_string(label), v, v_min, v_max, _make_display_fmt_string(display_format)); }
+slider_int2    :: proc(label : string, v : ^[2]i32, v_min : i32, v_max : i32, display_format : string = "%d") -> bool                               { return im_slider_int2(_make_label_string(label), &v[0], v_min, v_max, _make_display_fmt_string(display_format)); }
+slider_int3    :: proc(label : string, v : ^[3]i32, v_min : i32, v_max : i32, display_format : string = "%d") -> bool                               { return im_slider_int3(_make_label_string(label), &v[0], v_min, v_max, _make_display_fmt_string(display_format)); }
+slider_int4    :: proc(label : string, v : ^[4]i32, v_min : i32, v_max : i32, display_format : string = "%d") -> bool                               { return im_slider_int4(_make_label_string(label), &v[0], v_min, v_max, _make_display_fmt_string(display_format)); }
+vslider_float  :: proc(label : string, size : Vec2, v : ^f32, v_min : f32 , v_max : f32, display_format : string = "%.3f", power : f32 = 1) -> bool { return im_vslider_float(_make_label_string(label), size, v, v_min, v_max, _make_display_fmt_string(display_format), power); }
+vslider_int    :: proc(label : string, size : Vec2, v : ^i32, v_min : i32, v_max : i32, display_format : string = "%d") -> bool                     { return im_vslider_int(_make_label_string(label), size, v, v_min, v_max, _make_display_fmt_string(display_format)); }
 
 @(default_calling_convention="c")
 foreign cimgui {
@@ -776,11 +809,14 @@ foreign cimgui {
     @(link_name = "igVSliderInt")   im_vslider_int   :: proc(label : Cstring, size : Vec2, v : ^i32, v_min : i32, v_max : i32, display_format : Cstring) -> bool               ---;
 }
 
-color_edit   :: proc(label : string, col : [3]f32, flags : ColorEditFlags = 0) -> bool                           { return im_color_edit3(_make_label_string(label), &col[0], flags) }
-color_edit   :: proc(label : string, col : [4]f32, flags : ColorEditFlags = 0) -> bool                           { return im_color_edit4(_make_label_string(label), &col[0], flags) }
-color_picker :: proc(label : string, col : [3]f32, flags : ColorEditFlags = 0) -> bool                           { return im_color_picker3(_make_label_string(label), &col[0], flags) }
-color_picker :: proc(label : string, col : [4]f32, flags : ColorEditFlags = 0) -> bool                           { return im_color_picker4(_make_label_string(label), &col[0], flags) }
-color_button :: proc(desc_id : string, col : Vec4, flags : ColorEditFlags = 0, size : Vec2 = Vec2{0, 0}) -> bool { return im_color_button(_make_label_string(desc_id), col, flags, size) }
+color_edit    :: proc[color_edit3, color_edit4];
+color_edit3   :: proc(label : string, col : [3]f32, flags : ColorEditFlags = 0) -> bool                           { return im_color_edit3(_make_label_string(label), &col[0], flags) }
+color_edit4   :: proc(label : string, col : [4]f32, flags : ColorEditFlags = 0) -> bool                           { return im_color_edit4(_make_label_string(label), &col[0], flags) }
+
+color_picker  :: proc[color_picker3, color_picker4];
+color_picker3 :: proc(label : string, col : [3]f32, flags : ColorEditFlags = 0) -> bool                           { return im_color_picker3(_make_label_string(label), &col[0], flags) }
+color_picker4 :: proc(label : string, col : [4]f32, flags : ColorEditFlags = 0) -> bool                           { return im_color_picker4(_make_label_string(label), &col[0], flags) }
+color_button  :: proc(desc_id : string, col : Vec4, flags : ColorEditFlags = 0, size : Vec2 = Vec2{0, 0}) -> bool { return im_color_button(_make_label_string(desc_id), col, flags, size) }
 
 @(default_calling_convention="c")
 foreign cimgui {
@@ -793,15 +829,22 @@ foreign cimgui {
 }
 
 // Widgets: Trees
-tree_node         :: proc(label : string) -> bool                                                              { return im_tree_node(_make_label_string(label)); }
-tree_node         :: proc(str_id : string, fmt_ : string, args : ...any) -> bool                               { return im_tree_node_str(_make_label_string(str_id), _make_text_string(fmt_, ...args)); }
-tree_node         :: proc(ptr_id : rawptr, fmt_ : string, args : ...any) -> bool                               { return im_tree_node_ptr(ptr_id, _make_text_string(fmt_, ...args)); }
-tree_node_ex      :: proc(label : string, flags : TreeNodeFlags = 0) -> bool                                { return im_tree_node_ex(_make_label_string(label), flags); }
-tree_node_ex      :: proc(str_id : string, flags : TreeNodeFlags = 0, fmt_ : string, args : ...any) -> bool { return im_tree_node_ex_str(_make_label_string(str_id), flags, _make_text_string(fmt_, ...args)); }
-tree_node_ex      :: proc(ptr_id : rawptr, flags : TreeNodeFlags = 0, fmt_ : string, args : ...any) -> bool { return im_tree_node_ex_ptr(ptr_id, flags, _make_text_string(fmt_, ...args)); }
-tree_push         :: proc(str_id : string)                                                                     { im_tree_push_str(_make_label_string(str_id)); }
-collapsing_header :: proc(label : string, flags : TreeNodeFlags = 0) -> bool                                { return im_collapsing_header(_make_label_string(label), flags); }
-collapsing_header :: proc(label : string, p_open : ^bool, flags : TreeNodeFlags = 0) -> bool                { return im_collapsing_header_ex(_make_label_string(label), p_open, flags); }
+tree_node               :: proc[tree_node_str, tree_node_str_fmt, tree_node_ptr];
+tree_node_str           :: proc(label : string) -> bool                                                              { return im_tree_node(_make_label_string(label)); }
+tree_node_str_fmt       :: proc(str_id : string, fmt_ : string, args : ...any) -> bool                               { return im_tree_node_str(_make_label_string(str_id), _make_text_string(fmt_, ...args)); }
+tree_node_ptr           :: proc(ptr_id : rawptr, fmt_ : string, args : ...any) -> bool                               { return im_tree_node_ptr(ptr_id, _make_text_string(fmt_, ...args)); }
+
+tree_node_ext           :: proc[tree_node_ext_str, tree_node_ext_str_fmt, tree_node_ext_ptr];
+tree_node_ext_str       :: proc(label : string, flags : TreeNodeFlags = 0) -> bool                                { return im_tree_node_ex(_make_label_string(label), flags); }
+tree_node_ext_str_fmt   :: proc(str_id : string, flags : TreeNodeFlags = 0, fmt_ : string, args : ...any) -> bool { return im_tree_node_ex_str(_make_label_string(str_id), flags, _make_text_string(fmt_, ...args)); }
+tree_node_ext_ptr       :: proc(ptr_id : rawptr, flags : TreeNodeFlags = 0, fmt_ : string, args : ...any) -> bool { return im_tree_node_ex_ptr(ptr_id, flags, _make_text_string(fmt_, ...args)); }
+
+tree_push               :: proc[tree_push_str, tree_push_ptr];
+tree_push_str           :: proc(str_id : string)                                                                     { im_tree_push_str(_make_label_string(str_id)); }
+
+collapsing_header       :: proc[collapsing_header_, collapsing_header_ext];
+collapsing_header_      :: proc(label : string, flags : TreeNodeFlags = 0) -> bool                                { return im_collapsing_header(_make_label_string(label), flags); }
+collapsing_header_ext   :: proc(label : string, p_open : ^bool, flags : TreeNodeFlags = 0) -> bool                { return im_collapsing_header_ex(_make_label_string(label), p_open, flags); }
 
 @(default_calling_convention="c")
 foreign cimgui {
@@ -812,7 +855,8 @@ foreign cimgui {
     @(link_name = "igTreeNodeExStr")             im_tree_node_ex_str            :: proc(str_id : Cstring, flags : TreeNodeFlags, fmt_ : Cstring) -> bool ---;
     @(link_name = "igTreeNodeExPtr")             im_tree_node_ex_ptr            :: proc(ptr_id : rawptr, flags : TreeNodeFlags, fmt_ : Cstring) -> bool ---;
     @(link_name = "igTreePushStr")               im_tree_push_str               :: proc(str_id : Cstring) ---;
-    @(link_name = "igTreePushPtr")               tree_push                      :: proc(ptr_id : rawptr) ---;
+    @(link_name = "igTreePushPtr")               tree_push_ptr                  :: proc(ptr_id : rawptr) ---;
+
     @(link_name = "igTreePop")                   tree_pop                       :: proc() ---;
     @(link_name = "igTreeAdvanceToLabelPos")     tree_advance_to_label_pos      :: proc() ---;
     @(link_name = "igGetTreeNodeToLabelSpacing") get_tree_node_to_label_spacing :: proc() -> f32 ---;
@@ -822,28 +866,38 @@ foreign cimgui {
 }
 
 // Widgets: Selectable / Lists
-selectable      :: proc(label : string, selected : bool = false, flags : SelectableFlags = 0, size : Vec2 = Vec2{0,0}) -> bool { return im_selectable(_make_label_string(label), selected, flags, size); }
-selectable      :: proc(label : string, p_selected : ^bool, flags : SelectableFlags = 0, size : Vec2 = Vec2{0,0}) -> bool      { return im_selectable_ex(_make_label_string(label), p_selected, flags, size); }
-list_box_header :: proc(label : string, size : Vec2 = Vec2{0, 0}) -> bool                                                         { return im_list_box_header(_make_label_string(label), size); }
-list_box_header :: proc(label : string, items_count : i32, height_in_items : i32 = -1) -> bool                                    { return im_list_box_header(_make_label_string(label), items_count, height_in_items); }
+selectable      :: proc[selectable_val, selectable_ptr];
+selectable_val  :: proc(label : string, selected : bool = false, flags : SelectableFlags = 0, size : Vec2 = Vec2{0,0}) -> bool { return im_selectable(_make_label_string(label), selected, flags, size); }
+selectable_ptr  :: proc(label : string, p_selected : ^bool, flags : SelectableFlags = 0, size : Vec2 = Vec2{0,0}) -> bool      { return im_selectable_ex(_make_label_string(label), p_selected, flags, size); }
+
+list_box_header        :: proc[list_box_header_simple, list_box_header_count];
+list_box_header_simple :: proc(label : string, size : Vec2 = Vec2{0, 0}) -> bool                      { return im_list_box_header(_make_label_string(label), size); }
+list_box_header_count  :: proc(label : string, items_count : i32, height_in_items : i32 = -1) -> bool { return im_list_box_header2(_make_label_string(label), items_count, height_in_items); }
 
 @(default_calling_convention="c")
 foreign cimgui {
     @(link_name = "igSelectable")     im_selectable      :: proc(label : Cstring, selected : bool, flags : SelectableFlags, size : Vec2) -> bool ---;
     @(link_name = "igSelectableEx")   im_selectable_ex   :: proc(label : Cstring, p_selected : ^bool, flags : SelectableFlags, size : Vec2) -> bool ---;
-    @(link_name = "igListBox")        list_box           :: proc(label : Cstring, current_item : ^i32, items : ^^u8, items_count : i32, height_in_items : i32) -> bool ---;
-    @(link_name = "igListBox2")       list_box           :: proc(label : Cstring, current_item : ^i32, items_getter : proc "cdecl"(data : rawptr, idx : i32, out_text : ^^u8) -> bool, data : rawptr, items_count : i32, height_in_items : i32) -> bool ---;
+    @(link_name = "igListBox")        list_box1          :: proc(label : Cstring, current_item : ^i32, items : ^^u8, items_count : i32, height_in_items : i32) -> bool ---;
+    @(link_name = "igListBox2")       list_box2          :: proc(label : Cstring, current_item : ^i32, items_getter : proc "cdecl"(data : rawptr, idx : i32, out_text : ^^u8) -> bool, data : rawptr, items_count : i32, height_in_items : i32) -> bool ---;
+}
+
+list_box :: proc[list_box1, list_box2];
+
+@(default_calling_convention="c")
+foreign cimgui {
     @(link_name = "igListBoxHeader")  im_list_box_header :: proc(label : Cstring, size : Vec2) -> bool ---;
-    @(link_name = "igListBoxHeader2") im_list_box_header :: proc(label : Cstring, items_count : i32, height_in_items : i32) -> bool ---;
+    @(link_name = "igListBoxHeader2") im_list_box_header2 :: proc(label : Cstring, items_count : i32, height_in_items : i32) -> bool ---;
     @(link_name = "igListBoxFooter")  list_box_footer    :: proc() ---;
 }
 
 // Widgets: Value() Helpers. Output single value in "name: value" format (tip: freely declare your own within the ImGui namespace!)
-value :: proc(prefix : string, b : bool)                          { im_value_bool(_make_label_string(prefix), b); }
-value :: proc(prefix : string, v : i32)                           { im_value_int(_make_label_string(prefix), v); }
-value :: proc(prefix : string, v : u32)                           { im_value_uint(_make_label_string(prefix), v); }
-value :: proc(prefix : string, v : f32, format : string = "\x00") { im_value_float(_make_label_string(prefix), v, _make_misc_string(format)); }
-value :: proc(prefix : string, v : Vec4)                          { im_value_color(_make_label_string(prefix), v); }
+value       :: proc[value_bool, value_int, value_uint, value_float, value_color];
+value_bool  :: proc(prefix : string, b : bool)                          { im_value_bool(_make_label_string(prefix), b); }
+value_int   :: proc(prefix : string, v : i32)                           { im_value_int(_make_label_string(prefix), v); }
+value_uint  :: proc(prefix : string, v : u32)                           { im_value_uint(_make_label_string(prefix), v); }
+value_float :: proc(prefix : string, v : f32, format : string = "\x00") { im_value_float(_make_label_string(prefix), v, _make_misc_string(format)); }
+value_color :: proc(prefix : string, v : Vec4)                          { im_value_color(_make_label_string(prefix), v); }
 
 @(default_calling_convention="c")
 foreign cimgui {
@@ -865,8 +919,10 @@ foreign cimgui {
 }
 
 begin_menu :: proc(label : string, enabled : bool = true) -> bool                                                      { return im_begin_menu(_make_label_string(label), enabled); }
-menu_item  :: proc(label : string, shortcut : string = "\x00", selected : bool = false, enabled : bool = true) -> bool { return im_menu_item(_make_label_string(label), _make_misc_string(shortcut), selected, enabled); }
-menu_item  :: proc(label : string, shortcut : string, selected : ^bool , enabled : bool = true) -> bool                { return im_menu_item_ptr(_make_label_string(label), _make_misc_string(shortcut), selected, enabled); }
+
+menu_item   :: proc[menu_item1, menu_item2];
+menu_item1  :: proc(label : string, shortcut : string = "\x00", selected : bool = false, enabled : bool = true) -> bool { return im_menu_item(_make_label_string(label), _make_misc_string(shortcut), selected, enabled); }
+menu_item2  :: proc(label : string, shortcut : string, selected : ^bool , enabled : bool = true) -> bool                { return im_menu_item_ptr(_make_label_string(label), _make_misc_string(shortcut), selected, enabled); }
 
 // Widgets: Menus
 @(default_calling_convention="c")
