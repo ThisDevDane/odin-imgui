@@ -6,7 +6,7 @@
  *  @Creation: 10-05-2017 21:11:30
  *
  *  @Last By:   Mikkel Hjortshoej
- *  @Last Time: 13-12-2017 01:07:48
+ *  @Last Time: 14-12-2017 06:54:11 UTC+1
  *  
  *  @Description:
  *      Wrapper for Dear ImGui 1.52
@@ -635,17 +635,19 @@ foreign cimgui {
     // If you are creating widgets in a loop you most likely want to push a unique identifier so ImGui can differentiate them
     // You can also use "##extra" within your widget name to distinguish them from each others (see 'Programmer Guide')
     //@TODO(Hoej): Figure out what to do here
-    @(link_name = "igPushIdStr")       push_id_str       :: proc (str_id : Cstring)  ---;
-    @(link_name = "igPushIdStrRange")  push_id_str_range :: proc (str_begin : Cstring, str_end : Cstring)  ---;
-    @(link_name = "igPushIdPtr")       push_id_ptr       :: proc (ptr_id : rawptr)  ---;
-    @(link_name = "igPushIdInt")       push_id_int       :: proc (int_id : i32)  ---;
-    @(link_name = "igPopId")           pop_id            :: proc ()  ---;
-    @(link_name = "igGetIdStr")        get_id_str        :: proc (str_id : Cstring) -> GuiId  ---;
-    @(link_name = "igGetIdStrRange")   get_id_str_range  :: proc (str_begin : Cstring, str_end : Cstring) -> GuiId  ---;
-    @(link_name = "igGetIdPtr")        get_id_ptr        :: proc (ptr_id : rawptr) -> GuiId  ---;
+    @(link_name = "igPushIDStr")       push_id_cstr       :: proc (str_id : Cstring)  ---;
+    @(link_name = "igPushIDStrRange")  push_id_cstr_range :: proc (str_begin : Cstring, str_end : Cstring)  ---;
+    @(link_name = "igPushIDPtr")       push_id_ptr        :: proc (ptr_id : rawptr)  ---;
+    @(link_name = "igPushIDInt")       push_id_int        :: proc (int_id : i32)  ---;
+    @(link_name = "igPopID")           pop_id             :: proc ()  ---;
+    @(link_name = "igGetIDStr")        get_id_str         :: proc (str_id : Cstring) -> GuiId  ---;
+    @(link_name = "igGetIDStrRange")   get_id_str_range   :: proc (str_begin : Cstring, str_end : Cstring) -> GuiId  ---;
+    @(link_name = "igGetIDPtr")        get_id_ptr         :: proc (ptr_id : rawptr) -> GuiId  ---;
 }
 
-push_id :: proc[push_id_str, push_id_str_range, push_id_ptr, push_id_int];
+push_id_str :: proc(str_id : string) { push_id_cstr(_make_label_string(str_id)); }
+
+push_id :: proc[push_id_str, push_id_cstr_range, push_id_ptr, push_id_int];
 get_id :: proc[get_id_str, get_id_str_range, get_id_ptr];
 
 /////// Widgtes: Text
