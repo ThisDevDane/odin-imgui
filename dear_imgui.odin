@@ -1,13 +1,13 @@
 /*
  *  @Name:     dear_imgui
- *  
+ *
  *  @Author:   Mikkel Hjortshoej
  *  @Email:    hoej@northwolfprod.com
  *  @Creation: 10-05-2017 21:11:30
  *
- *  @Last By:   Mikkel Hjortshoej
- *  @Last Time: 14-12-2017 06:54:11 UTC+1
- *  
+ *  @Last By:   Joshua Manton
+ *  @Last Time: 17-12-2017 09:43:32 UTC-8
+ *
  *  @Description:
  *      Wrapper for Dear ImGui 1.52
  */
@@ -16,34 +16,34 @@ foreign import "cimgui.lib";
 import "core:fmt.odin";
 import "core:mem.odin";
 import "core:math.odin";
-import "core:strings.odin"; 
+import "core:strings.odin";
 
 DrawIdx    :: u16;
 Wchar      :: u16;
 TextureID  :: rawptr;
 GuiId      :: u32;
 Cstring    :: ^u8;
-Font       :: struct #ordered {}
-Storage :: struct #ordered {}
-Context :: struct #ordered {}
-FontAtlas  :: struct #ordered {}
-DrawList   :: struct #ordered {}
-TextFilter :: struct #ordered {}
-TextBuffer :: struct #ordered {}
+Font       :: struct {}
+Storage :: struct {}
+Context :: struct {}
+FontAtlas  :: struct {}
+DrawList   :: struct {}
+TextFilter :: struct {}
+TextBuffer :: struct {}
 
-Vec2 :: struct #ordered {
+Vec2 :: struct {
     x : f32,
     y : f32,
 }
 
-Vec4 :: struct #ordered {
+Vec4 :: struct {
     x : f32,
     y : f32,
     z : f32,
     w : f32,
 }
 
-TextEditCallbackData :: struct #ordered {
+TextEditCallbackData :: struct {
     event_flag      : InputTextFlags,
     flags           : InputTextFlags,
     user_data       : rawptr,
@@ -59,14 +59,14 @@ TextEditCallbackData :: struct #ordered {
     selection_end   : i32,
 }
 
-SizeConstraintCallbackData :: struct #ordered {
+SizeConstraintCallbackData :: struct {
     user_date    : rawptr,
     pos          : Vec2,
     current_size : Vec2,
     desired_size : Vec2,
 }
 
-DrawCmd :: struct #ordered {
+DrawCmd :: struct {
     elem_count         : u32,
     clip_rect          : Vec4,
     texture_id         : TextureID,
@@ -74,13 +74,13 @@ DrawCmd :: struct #ordered {
     user_callback_data : rawptr,
 }
 
-DrawVert :: struct #ordered {
+DrawVert :: struct {
     pos : Vec2,
     uv  : Vec2,
     col : u32,
 }
 
-DrawData :: struct #ordered {
+DrawData :: struct {
     valid           : bool,
     cmd_lists       : ^^DrawList,
     cmd_lists_count : i32,
@@ -88,13 +88,13 @@ DrawData :: struct #ordered {
     total_idx_count : i32,
 }
 
-FontConfig :: struct #ordered {
+FontConfig :: struct {
     font_data                : rawptr,
     font_data_size           : i32,
     font_data_owned_by_atlas : bool,
     font_no                  : i32,
     size_pixels              : f32,
-    over_sample_h            : i32, 
+    over_sample_h            : i32,
     over_sample_v            : i32,
     pixel_snap_h             : bool,
     glyph_extra_spacing      : Vec2,
@@ -115,7 +115,7 @@ ListClipper :: struct {
 }
 
 
-Style :: struct #ordered {
+Style :: struct {
     alpha                     : f32,
     window_padding            : Vec2,
     window_min_size           : Vec2,
@@ -142,7 +142,7 @@ Style :: struct #ordered {
     colors                    : [Color.COUNT]Vec4,
 }
 
-IO :: struct #ordered {
+IO :: struct {
     display_size                : Vec2,
     delta_time                  : f32,
     ini_saving_rate             : f32,
@@ -154,7 +154,7 @@ IO :: struct #ordered {
     key_map                     : [Key.COUNT]i32,
     key_repeat_delay            : f32,
     key_repeat_rate             : f32,
-    user_data                   : rawptr, 
+    user_data                   : rawptr,
     fonts                       : ^FontAtlas,
     font_global_scale           : f32,
     font_allow_user_scaling     : bool,
@@ -410,10 +410,10 @@ ColorEditFlags :: enum i32 {
 
 HoveredFlags :: enum i32
 {
-    Default                       = 0,        
-    AllowWhenBlockedByPopup       = 1 << 0,   
-    AllowWhenBlockedByActiveItem  = 1 << 2, 
-    AllowWhenOverlapped           = 1 << 3,   
+    Default                       = 0,
+    AllowWhenBlockedByPopup       = 1 << 0,
+    AllowWhenBlockedByActiveItem  = 1 << 2,
+    AllowWhenOverlapped           = 1 << 3,
     RectOnly                      = AllowWhenBlockedByPopup | AllowWhenBlockedByActiveItem | AllowWhenOverlapped
 }
 
@@ -466,7 +466,7 @@ foreign cimgui {
     @(link_name = "igNewFrame")          new_frame     :: proc() ---;
     @(link_name = "igRender")            render        :: proc() ---;
     @(link_name = "igShutdown")          shutdown      :: proc() ---;
-    
+
     // Demo/Debug/Info
     @(link_name = "igShowTestWindow")    show_test_window    :: proc(opened : ^bool = nil) ---;
     @(link_name = "igShowMetricsWindow") show_metrics_window :: proc(opened : ^bool = nil) ---;
@@ -484,7 +484,7 @@ get_window_content_region_min :: proc() -> Vec2                                 
 get_window_content_region_max :: proc() -> Vec2                                                                                                  { res : Vec2 = ---; im_get_window_content_region_max(&res); return res; }
 get_window_pos                :: proc() -> Vec2                                                                                                  { res : Vec2 = ---; im_get_window_pos(&res); return res; }
 get_window_size               :: proc() -> Vec2                                                                                                  { res : Vec2 = ---; im_get_content_region_max(&res); return res; }
-    
+
 @(default_calling_convention="c")
 foreign cimgui {
     @(link_name = "igBegin")                       im_begin                         :: proc(name : Cstring, p_open : ^bool, flags : WindowFlags) -> bool ---;
@@ -661,7 +661,7 @@ bullet_text      :: proc (fmt_: string, args: ...any)                   { im_bul
 
 @(default_calling_convention="c")
 foreign cimgui {
-    @(link_name = "igText")            im_text             :: proc(fmt: Cstring) ---; 
+    @(link_name = "igText")            im_text             :: proc(fmt: Cstring) ---;
     @(link_name = "igTextColored")     im_text_colored     :: proc(col : Vec4, fmt_ : Cstring) ---;
     @(link_name = "igTextDisabled")    im_text_disabled    :: proc(fmt_ : Cstring) ---;
     @(link_name = "igTextWrapped")     im_text_wrapped     :: proc(fmt: Cstring) ---;
@@ -684,7 +684,7 @@ combo            :: proc (label : string, current_item : ^i32, items : []string,
     for item, idx in items {
         data[idx] = strings.new_c_string(item);
     }
-    return im_combo(_make_label_string(label), current_item, &data[0], i32(len(items)), height_in_items); 
+    return im_combo(_make_label_string(label), current_item, &data[0], i32(len(items)), height_in_items);
 }
 plot_histogram   :: proc (label : string, values : []f32, overlay_text : string = "\x00", scale_min : f32 = math.F32_MAX, scale_max : f32 = math.F32_MAX, graph_size : Vec2 = Vec2{0,0}, stride : i32 = size_of(f32)) { im_plot_histogram(_make_label_string(label), &values[0], i32(len(values)), 0, _make_misc_string(overlay_text), scale_min, scale_max, graph_size, stride); }
 progress_bar     :: proc (fraction : f32, size_arg : ^Vec2 = Vec2{0, 0}, overlay : string = "\x00")                                                                                                                   { im_progress_bar(fraction, size_arg, _make_misc_string(overlay)); }
@@ -915,7 +915,7 @@ set_tooltip :: proc(fmt_ : string, args : ...any) { im_set_tooltip(_make_text_st
 
 @(default_calling_convention="c")
 foreign cimgui {
-    @(link_name = "igSetTooltip")   im_set_tooltip :: proc(fmt : Cstring) ---; 
+    @(link_name = "igSetTooltip")   im_set_tooltip :: proc(fmt : Cstring) ---;
     @(link_name = "igBeginTooltip") begin_tooltip  :: proc() ---;
     @(link_name = "igEndTooltip")   end_tooltip    :: proc() ---;
 }
@@ -935,7 +935,7 @@ foreign cimgui {
     @(link_name = "igEndMenuBar")       end_menu_bar        :: proc() ---;
     @(link_name = "igBeginMenu")        im_begin_menu       :: proc(label : Cstring, enabled : bool) -> bool ---;
     @(link_name = "igEndMenu")          end_menu            :: proc() ---;
-    @(link_name = "igMenuItem")         im_menu_item        :: proc(label : Cstring, shortcut : Cstring, selected : bool, enabled : bool) -> bool ---;   
+    @(link_name = "igMenuItem")         im_menu_item        :: proc(label : Cstring, shortcut : Cstring, selected : bool, enabled : bool) -> bool ---;
     @(link_name = "igMenuItemPtr")      im_menu_item_ptr    :: proc(label : Cstring, shortcut : Cstring, p_selected : ^bool, enabled : bool) -> bool ---;
 }
 
@@ -1057,7 +1057,7 @@ foreign cimgui {
     @(link_name = "igGetCurrentContext") get_current_context   :: proc() -> ^Context ---;
     @(link_name = "igSetCurrentContext") set_current_context   :: proc(ctx : ^Context) ---;
 
-///// Misc    
+///// Misc
     @(link_name = "ImFontConfig_DefaultConstructor") font_config_default_constructor  :: proc(config : ^FontConfig) ---;
     @(link_name = "ImGuiIO_AddInputCharacter")       gui_io_add_input_character       :: proc(c : u16) ---;
     @(link_name = "ImGuiIO_AddInputCharactersUTF8")  gui_io_add_input_characters_utf8 :: proc(utf8_chars : ^u8) ---;
@@ -1115,7 +1115,7 @@ foreign cimgui {
     @(link_name = "ImGuiListClipper_End")             list_clipper_end               :: proc (clipper : ^ListClipper) ---;
 }
 
-///// FontAtlas  
+///// FontAtlas
 font_atlas_add_font_from_file_ttf :: proc(atlas : ^FontAtlas, filename : string, size_pixels : f32, font_cfg : ^FontConfig = nil, glyph_ranges : ^Wchar = nil) -> ^Font { return im_font_atlas_add_font_from_file_ttf(atlas, _make_misc_string(filename), size_pixels, font_cfg, glyph_ranges); }
 foreign cimgui {
     @(link_name = "ImFontAtlas_GetTexDataAsRGBA32")                   font_atlas_get_text_data_as_rgba32                    :: proc(atlas : ^FontAtlas, out_pixels : ^^u8, out_width : ^i32, out_height : ^i32, out_bytes_per_pixel : ^i32 = nil) ---;
