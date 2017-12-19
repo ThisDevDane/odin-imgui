@@ -5,8 +5,8 @@
  *  @Email:    hoej@northwolfprod.com
  *  @Creation: 10-05-2017 21:11:30
  *
- *  @Last By:   Joshua Manton
- *  @Last Time: 17-12-2017 09:43:32 UTC-8
+ *  @Last By:   Mikkel Hjortshoej
+ *  @Last Time: 19-12-2017 01:04:54 UTC+1
  *
  *  @Description:
  *      Wrapper for Dear ImGui 1.52
@@ -1001,7 +1001,14 @@ foreign cimgui {
     @(link_name = "igIsRootWindowFocused")              is_root_window_focused                 :: proc () -> bool ---;
     @(link_name = "igIsRootWindowOrAnyChildFocused")    is_root_window_or_any_child_focused    :: proc () -> bool ---;
     @(link_name = "igIsRootWindowOrAnyChildHovered")    is_root_window_or_any_child_hovered    :: proc (flags : HoveredFlags = 0) -> bool ---;
-    @(link_name = "igIsRectVisible")                    is_rect_visible                        :: proc (item_size : Vec2) -> bool ---;
+    @(link_name = "igIsRectVisible")                    is_rect_visible_size                   :: proc (item_size : Vec2) -> bool ---;
+    @(link_name = "igIsRectVisible2")                   is_rect_visible_minmax                 :: proc (min : ^Vec2, max : ^Vec2) -> bool ---;
+}
+
+is_rect_visible :: proc[is_rect_visible_size, is_rect_visible_minmax];
+
+@(default_calling_convention="c")
+foreign cimgui {
     @(link_name = "igIsPosHoveringAnyWindow")           is_pos_hovering_any_window             :: proc (pos : Vec2) -> bool ---;
     @(link_name = "igGetTime")                          get_time                               :: proc () -> f32 ---;
     @(link_name = "igGetFrameCount")                    get_frame_count                        :: proc () -> i32 ---;
