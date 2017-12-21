@@ -5,8 +5,8 @@
  *  @Email:    hoej@northwolfprod.com
  *  @Creation: 10-05-2017 21:11:30
  *
- *  @Last By:   Mikkel Hjortshoej
- *  @Last Time: 19-12-2017 01:04:54 UTC+1
+ *  @Last By:   Brendan Punsky
+ *  @Last Time: 19-12-2017 12:33:45 UTC-5
  *
  *  @Description:
  *      Wrapper for Dear ImGui 1.52
@@ -638,16 +638,18 @@ foreign cimgui {
     @(link_name = "igPushIDStr")       push_id_cstr       :: proc (str_id : Cstring)  ---;
     @(link_name = "igPushIDStrRange")  push_id_cstr_range :: proc (str_begin : Cstring, str_end : Cstring)  ---;
     @(link_name = "igPushIDPtr")       push_id_ptr        :: proc (ptr_id : rawptr)  ---;
-    @(link_name = "igPushIDInt")       push_id_int        :: proc (int_id : i32)  ---;
+    @(link_name = "igPushIDInt")       push_id_i32        :: proc (int_id : i32)  ---;
     @(link_name = "igPopID")           pop_id             :: proc ()  ---;
     @(link_name = "igGetIDStr")        get_id_str         :: proc (str_id : Cstring) -> GuiId  ---;
     @(link_name = "igGetIDStrRange")   get_id_str_range   :: proc (str_begin : Cstring, str_end : Cstring) -> GuiId  ---;
     @(link_name = "igGetIDPtr")        get_id_ptr         :: proc (ptr_id : rawptr) -> GuiId  ---;
 }
 
-push_id_str :: proc(str_id : string) { push_id_cstr(_make_label_string(str_id)); }
+push_id_uint :: proc(uint_id : uint)  { push_id_i32(cast(i32) uint_id); }  
+push_id_int  :: proc(int_id : int)    { push_id_i32(cast(i32) int_id); }
+push_id_str  :: proc(str_id : string) { push_id_cstr(_make_label_string(str_id)); }
 
-push_id :: proc[push_id_str, push_id_cstr_range, push_id_ptr, push_id_int];
+push_id :: proc[push_id_str, push_id_cstr_range, push_id_ptr, push_id_int, push_id_i32];
 get_id :: proc[get_id_str, get_id_str_range, get_id_ptr];
 
 /////// Widgtes: Text
