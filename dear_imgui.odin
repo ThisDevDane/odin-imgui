@@ -5,8 +5,8 @@
  *  @Email:    hoej@northwolfprod.com
  *  @Creation: 10-05-2017 21:11:30
  *
- *  @Last By:   Brendan Punsky
- *  @Last Time: 19-12-2017 12:33:45 UTC-5
+ *  @Last By:   Mikkel Hjortshoej
+ *  @Last Time: 28-12-2017 11:12:04 UTC+1
  *
  *  @Description:
  *      Wrapper for Dear ImGui 1.52
@@ -24,8 +24,8 @@ TextureID  :: rawptr;
 GuiId      :: u32;
 Cstring    :: ^u8;
 Font       :: struct {}
-Storage :: struct {}
-Context :: struct {}
+Storage    :: struct {}
+Context    :: struct {}
 FontAtlas  :: struct {}
 DrawList   :: struct {}
 TextFilter :: struct {}
@@ -44,8 +44,8 @@ Vec4 :: struct {
 }
 
 TextEditCallbackData :: struct {
-    event_flag      : InputTextFlags,
-    flags           : InputTextFlags,
+    event_flag      : Input_Text_Flags,
+    flags           : Input_Text_Flags,
     user_data       : rawptr,
     read_only       : bool,
     event_char      : Wchar,
@@ -116,30 +116,35 @@ ListClipper :: struct {
 
 
 Style :: struct {
-    alpha                     : f32,
-    window_padding            : Vec2,
-    window_min_size           : Vec2,
-    window_rounding           : f32,
-    window_title_align        : Vec2,
-    child_window_rounding     : f32,
-    frame_padding             : Vec2,
-    frame_rounding            : f32,
-    item_spacing              : Vec2,
-    item_inner_spacing        : Vec2,
-    touch_extra_padding       : Vec2,
-    indent_spacing            : f32,
-    columns_min_spacing       : f32,
-    scrollbar_size            : f32,
-    scrollbar_rounding        : f32,
-    grab_min_size             : f32,
-    grab_rounding             : f32,
-    button_text_align         : Vec2,
-    display_window_padding    : Vec2,
-    display_safe_area_padding : Vec2,
-    anti_aliased_lines        : bool,
-    anti_aliased_shapes       : bool,
-    curve_tessellation_tol    : f32,
-    colors                    : [Color.COUNT]Vec4,
+    alpha                     : f32,         
+    window_padding            : Vec2, 
+    window_rounding           : f32,         
+    window_border_size        : f32,         
+    window_min_size           : Vec2,        
+    window_title_align        : Vec2, 
+    child_rounding            : f32,         
+    child_border_size         : f32,         
+    popup_rounding            : f32,         
+    popup_border_size         : f32,         
+    frame_padding             : Vec2, 
+    frame_rounding            : f32,         
+    frame_border_size         : f32,         
+    item_spacing              : Vec2, 
+    item_inner_spacing        : Vec2, 
+    touch_extra_padding       : Vec2, 
+    indent_spacing            : f32,         
+    columns_min_spacing       : f32,         
+    scrollbar_size            : f32,         
+    scrollbar_rounding        : f32,         
+    grab_min_size             : f32,         
+    grab_rounding             : f32,         
+    button_text_align         : Vec2, 
+    display_window_padding    : Vec2, 
+    display_safe_area_padding : Vec2, 
+    anti_aliased_lines        : bool,          
+    anti_aliased_fill         : bool,          
+    curve_tessellation_tol    : f32,         
+    colors                    : [Color.COUNT]Vec4, 
 }
 
 IO :: struct {
@@ -162,7 +167,8 @@ IO :: struct {
     display_framebuffer_scale   : Vec2,
     display_visible_min         : Vec2,
     display_visible_max         : Vec2,
-    o_s_x_behaviors             : bool,
+    opt_mac_osx_Behaviors       : bool,
+    opt_cursor_blink            : bool,
     render_draw_lists_fn        : proc "c"(data : ^DrawData),
     get_clipboard_text_fn       : proc "c"(user_data : rawptr) -> Cstring,
     set_clipboard_text_fn       : proc "c"(user_data : rawptr, text : Cstring),
@@ -199,16 +205,29 @@ IO :: struct {
     mouse_down_owned            : [5]bool,
     mouse_down_duration         : [5]f32,
     mouse_down_duration_prev    : [5]f32,
+    mouse_drag_max_distance_abs : [5]Vec2,
     mouse_drag_max_distance_sqr : [5]f32,
     keys_down_duration          : [512]f32,
     keys_down_duration_prev     : [512]f32,
+}
+
+Payload :: struct {
+    data             : rawptr,
+    data_size        : i32,
+
+    source_id        : GuiId,
+    source_parent_id : GuiId,
+    data_frame_count : i32,
+    data_type        : [8+1]byte,
+    preview          : bool,
+    delivery         : bool,
 }
 
 text_edit_callback       :: proc "c"(data : ^TextEditCallbackData) -> i32;
 size_constraint_callback :: proc "c"(data : ^SizeConstraintCallbackData);
 draw_callback            :: proc "c"(parent_list : ^DrawList, cmd : ^DrawCmd);
 
-WindowFlags :: enum i32 {
+Window_Flags :: enum i32 {
     NoTitleBar                = 1 << 0,
     NoResize                  = 1 << 1,
     NoMove                    = 1 << 2,
@@ -216,7 +235,7 @@ WindowFlags :: enum i32 {
     NoScrollWithMouse         = 1 << 4,
     NoCollapse                = 1 << 5,
     AlwaysAutoResize          = 1 << 6,
-    ShowBorders               = 1 << 7,
+    //ShowBorders             = 1 << 7, NOTE(Hoej): obselete
     NoSavedSettings           = 1 << 8,
     NoInputs                  = 1 << 9,
     MenuBar                   = 1 << 10,
@@ -225,10 +244,11 @@ WindowFlags :: enum i32 {
     NoBringToFrontOnFocus     = 1 << 13,
     AlwaysVerticalScrollbar   = 1 << 14,
     AlwaysHorizontalScrollbar = 1 << 15,
-    AlwaysUseWindowPadding    = 1 << 16
+    AlwaysUseWindowPadding    = 1 << 16,
+    ResizeFromAnySide         = 1 << 17,
 }
 
-InputTextFlags :: enum i32 {
+Input_Text_Flags :: enum i32 {
     CharsDecimal              = 1 << 0,
     CharsHexadecimal          = 1 << 1,
     CharsUppercase            = 1 << 2,
@@ -244,13 +264,14 @@ InputTextFlags :: enum i32 {
     NoHorizontalScroll        = 1 << 12,
     AlwaysInsertMode          = 1 << 13,
     ReadOnly                  = 1 << 14,
-    Password                  = 1 << 15
+    Password                  = 1 << 15,
+    NoUndoRedo                = 1 << 16,
 }
 
-TreeNodeFlags :: enum i32 {
+Tree_Node_Flags :: enum i32 {
     Selected                  = 1 << 0,
     Framed                    = 1 << 1,
-    AllowOverlapMode          = 1 << 2,
+    AllowItemMode             = 1 << 2,
     NoTreePushOnOpen          = 1 << 3,
     NoAutoOpenOnLog           = 1 << 4,
     DefaultOpen               = 1 << 5,
@@ -261,7 +282,44 @@ TreeNodeFlags :: enum i32 {
     CollapsingHeader          = Framed | NoAutoOpenOnLog
 }
 
-SelectableFlags :: enum {
+Combo_Flags :: enum i32 {
+    PopupAlignLeft            = 1 << 0,
+    HeightSmall               = 1 << 1,
+    HeightRegular             = 1 << 2,
+    HeightLarge               = 1 << 3,
+    HeightLargest             = 1 << 4,
+    HeightMask                = HeightSmall | HeightRegular | HeightLarge | HeightLargest
+}
+
+Focused_Flags :: enum i32 {
+    ChildWindows              = 1 << 0,
+    RootWindow                = 1 << 1,
+    RootAndChildWindows       = RootWindow | ChildWindows
+}
+
+Hovered_Flags :: enum i32 {
+    ChildWindows                  = 1 << 0,
+    RootWindow                    = 1 << 1,
+    AllowWhenBlockedByPopup       = 1 << 2,
+    //AllowWhenBlockedByModal     = 1 << 3,
+    AllowWhenBlockedByActiveItem  = 1 << 4,
+    AllowWhenOverlapped           = 1 << 5,
+    RectOnly                      = AllowWhenBlockedByPopup | AllowWhenBlockedByActiveItem | AllowWhenOverlapped,
+    RootAndChildWindows           = RootWindow | ChildWindows
+};
+
+Drag_Drop_Flags :: enum i32 {
+    SourceNoPreviewTooltip   = 1 << 0,
+    SourceNoDisableHover     = 1 << 1,
+    SourceNoHoldToOpenOthers = 1 << 2,
+    SourceAllowNullID        = 1 << 3,
+    SourceExtern             = 1 << 4,
+    AcceptBeforeDelivery     = 1 << 10,
+    AcceptNoDrawDefaultRect  = 1 << 11,
+    AcceptPeekOnly           = AcceptBeforeDelivery | AcceptNoDrawDefaultRect
+}
+
+Selectable_Flags :: enum {
     DontClosePopups           = 1 << 0,
     SpanAllColumns            = 1 << 1,
     AllowDoubleClick          = 1 << 2
@@ -293,12 +351,12 @@ Key :: enum i32 {
 Color :: enum i32 {
     Text,
     TextDisabled,
-    WindowBg,
-    ChildWindowBg,
-    PopupBg,
+    WindowBg,              // Background of normal windows
+    ChildBg,               // Background of child windows
+    PopupBg,               // Background of popups, menus, tooltips windows
     Border,
     BorderShadow,
-    FrameBg,
+    FrameBg,               // Background of checkbox, radio button, plot, slider, text input
     FrameBgHovered,
     FrameBgActive,
     TitleBg,
@@ -309,7 +367,6 @@ Color :: enum i32 {
     ScrollbarGrab,
     ScrollbarGrabHovered,
     ScrollbarGrabActive,
-    ComboBg,
     CheckMark,
     SliderGrab,
     SliderGrabActive,
@@ -333,22 +390,51 @@ Color :: enum i32 {
     PlotHistogram,
     PlotHistogramHovered,
     TextSelectedBg,
-    ModalWindowDarkening,
-    COUNT
+    ModalWindowDarkening,  // darken entire screen when a modal window is active
+    DragDropTarget,
+    COUNT,
+
+    // Obsolete names (will be removed)
+    //, ComboBg = PopupBg     // ComboBg has been merged with PopupBg, so a redirect isn't accurate.
+    ChildWindowBg = ChildBg, Column = Separator, ColumnHovered = SeparatorHovered, ColumnActive = SeparatorActive
 }
 
-StyleVar :: enum i32 {
+Style_Var :: enum i32 {
     Alpha,
     WindowPadding,
     WindowRounding,
+    WindowBorderSize,
     WindowMinSize,
-    ChildWindowRounding,
+    ChildRounding,
+    ChildBorderSize,
+    PopupRounding,
+    PopupBorderSize,
     FramePadding,
     FrameRounding,
+    FrameBorderSize,
     ItemSpacing,
     ItemInnerSpacing,
     IndentSpacing,
-    GrabMinSize
+    GrabMinSize,
+    ButtonTextAlign,
+    Count
+}
+
+Draw_Corner_Flags :: enum i32 {
+    TopLeft  = 1 << 0,
+    TopRight = 1 << 1,
+    BotLeft  = 1 << 2,
+    BotRight = 1 << 3,
+    Top      = TopLeft  | TopRight,
+    Bot      = BotLeft  | BotRight,
+    Left     = TopLeft  | BotLeft,
+    Right    = TopRight | BotRight,
+    All      = 0xF
+}
+
+Draw_List_Flags :: enum i32 {
+    AntiAliasedLines = 1 << 0,
+    AntiAliasedFill  = 1 << 1
 }
 
 Align :: enum i32 {
@@ -360,7 +446,7 @@ Align :: enum i32 {
     Default  = Left | Top
 }
 
-ColorEditMode :: enum i32 {
+Color_Edit_Mode :: enum i32 {
     UserSelect           = -2,
     UserSelectShowButton = -1,
     RGB                  = 0,
@@ -368,7 +454,7 @@ ColorEditMode :: enum i32 {
     HEX                  = 2
 }
 
-MouseCursor :: enum i32 {
+Mouse_Cursor :: enum i32 {
     Arrow = 0,
     TextInput,
     Move,
@@ -379,14 +465,14 @@ MouseCursor :: enum i32 {
     Count_
 }
 
-SetCond :: enum i32 {
+Set_Cond :: enum i32 {
     Always        = 1 << 0,
     Once          = 1 << 1,
     FirstUseEver  = 1 << 2,
     Appearing     = 1 << 3
 }
 
-ColorEditFlags :: enum i32 {
+Color_Edit_Flags :: enum i32 {
     NoAlpha         = 1 << 1,
     NoPicker        = 1 << 2,
     NoOptions       = 1 << 3,
@@ -407,16 +493,6 @@ ColorEditFlags :: enum i32 {
     PickerHueBar    = 1 << 18,
     PickerHueWheel  = 1 << 19
 };
-
-HoveredFlags :: enum i32
-{
-    Default                       = 0,
-    AllowWhenBlockedByPopup       = 1 << 0,
-    AllowWhenBlockedByActiveItem  = 1 << 2,
-    AllowWhenOverlapped           = 1 << 3,
-    RectOnly                      = AllowWhenBlockedByPopup | AllowWhenBlockedByActiveItem | AllowWhenOverlapped
-}
-
 
 ///////////////////////// Odin UTIL /////////////////////////
 
@@ -468,7 +544,7 @@ foreign cimgui {
     @(link_name = "igShutdown")          shutdown      :: proc() ---;
 
     // Demo/Debug/Info
-    @(link_name = "igShowTestWindow")    show_test_window    :: proc(opened : ^bool = nil) ---;
+    @(link_name = "igShowDemoWindow")    show_demo_window    :: proc(opened : ^bool = nil) ---;
     @(link_name = "igShowMetricsWindow") show_metrics_window :: proc(opened : ^bool = nil) ---;
     @(link_name = "igShowStyleEditor")   show_style_editor   :: proc(ref : ^Style = nil) ---;
     @(link_name = "igShowUserGuide")     show_user_guide     :: proc() ---;
@@ -476,8 +552,8 @@ foreign cimgui {
 
 
 // Window
-begin                         :: proc (name : string, open : ^bool = nil, flags : WindowFlags = 0) -> bool                                    { return im_begin(_make_label_string(name), open, flags); }
-begin_child                   :: proc (str_id : string, size : Vec2 = Vec2{0,0}, border : bool = true, extra_flags : WindowFlags = 0) -> bool { return im_begin_child(_make_label_string(str_id), size, border, extra_flags); }
+begin                         :: proc (name : string, open : ^bool = nil, flags : Window_Flags = 0) -> bool                                      { return im_begin(_make_label_string(name), open, flags); }
+begin_child                   :: proc (str_id : string, size : Vec2 = Vec2{0,0}, border : bool = true, extra_flags : Window_Flags = 0) -> bool   { return im_begin_child(_make_label_string(str_id), size, border, extra_flags); }
 get_content_region_max        :: proc() -> Vec2                                                                                                  { res : Vec2 = ---; im_get_content_region_max(&res); return res; }
 get_content_region_avail      :: proc() -> Vec2                                                                                                  { res : Vec2 = ---; im_get_content_region_avail(&res); return res; }
 get_window_content_region_min :: proc() -> Vec2                                                                                                  { res : Vec2 = ---; im_get_window_content_region_min(&res); return res; }
@@ -487,9 +563,9 @@ get_window_size               :: proc() -> Vec2                                 
 
 @(default_calling_convention="c")
 foreign cimgui {
-    @(link_name = "igBegin")                       im_begin                         :: proc(name : Cstring, p_open : ^bool, flags : WindowFlags) -> bool ---;
+    @(link_name = "igBegin")                       im_begin                         :: proc(name : Cstring, p_open : ^bool, flags : Window_Flags) -> bool ---;
     @(link_name = "igEnd")                         end                              :: proc() ---;
-    @(link_name = "igBeginChild")                  im_begin_child                   :: proc(str_id : Cstring, size : Vec2, border : bool, extra_flags : WindowFlags) -> bool ---;
+    @(link_name = "igBeginChild")                  im_begin_child                   :: proc(str_id : Cstring, size : Vec2, border : bool, extra_flags : Window_Flags) -> bool ---;
     @(link_name = "igEndChild")                    end_child                        :: proc() ---;
     @(link_name = "igGetContentRegionMax")         im_get_content_region_max        :: proc(out : ^Vec2) ---;
     @(link_name = "igGetContentRegionAvail")       im_get_content_region_avail      :: proc(out : ^Vec2) ---;
@@ -507,10 +583,10 @@ foreign cimgui {
     @(link_name = "igSetWindowFontScale")          set_window_font_scale            :: proc(scale : f32) ---;
 }
 
-set_window_collapsed  :: proc (name : string, collapsed : bool, cond : SetCond)    { im_set_window_collapsed(_make_label_string(name), collapsed, cond); }
-set_window_size       :: proc (name : string, size : Vec2, cond : SetCond)         { im_set_window_size(_make_label_string(name), size, cond); }
+set_window_collapsed  :: proc (name : string, collapsed : bool, cond : Set_Cond)    { im_set_window_collapsed(_make_label_string(name), collapsed, cond); }
+set_window_size       :: proc (name : string, size : Vec2, cond : Set_Cond)         { im_set_window_size(_make_label_string(name), size, cond); }
 set_window_focus      :: proc (name : string)                                      { im_set_window_focus(_make_label_string(name)); }
-set_window_pos        :: proc (name : string, pos : Vec2, cond : SetCond)          { im_set_window_pos(_make_label_string(name), pos, cond); }
+set_window_pos        :: proc (name : string, pos : Vec2, cond : Set_Cond)          { im_set_window_pos(_make_label_string(name), pos, cond); }
 get_cursor_pos        :: proc () -> Vec2                                           { res : Vec2 = ---; im_get_cursor_pos(&res); return res; }
 get_cursor_start_pos  :: proc () -> Vec2                                           { res : Vec2 = ---; im_get_cursor_start_pos(&res); return res; }
 get_cursor_screen_pos :: proc () -> Vec2                                           { res : Vec2 = ---; im_get_cursor_screen_pos(&res); return res;}
@@ -519,20 +595,20 @@ get_cursor_screen_pos :: proc () -> Vec2                                        
 
 @(default_calling_convention="c")
 foreign cimgui {
-    @(link_name = "igSetNextWindowPos")              set_next_window_pos                :: proc (pos : Vec2, cond : SetCond = 0, pivot : Vec2 = Vec2{0, 0}) ---;
-    @(link_name = "igSetNextWindowSize")             set_next_window_size               :: proc (size : Vec2, cond : SetCond = 0) ---;
+    @(link_name = "igSetNextWindowPos")              set_next_window_pos                :: proc (pos : Vec2, cond : Set_Cond = 0, pivot : Vec2 = Vec2{0, 0}) ---;
+    @(link_name = "igSetNextWindowSize")             set_next_window_size               :: proc (size : Vec2, cond : Set_Cond = 0) ---;
     @(link_name = "igSetNextWindowSizeConstraints")  set_next_window_size_constraints   :: proc (size_min : Vec2, size_max : Vec2, custom_callback : size_constraint_callback =  nil, custom_callback_data : rawptr = nil) ---;
     @(link_name = "igSetNextWindowContentSize")      set_next_window_content_size       :: proc (size : Vec2) ---;
     @(link_name = "igSetNextWindowContentWidth")     set_next_window_content_width      :: proc (width : f32) ---;
-    @(link_name = "igSetNextWindowCollapsed")        set_next_window_collapsed          :: proc (collapsed : bool, cond : SetCond = 0) ---;
+    @(link_name = "igSetNextWindowCollapsed")        set_next_window_collapsed          :: proc (collapsed : bool, cond : Set_Cond = 0) ---;
     @(link_name = "igSetNextWindowFocus")            set_next_window_focus              :: proc () ---;
-    @(link_name = "igSetWindowPos")                  set_window_pos_                    :: proc (pos : Vec2, cond : SetCond = 0) ---;
-    @(link_name = "igSetWindowSize")                 set_window_size_                    :: proc (size : Vec2, cond : SetCond = 0) ---;
-    @(link_name = "igSetWindowCollapsed")            set_window_collapsed_               :: proc (collapsed : bool, cond : SetCond = 0) ---;
+    @(link_name = "igSetWindowPos")                  set_window_pos_                    :: proc (pos : Vec2, cond : Set_Cond = 0) ---;
+    @(link_name = "igSetWindowSize")                 set_window_size_                    :: proc (size : Vec2, cond : Set_Cond = 0) ---;
+    @(link_name = "igSetWindowCollapsed")            set_window_collapsed_               :: proc (collapsed : bool, cond : Set_Cond = 0) ---;
     @(link_name = "igSetWindowFocus")                set_window_focus_                   :: proc () ---;
-    @(link_name = "igSetWindowPosByName")            im_set_window_pos                  :: proc (name : Cstring, pos : Vec2, cond : SetCond = 0) ---;
-    @(link_name = "igSetWindowSize2")                im_set_window_size                 :: proc (name : Cstring, size : Vec2, cond : SetCond = 0) ---;
-    @(link_name = "igSetWindowCollapsed2")           im_set_window_collapsed            :: proc (name : Cstring, collapsed : bool, cond : SetCond = 0) ---;
+    @(link_name = "igSetWindowPosByName")            im_set_window_pos                  :: proc (name : Cstring, pos : Vec2, cond : Set_Cond = 0) ---;
+    @(link_name = "igSetWindowSize2")                im_set_window_size                 :: proc (name : Cstring, size : Vec2, cond : Set_Cond = 0) ---;
+    @(link_name = "igSetWindowCollapsed2")           im_set_window_collapsed            :: proc (name : Cstring, collapsed : bool, cond : Set_Cond = 0) ---;
     @(link_name = "igSetWindowFocus2")               im_set_window_focus                :: proc (name : Cstring) ---;
 
     @(link_name = "igGetScrollX")                    get_scroll_x                       :: proc () -> f32 ---;
@@ -559,8 +635,8 @@ push_style_color :: proc[push_style_color_, push_style_colorU32];
 @(default_calling_convention="c")
 foreign cimgui {
     @(link_name = "igPopStyleColor")                 pop_style_color                    :: proc (count : i32 = 1) ---;
-    @(link_name = "igPushStyleVar")                  push_style_var_                    :: proc (idx : StyleVar, val : f32) ---;
-    @(link_name = "igPushStyleVarVec")               push_style_var_vec                 :: proc (idx : StyleVar, val : Vec2) ---;
+    @(link_name = "igPushStyleVar")                  push_style_var_                    :: proc (idx : Style_Var, val : f32) ---;
+    @(link_name = "igPushStyleVarVec")               push_style_var_vec                 :: proc (idx : Style_Var, val : Vec2) ---;
 }
 
 push_style_var :: proc[push_style_var_, push_style_var_vec];
@@ -614,7 +690,8 @@ foreign cimgui {
     @(link_name = "igAlignTextToFramePadding")       align_text_to_frame_padding        :: proc () ---;
     @(link_name = "igGetTextLineHeight")             get_text_line_height               :: proc () -> f32 ---;
     @(link_name = "igGetTextLineHeightWithSpacing")  get_text_line_height_with_spacing  :: proc () -> f32 ---;
-    @(link_name = "igGetItemsLineHeightWithSpacing") get_items_line_height_with_spacing :: proc () -> f32 ---;
+    @(link_name = "igGetFrameHeight")                get_frame_height                   :: proc () -> f32 ---;
+    @(link_name = "igGetFrameHeightWithSpacing")     get_frame_height_with_spacing      :: proc () -> f32 ---;
 }
 
 //Columns
@@ -653,13 +730,13 @@ push_id :: proc[push_id_str, push_id_cstr_range, push_id_ptr, push_id_int, push_
 get_id :: proc[get_id_str, get_id_str_range, get_id_ptr];
 
 /////// Widgtes: Text
-text_unformatted :: proc (fmt_: string)                                 { im_text_unformatted(_make_text_string(fmt_)); }
-text             :: proc (fmt_: string, args: ...any)                   { im_text_unformatted(_make_text_string(fmt_, ...args)); }
-text_colored     :: proc (col : Vec4, fmt_: string, args: ...any)       { im_text_colored(col, _make_text_string(fmt_, ...args)); }
-text_disabled    :: proc (fmt_: string, args: ...any)                   { im_text_disabled(_make_text_string(fmt_, ...args)); }
-text_wrapped     :: proc (fmt_: string, args: ...any)                   { im_text_wrapped(_make_text_string(fmt_, ...args)); }
-label_text       :: proc (label : string, fmt_ : string, args : ...any) { im_label_text(_make_label_string(label), _make_text_string(fmt_, ...args)); }
-bullet_text      :: proc (fmt_: string, args: ...any)                   { im_bullet_text(_make_text_string(fmt_, ...args)); }
+text_unformatted :: proc (fmt_  : string)                                 { im_text_unformatted(_make_text_string(fmt_)); }
+text             :: proc (fmt_  : string, args: ...any)                   { im_text_unformatted(_make_text_string(fmt_, ...args)); }
+text_colored     :: proc (col   : Vec4,   fmt_: string,  args: ...any)    { im_text_colored(col, _make_text_string(fmt_, ...args)); }
+text_disabled    :: proc (fmt_  : string, args: ...any)                   { im_text_disabled(_make_text_string(fmt_, ...args)); }
+text_wrapped     :: proc (fmt_  : string, args: ...any)                   { im_text_wrapped(_make_text_string(fmt_, ...args)); }
+label_text       :: proc (label : string, fmt_ : string, args : ...any)   { im_label_text(_make_label_string(label), _make_text_string(fmt_, ...args)); }
+bullet_text      :: proc (fmt_  : string, args: ...any)                   { im_bullet_text(_make_text_string(fmt_, ...args)); }
 
 @(default_calling_convention="c")
 foreign cimgui {
@@ -681,13 +758,6 @@ checkbox         :: proc (label : string, v : ^bool) -> bool                    
 checkbox_flags   :: proc (label : string, flags : ^u32, flags_value : u32) -> bool                                                                                                                                    { return im_checkbox_flags(_make_label_string(label), flags, flags_value); }
 radio_buttons    :: proc (label : string, active : bool) -> bool                                                                                                                                                      { return im_radio_buttons_bool(_make_label_string(label), active); }
 radio_button     :: proc (label : string, v : ^i32, v_button : i32) -> bool                                                                                                                                           { return im_radio_button(_make_label_string(label), v, v_button); }
-combo            :: proc (label : string, current_item : ^i32, items : []string, height_in_items : i32 = -1) -> bool {
-    data := make([]^u8, len(items)); defer free(data);
-    for item, idx in items {
-        data[idx] = strings.new_c_string(item);
-    }
-    return im_combo(_make_label_string(label), current_item, &data[0], i32(len(items)), height_in_items);
-}
 plot_histogram   :: proc (label : string, values : []f32, overlay_text : string = "\x00", scale_min : f32 = math.F32_MAX, scale_max : f32 = math.F32_MAX, graph_size : Vec2 = Vec2{0,0}, stride : i32 = size_of(f32)) { im_plot_histogram(_make_label_string(label), &values[0], i32(len(values)), 0, _make_misc_string(overlay_text), scale_min, scale_max, graph_size, stride); }
 progress_bar     :: proc (fraction : f32, size_arg : ^Vec2 = Vec2{0, 0}, overlay : string = "\x00")                                                                                                                   { im_progress_bar(fraction, size_arg, _make_misc_string(overlay)); }
 
@@ -702,14 +772,24 @@ foreign cimgui {
     @(link_name = "igCheckboxFlags")   im_checkbox_flags     :: proc(label : Cstring, flags : ^u32, flags_value : u32) -> bool ---;
     @(link_name = "igRadioButtonBool") im_radio_buttons_bool :: proc(label : Cstring, active : bool) -> bool ---;
     @(link_name = "igRadioButton")     im_radio_button       :: proc(label : Cstring, v : ^i32, v_button : i32) -> bool ---;
-    @(link_name = "igCombo")           im_combo              :: proc(label : Cstring, current_item : ^i32, items : ^^u8, items_count : i32, height_in_items : i32) -> bool ---;
-    @(link_name = "igCombo2")          combo2                :: proc(label : Cstring, current_item : ^i32, items_separated_by_zeros : Cstring, height_in_items : i32) -> bool ---;
-    @(link_name = "igCombo3")          combo3                :: proc(label : Cstring, current_item : ^i32, items_getter : proc "cdecl"(data : rawptr, idx : i32, out_text : ^^u8) -> bool, data : rawptr, items_count : i32, height_in_items : i32) -> bool ---;
     @(link_name = "igPlotLines")       plot_lines            :: proc(label : Cstring, values : ^f32, values_count : i32, values_offset : i32, overlay_text : Cstring, scale_min : f32, scale_max : f32, graph_size : Vec2, stride : i32) ---;
     @(link_name = "igPlotLines2")      plot_lines2           :: proc(label : Cstring, values_getter : proc(data : rawptr, idx : i32) -> f32, data : rawptr, values_count : i32, values_offset : i32, overlay_text : Cstring, scale_min : f32, scale_max : f32, graph_size : Vec2) ---;
     @(link_name = "igPlotHistogram")   im_plot_histogram     :: proc(label : Cstring, values : ^f32, values_count : i32, values_offset : i32, overlay_text : Cstring, scale_min : f32, scale_max : f32, graph_size : Vec2, stride : i32) ---;
     @(link_name = "igPlotHistogram2")  plot_histogram2       :: proc(label : Cstring, values_getter : proc(data : rawptr, idx : i32) -> f32, data : rawptr, values_count : i32, values_offset : i32, overlay_text : Cstring, scale_min : f32, scale_max : f32, graph_size : Vec2) ---;
     @(link_name = "igProgressBar")     im_progress_bar       :: proc(fraction : f32, size_arg : ^Vec2, overlay : Cstring) ---;
+    @(link_name = "igBeginCombo")      im_begin_combo        :: proc(label : Cstring, preview_value : Cstring, flags : Combo_Flags) -> bool ---;
+    @(link_name = "igEndCombo")        end_combo             :: proc() -> bool ---;
+    @(link_name = "igCombo")           im_combo              :: proc(label : Cstring, current_item : ^i32, items : ^^u8, items_count : i32, height_in_items : i32) -> bool ---;
+    @(link_name = "igCombo2")          combo2                :: proc(label : Cstring, current_item : ^i32, items_separated_by_zeros : Cstring, height_in_items : i32) -> bool ---;
+    @(link_name = "igCombo3")          combo3                :: proc(label : Cstring, current_item : ^i32, items_getter : proc "cdecl"(data : rawptr, idx : i32, out_text : ^^u8) -> bool, data : rawptr, items_count : i32, height_in_items : i32) -> bool ---;
+}
+
+combo            :: proc (label : string, current_item : ^i32, items : []string, height_in_items : i32 = -1) -> bool {
+    data := make([]^u8, len(items)); defer free(data);
+    for item, idx in items {
+        data[idx] = strings.new_c_string(item);
+    }
+    return im_combo(_make_label_string(label), current_item, &data[0], i32(len(items)), height_in_items);
 }
 
 drag_float :: proc[drag_float1, drag_float2, drag_float3, drag_float4];
@@ -753,33 +833,33 @@ foreign cimgui {
 }
 
 // Widgets: Input with Keyboard
-input_text           :: proc(label : string, buf : []u8, flags : InputTextFlags = 0, callback : text_edit_callback = nil, user_data : rawptr = nil) -> bool              { return im_input_text(_make_label_string(label), Cstring(&buf[0]), uint(len(buf)), flags, callback, user_data); }
-input_text_multiline :: proc(label : string, buf : []u8, size : Vec2, flags : InputTextFlags = 0, callback : text_edit_callback = nil, user_data : rawptr = nil) -> bool { return im_input_text_multiline(_make_label_string(label), Cstring(&buf[0]), uint(len(buf)), size, flags, callback, user_data); }
+input_text           :: proc(label : string, buf : []u8, flags : Input_Text_Flags = 0, callback : text_edit_callback = nil, user_data : rawptr = nil) -> bool              { return im_input_text(_make_label_string(label), Cstring(&buf[0]), uint(len(buf)), flags, callback, user_data); }
+input_text_multiline :: proc(label : string, buf : []u8, size : Vec2, flags : Input_Text_Flags = 0, callback : text_edit_callback = nil, user_data : rawptr = nil) -> bool { return im_input_text_multiline(_make_label_string(label), Cstring(&buf[0]), uint(len(buf)), size, flags, callback, user_data); }
 
 input_float          :: proc[input_float1, input_float2, input_float3, input_float4];
-input_float1         :: proc(label : string, v : ^f32, step : f32 = 0, step_fast : f32 = 0, decimal_precision : i32 = -1, extra_flags : InputTextFlags = 0) -> bool          { return im_input_float(_make_label_string(label), v, step, step_fast, decimal_precision, extra_flags); }
-input_float2         :: proc(label : string, v : ^[2]f32, decimal_precision : i32 = -1, extra_flags : InputTextFlags = 0) -> bool                                            { return im_input_float2(_make_label_string(label), &v[0], decimal_precision, extra_flags); }
-input_float3         :: proc(label : string, v : ^[3]f32, decimal_precision : i32 = -1, extra_flags : InputTextFlags = 0) -> bool                                            { return im_input_float3(_make_label_string(label), &v[0], decimal_precision, extra_flags); }
-input_float4         :: proc(label : string, v : ^[4]f32, decimal_precision : i32 = -1, extra_flags : InputTextFlags = 0) -> bool                                            { return im_input_float4(_make_label_string(label), &v[0], decimal_precision, extra_flags); }
+input_float1         :: proc(label : string, v : ^f32, step : f32 = 0, step_fast : f32 = 0, decimal_precision : i32 = -1, extra_flags : Input_Text_Flags = 0) -> bool          { return im_input_float(_make_label_string(label), v, step, step_fast, decimal_precision, extra_flags); }
+input_float2         :: proc(label : string, v : ^[2]f32, decimal_precision : i32 = -1, extra_flags : Input_Text_Flags = 0) -> bool                                            { return im_input_float2(_make_label_string(label), &v[0], decimal_precision, extra_flags); }
+input_float3         :: proc(label : string, v : ^[3]f32, decimal_precision : i32 = -1, extra_flags : Input_Text_Flags = 0) -> bool                                            { return im_input_float3(_make_label_string(label), &v[0], decimal_precision, extra_flags); }
+input_float4         :: proc(label : string, v : ^[4]f32, decimal_precision : i32 = -1, extra_flags : Input_Text_Flags = 0) -> bool                                            { return im_input_float4(_make_label_string(label), &v[0], decimal_precision, extra_flags); }
 
 input_int            :: proc[input_int1, input_int2, input_int3, input_int4];
-input_int1           :: proc(label : string, v : ^i32, step : i32 = 0, step_fast : i32 = 0, extra_flags : InputTextFlags = 0) -> bool                                        { return im_input_int(_make_label_string(label), v, step, step_fast, extra_flags); }
-input_int2           :: proc(label : string, v : ^[2]i32, extra_flags : InputTextFlags = 0) -> bool                                                                          { return im_input_int2(_make_label_string(label), &v[0], extra_flags); }
-input_int3           :: proc(label : string, v : ^[3]i32, extra_flags : InputTextFlags = 0) -> bool                                                                          { return im_input_int3(_make_label_string(label), &v[0], extra_flags); }
-input_int4           :: proc(label : string, v : ^[4]i32, extra_flags : InputTextFlags = 0) -> bool                                                                          { return im_input_int4(_make_label_string(label), &v[0], extra_flags); }
+input_int1           :: proc(label : string, v : ^i32, step : i32 = 0, step_fast : i32 = 0, extra_flags : Input_Text_Flags = 0) -> bool                                        { return im_input_int(_make_label_string(label), v, step, step_fast, extra_flags); }
+input_int2           :: proc(label : string, v : ^[2]i32, extra_flags : Input_Text_Flags = 0) -> bool                                                                          { return im_input_int2(_make_label_string(label), &v[0], extra_flags); }
+input_int3           :: proc(label : string, v : ^[3]i32, extra_flags : Input_Text_Flags = 0) -> bool                                                                          { return im_input_int3(_make_label_string(label), &v[0], extra_flags); }
+input_int4           :: proc(label : string, v : ^[4]i32, extra_flags : Input_Text_Flags = 0) -> bool                                                                          { return im_input_int4(_make_label_string(label), &v[0], extra_flags); }
 
 @(default_calling_convention="c")
 foreign cimgui {
-    @(link_name = "igInputText")          im_input_text           :: proc(label : Cstring, buf : Cstring, buf_size : uint /*size_t*/, flags : InputTextFlags, callback : text_edit_callback, user_data : rawptr) -> bool ---;
-    @(link_name = "igInputTextMultiline") im_input_text_multiline :: proc(label : Cstring, buf : Cstring, buf_size : uint /*size_t*/, size : Vec2, flags : InputTextFlags, callback : text_edit_callback, user_data : rawptr) -> bool ---;
-    @(link_name = "igInputFloat")         im_input_float          :: proc(label : Cstring, v : ^f32, step : f32, step_fast : f32, decimal_precision : i32, extra_flags : InputTextFlags) -> bool ---;
-    @(link_name = "igInputFloat2")        im_input_float2         :: proc(label : Cstring, v : ^f32, decimal_precision : i32, extra_flags : InputTextFlags) -> bool ---;
-    @(link_name = "igInputFloat3")        im_input_float3         :: proc(label : Cstring, v : ^f32, decimal_precision : i32, extra_flags : InputTextFlags) -> bool ---;
-    @(link_name = "igInputFloat4")        im_input_float4         :: proc(label : Cstring, v : ^f32, decimal_precision : i32, extra_flags : InputTextFlags) -> bool ---;
-    @(link_name = "igInputInt")           im_input_int            :: proc(label : Cstring, v : ^i32, step : i32, step_fast : i32, extra_flags : InputTextFlags) -> bool ---;
-    @(link_name = "igInputInt2")          im_input_int2           :: proc(label : Cstring, v : ^i32, extra_flags : InputTextFlags) -> bool ---;
-    @(link_name = "igInputInt3")          im_input_int3           :: proc(label : Cstring, v : ^i32, extra_flags : InputTextFlags) -> bool ---;
-    @(link_name = "igInputInt4")          im_input_int4           :: proc(label : Cstring, v : ^i32, extra_flags : InputTextFlags) -> bool ---;
+    @(link_name = "igInputText")          im_input_text           :: proc(label : Cstring, buf : Cstring, buf_size : uint /*size_t*/, flags : Input_Text_Flags, callback : text_edit_callback, user_data : rawptr) -> bool ---;
+    @(link_name = "igInputTextMultiline") im_input_text_multiline :: proc(label : Cstring, buf : Cstring, buf_size : uint /*size_t*/, size : Vec2, flags : Input_Text_Flags, callback : text_edit_callback, user_data : rawptr) -> bool ---;
+    @(link_name = "igInputFloat")         im_input_float          :: proc(label : Cstring, v : ^f32, step : f32, step_fast : f32, decimal_precision : i32, extra_flags : Input_Text_Flags) -> bool ---;
+    @(link_name = "igInputFloat2")        im_input_float2         :: proc(label : Cstring, v : ^f32, decimal_precision : i32, extra_flags : Input_Text_Flags) -> bool ---;
+    @(link_name = "igInputFloat3")        im_input_float3         :: proc(label : Cstring, v : ^f32, decimal_precision : i32, extra_flags : Input_Text_Flags) -> bool ---;
+    @(link_name = "igInputFloat4")        im_input_float4         :: proc(label : Cstring, v : ^f32, decimal_precision : i32, extra_flags : Input_Text_Flags) -> bool ---;
+    @(link_name = "igInputInt")           im_input_int            :: proc(label : Cstring, v : ^i32, step : i32, step_fast : i32, extra_flags : Input_Text_Flags) -> bool ---;
+    @(link_name = "igInputInt2")          im_input_int2           :: proc(label : Cstring, v : ^i32, extra_flags : Input_Text_Flags) -> bool ---;
+    @(link_name = "igInputInt3")          im_input_int3           :: proc(label : Cstring, v : ^i32, extra_flags : Input_Text_Flags) -> bool ---;
+    @(link_name = "igInputInt4")          im_input_int4           :: proc(label : Cstring, v : ^i32, extra_flags : Input_Text_Flags) -> bool ---;
 }
 
 // Widgets: Sliders (tip: ctrl+click on a slider to input text)
@@ -814,22 +894,22 @@ foreign cimgui {
 }
 
 color_edit    :: proc[color_edit3, color_edit4];
-color_edit3   :: proc(label : string, col : [3]f32, flags : ColorEditFlags = 0) -> bool                           { return im_color_edit3(_make_label_string(label), &col[0], flags) }
-color_edit4   :: proc(label : string, col : [4]f32, flags : ColorEditFlags = 0) -> bool                           { return im_color_edit4(_make_label_string(label), &col[0], flags) }
+color_edit3   :: proc(label : string, col : [3]f32, flags : Color_Edit_Flags = 0) -> bool                           { return im_color_edit3(_make_label_string(label), &col[0], flags) }
+color_edit4   :: proc(label : string, col : [4]f32, flags : Color_Edit_Flags = 0) -> bool                           { return im_color_edit4(_make_label_string(label), &col[0], flags) }
 
 color_picker  :: proc[color_picker3, color_picker4];
-color_picker3 :: proc(label : string, col : [3]f32, flags : ColorEditFlags = 0) -> bool                           { return im_color_picker3(_make_label_string(label), &col[0], flags) }
-color_picker4 :: proc(label : string, col : [4]f32, flags : ColorEditFlags = 0) -> bool                           { return im_color_picker4(_make_label_string(label), &col[0], flags) }
-color_button  :: proc(desc_id : string, col : Vec4, flags : ColorEditFlags = 0, size : Vec2 = Vec2{0, 0}) -> bool { return im_color_button(_make_label_string(desc_id), col, flags, size) }
+color_picker3 :: proc(label : string, col : [3]f32, flags : Color_Edit_Flags = 0) -> bool                           { return im_color_picker3(_make_label_string(label), &col[0], flags) }
+color_picker4 :: proc(label : string, col : [4]f32, flags : Color_Edit_Flags = 0) -> bool                           { return im_color_picker4(_make_label_string(label), &col[0], flags) }
+color_button  :: proc(desc_id : string, col : Vec4, flags : Color_Edit_Flags = 0, size : Vec2 = Vec2{0, 0}) -> bool { return im_color_button(_make_label_string(desc_id), col, flags, size) }
 
 @(default_calling_convention="c")
 foreign cimgui {
-    @(link_name = "igColorEdit3")          im_color_edit3         :: proc(label : Cstring, col : ^f32, flags : ColorEditFlags) -> bool ---;
-    @(link_name = "igColorEdit4")          im_color_edit4         :: proc(label : Cstring, col : ^f32, flags : ColorEditFlags) -> bool ---;
-    @(link_name = "igColorPicker3")        im_color_picker3       :: proc(label : Cstring, col : ^f32, flags : ColorEditFlags) -> bool ---;
-    @(link_name = "igColorPicker4")        im_color_picker4       :: proc(label : Cstring, col : ^f32, flags : ColorEditFlags, ref_col : ^f32 = nil) -> bool ---;
-    @(link_name = "igColorButton")         im_color_button        :: proc(desc_id : Cstring, col : Vec4, flags : ColorEditFlags, size : Vec2) -> bool ---;
-    @(link_name = "igSetColorEditOptions") set_color_edit_options :: proc(flags : ColorEditFlags)  ---;
+    @(link_name = "igColorEdit3")          im_color_edit3         :: proc(label : Cstring, col : ^f32, flags : Color_Edit_Flags) -> bool ---;
+    @(link_name = "igColorEdit4")          im_color_edit4         :: proc(label : Cstring, col : ^f32, flags : Color_Edit_Flags) -> bool ---;
+    @(link_name = "igColorPicker3")        im_color_picker3       :: proc(label : Cstring, col : ^f32, flags : Color_Edit_Flags) -> bool ---;
+    @(link_name = "igColorPicker4")        im_color_picker4       :: proc(label : Cstring, col : ^f32, flags : Color_Edit_Flags, ref_col : ^f32 = nil) -> bool ---;
+    @(link_name = "igColorButton")         im_color_button        :: proc(desc_id : Cstring, col : Vec4, flags : Color_Edit_Flags, size : Vec2) -> bool ---;
+    @(link_name = "igSetColorEditOptions") set_color_edit_options :: proc(flags : Color_Edit_Flags)  ---;
 }
 
 // Widgets: Trees
@@ -839,40 +919,40 @@ tree_node_str_fmt       :: proc(str_id : string, fmt_ : string, args : ...any) -
 tree_node_ptr           :: proc(ptr_id : rawptr, fmt_ : string, args : ...any) -> bool                               { return im_tree_node_ptr(ptr_id, _make_text_string(fmt_, ...args)); }
 
 tree_node_ext           :: proc[tree_node_ext_str, tree_node_ext_str_fmt, tree_node_ext_ptr];
-tree_node_ext_str       :: proc(label : string, flags : TreeNodeFlags = 0) -> bool                                { return im_tree_node_ex(_make_label_string(label), flags); }
-tree_node_ext_str_fmt   :: proc(str_id : string, flags : TreeNodeFlags = 0, fmt_ : string, args : ...any) -> bool { return im_tree_node_ex_str(_make_label_string(str_id), flags, _make_text_string(fmt_, ...args)); }
-tree_node_ext_ptr       :: proc(ptr_id : rawptr, flags : TreeNodeFlags = 0, fmt_ : string, args : ...any) -> bool { return im_tree_node_ex_ptr(ptr_id, flags, _make_text_string(fmt_, ...args)); }
+tree_node_ext_str       :: proc(label : string, flags : Tree_Node_Flags = 0) -> bool                                { return im_tree_node_ex(_make_label_string(label), flags); }
+tree_node_ext_str_fmt   :: proc(str_id : string, flags : Tree_Node_Flags = 0, fmt_ : string, args : ...any) -> bool { return im_tree_node_ex_str(_make_label_string(str_id), flags, _make_text_string(fmt_, ...args)); }
+tree_node_ext_ptr       :: proc(ptr_id : rawptr, flags : Tree_Node_Flags = 0, fmt_ : string, args : ...any) -> bool { return im_tree_node_ex_ptr(ptr_id, flags, _make_text_string(fmt_, ...args)); }
 
 tree_push               :: proc[tree_push_str, tree_push_ptr];
 tree_push_str           :: proc(str_id : string)                                                                     { im_tree_push_str(_make_label_string(str_id)); }
 
 collapsing_header       :: proc[collapsing_header_, collapsing_header_ext];
-collapsing_header_      :: proc(label : string, flags : TreeNodeFlags = 0) -> bool                                { return im_collapsing_header(_make_label_string(label), flags); }
-collapsing_header_ext   :: proc(label : string, p_open : ^bool, flags : TreeNodeFlags = 0) -> bool                { return im_collapsing_header_ex(_make_label_string(label), p_open, flags); }
+collapsing_header_      :: proc(label : string, flags : Tree_Node_Flags = 0) -> bool                                { return im_collapsing_header(_make_label_string(label), flags); }
+collapsing_header_ext   :: proc(label : string, p_open : ^bool, flags : Tree_Node_Flags = 0) -> bool                { return im_collapsing_header_ex(_make_label_string(label), p_open, flags); }
 
 @(default_calling_convention="c")
 foreign cimgui {
     @(link_name = "igTreeNode")                  im_tree_node                   :: proc(label : Cstring) -> bool ---;
     @(link_name = "igTreeNodeStr")               im_tree_node_str               :: proc(str_id : Cstring, fmt_ : Cstring) -> bool ---;
     @(link_name = "igTreeNodePtr")               im_tree_node_ptr               :: proc(ptr_id : rawptr, fmt_ : Cstring) -> bool ---;
-    @(link_name = "igTreeNodeEx")                im_tree_node_ex                :: proc(label : Cstring, flags : TreeNodeFlags) -> bool ---;
-    @(link_name = "igTreeNodeExStr")             im_tree_node_ex_str            :: proc(str_id : Cstring, flags : TreeNodeFlags, fmt_ : Cstring) -> bool ---;
-    @(link_name = "igTreeNodeExPtr")             im_tree_node_ex_ptr            :: proc(ptr_id : rawptr, flags : TreeNodeFlags, fmt_ : Cstring) -> bool ---;
+    @(link_name = "igTreeNodeEx")                im_tree_node_ex                :: proc(label : Cstring, flags : Tree_Node_Flags) -> bool ---;
+    @(link_name = "igTreeNodeExStr")             im_tree_node_ex_str            :: proc(str_id : Cstring, flags : Tree_Node_Flags, fmt_ : Cstring) -> bool ---;
+    @(link_name = "igTreeNodeExPtr")             im_tree_node_ex_ptr            :: proc(ptr_id : rawptr, flags : Tree_Node_Flags, fmt_ : Cstring) -> bool ---;
     @(link_name = "igTreePushStr")               im_tree_push_str               :: proc(str_id : Cstring) ---;
     @(link_name = "igTreePushPtr")               tree_push_ptr                  :: proc(ptr_id : rawptr) ---;
 
     @(link_name = "igTreePop")                   tree_pop                       :: proc() ---;
     @(link_name = "igTreeAdvanceToLabelPos")     tree_advance_to_label_pos      :: proc() ---;
     @(link_name = "igGetTreeNodeToLabelSpacing") get_tree_node_to_label_spacing :: proc() -> f32 ---;
-    @(link_name = "igSetNextTreeNodeOpen")       set_next_tree_node_open        :: proc(opened : bool, cond : SetCond) ---;
-    @(link_name = "igCollapsingHeader")          im_collapsing_header           :: proc(label : Cstring, flags : TreeNodeFlags) -> bool ---;
-    @(link_name = "igCollapsingHeaderEx")        im_collapsing_header_ex        :: proc(label : Cstring, p_open : ^bool, flags : TreeNodeFlags) -> bool ---;
+    @(link_name = "igSetNextTreeNodeOpen")       set_next_tree_node_open        :: proc(opened : bool, cond : Set_Cond) ---;
+    @(link_name = "igCollapsingHeader")          im_collapsing_header           :: proc(label : Cstring, flags : Tree_Node_Flags) -> bool ---;
+    @(link_name = "igCollapsingHeaderEx")        im_collapsing_header_ex        :: proc(label : Cstring, p_open : ^bool, flags : Tree_Node_Flags) -> bool ---;
 }
 
 // Widgets: Selectable / Lists
 selectable      :: proc[selectable_val, selectable_ptr];
-selectable_val  :: proc(label : string, selected : bool = false, flags : SelectableFlags = 0, size : Vec2 = Vec2{0,0}) -> bool { return im_selectable(_make_label_string(label), selected, flags, size); }
-selectable_ptr  :: proc(label : string, p_selected : ^bool, flags : SelectableFlags = 0, size : Vec2 = Vec2{0,0}) -> bool      { return im_selectable_ex(_make_label_string(label), p_selected, flags, size); }
+selectable_val  :: proc(label : string, selected : bool = false, flags : Selectable_Flags = 0, size : Vec2 = Vec2{0,0}) -> bool { return im_selectable(_make_label_string(label), selected, flags, size); }
+selectable_ptr  :: proc(label : string, p_selected : ^bool, flags : Selectable_Flags = 0, size : Vec2 = Vec2{0,0}) -> bool      { return im_selectable_ex(_make_label_string(label), p_selected, flags, size); }
 
 list_box_header        :: proc[list_box_header_simple, list_box_header_count];
 list_box_header_simple :: proc(label : string, size : Vec2 = Vec2{0, 0}) -> bool                      { return im_list_box_header(_make_label_string(label), size); }
@@ -880,8 +960,8 @@ list_box_header_count  :: proc(label : string, items_count : i32, height_in_item
 
 @(default_calling_convention="c")
 foreign cimgui {
-    @(link_name = "igSelectable")     im_selectable      :: proc(label : Cstring, selected : bool, flags : SelectableFlags, size : Vec2) -> bool ---;
-    @(link_name = "igSelectableEx")   im_selectable_ex   :: proc(label : Cstring, p_selected : ^bool, flags : SelectableFlags, size : Vec2) -> bool ---;
+    @(link_name = "igSelectable")     im_selectable      :: proc(label : Cstring, selected : bool, flags : Selectable_Flags, size : Vec2) -> bool ---;
+    @(link_name = "igSelectableEx")   im_selectable_ex   :: proc(label : Cstring, p_selected : ^bool, flags : Selectable_Flags, size : Vec2) -> bool ---;
     @(link_name = "igListBox")        list_box1          :: proc(label : Cstring, current_item : ^i32, items : ^^u8, items_count : i32, height_in_items : i32) -> bool ---;
     @(link_name = "igListBox2")       list_box2          :: proc(label : Cstring, current_item : ^i32, items_getter : proc "cdecl"(data : rawptr, idx : i32, out_text : ^^u8) -> bool, data : rawptr, items_count : i32, height_in_items : i32) -> bool ---;
 }
@@ -945,7 +1025,7 @@ foreign cimgui {
 open_popup                 :: proc(str_id : string)                                                         { im_open_popup(_make_label_string(str_id)); }
 open_popup_on_item_click   :: proc(str_id : string, mouse_button : int = 1) -> bool                         { return im_open_popup_on_item_click(_make_label_string(str_id), mouse_button) }
 begin_popup                :: proc(str_id : string) -> bool                                                 { return im_begin_popup(_make_label_string(str_id)); }
-begin_popup_modal          :: proc(name : string, open : ^bool, extra_flags : WindowFlags = 0) -> bool   { return im_begin_popup_modal(_make_label_string(name), open, extra_flags); }
+begin_popup_modal          :: proc(name : string, open : ^bool = nil, extra_flags : Window_Flags = 0) -> bool   { return im_begin_popup_modal(_make_label_string(name), open, extra_flags); }
 begin_popup_context_item   :: proc(str_id : string, mouse_button : i32 = 1) -> bool                         { return im_begin_popup_context_item(_make_label_string(str_id), mouse_button); }
 begin_popup_context_window :: proc(also_over_items : bool, str_id : string, mouse_button : i32 = 1) -> bool { return im_begin_popup_context_window(also_over_items, _make_label_string(str_id), mouse_button); }
 begin_popup_context_void   :: proc(str_id : string, mouse_button : i32 = 1) -> bool                         { return im_begin_popup_context_void(_make_label_string(str_id), mouse_button); }
@@ -956,7 +1036,7 @@ foreign cimgui {
     @(link_name = "igOpenPopup")               im_open_popup                 :: proc(str_id : Cstring) ---;
     @(link_name = "igOpenPopupOnItemClick")    im_open_popup_on_item_click   :: proc(str_id : Cstring, mouse_button : int) -> bool ---;
     @(link_name = "igBeginPopup")              im_begin_popup                :: proc(str_id : Cstring) -> bool ---;
-    @(link_name = "igBeginPopupModal")         im_begin_popup_modal          :: proc(name : Cstring, p_open : ^bool, extra_flags : WindowFlags) -> bool ---;
+    @(link_name = "igBeginPopupModal")         im_begin_popup_modal          :: proc(name : Cstring, p_open : ^bool, extra_flags : Window_Flags) -> bool ---;
     @(link_name = "igBeginPopupContextItem")   im_begin_popup_context_item   :: proc(str_id : Cstring, mouse_button : i32) -> bool ---;
     @(link_name = "igBeginPopupContextWindow") im_begin_popup_context_window :: proc(also_over_items : bool, str_id : Cstring, mouse_button : i32) -> bool ---;
     @(link_name = "igBeginPopupContextVoid")   im_begin_popup_context_void   :: proc(str_id : Cstring, mouse_button : i32) -> bool ---;
@@ -976,7 +1056,18 @@ foreign cimgui {
     @(link_name = "igLogFinish")      log_finish       :: proc() ---;
     @(link_name = "igLogButtons")     log_buttons      :: proc() ---;
     @(link_name = "igLogText")        im_log_text      :: proc(fmt_ : Cstring) ---;
+
+    //Drag n' Drop
+    @(link_name = "igBeginDragDropSource")   begin_drag_drop_source      :: proc(flags : Drag_Drop_Flags, mouse_button : i32) -> bool ---;
+    @(link_name = "igSetDragDropPayload")    im_set_drag_drop_payload    :: proc(type_ : Cstring, data : rawptr, size : uint, cond : Set_Cond) -> bool ---;
+    @(link_name = "igEndDragDropSource")     end_drag_drop_source        :: proc() ---;
+    @(link_name = "igBeginDragDropTarget")   begin_drag_drop_target      :: proc() -> bool ---;
+    @(link_name = "igAcceptDragDropPayload") im_accept_drag_drop_payload :: proc(type_ : Cstring, flags : Drag_Drop_Flags) -> ^Payload ---;
+    @(link_name = "igEndDragDropTarget")     end_drag_drop_target        :: proc() ---;
 }
+
+set_drag_drop_payload :: proc(type_ : string, data : rawptr, size : uint, cond : Set_Cond) -> bool { return im_set_drag_drop_payload(_make_misc_string(type_), data, size, cond) }
+accept_drag_drop_payload :: proc(type_ : string, flags : Drag_Drop_Flags) -> ^Payload             { return im_accept_drag_drop_payload(_make_misc_string(type_), flags) }
 
 @(default_calling_convention="c")
 foreign cimgui {
@@ -986,9 +1077,11 @@ foreign cimgui {
 
     // Styles
     @(link_name = "igStyleColorsClassic")               style_colors_classic                   :: proc(dst : ^Style) ---;
+    @(link_name = "igStyleColorsDark")                  style_colors_dark                      :: proc(dst : ^Style) ---;
+    @(link_name = "igStyleColorsLight")                 style_colors_light                     :: proc(dst : ^Style) ---;
 
     // Utilities
-    @(link_name = "igIsItemHovered")                    is_item_hovered                        :: proc (flags : HoveredFlags = 0) -> bool ---;
+    @(link_name = "igIsItemHovered")                    is_item_hovered                        :: proc (flags : Hovered_Flags = 0) -> bool ---;
     @(link_name = "igIsItemActive")                     is_item_active                         :: proc () -> bool ---;
     @(link_name = "igIsItemClicked")                    is_item_clicked                        :: proc (mouse_button : i32 = 0) -> bool ---;
     @(link_name = "igIsItemVisible")                    is_item_visible                        :: proc () -> bool ---;
@@ -998,11 +1091,11 @@ foreign cimgui {
     @(link_name = "igGetItemRectMax")                   get_item_rect_max                      :: proc (pOut : ^Vec2) ---;
     @(link_name = "igGetItemRectSize")                  get_item_rect_size                     :: proc (pOut : ^Vec2) ---;
     @(link_name = "igSetItemAllowOverlap")              set_item_allow_overlap                 :: proc () ---;
-    @(link_name = "igIsWindowFocused")                  is_window_focused                      :: proc () -> bool ---;
-    @(link_name = "igIsWindowHovered")                  is_window_hovered                      :: proc (flags : HoveredFlags = 0) -> bool ---;
+    @(link_name = "igIsWindowFocused")                  is_window_focused                      :: proc (flags : Hovered_Flags = 0) -> bool ---;
+    @(link_name = "igIsWindowHovered")                  is_window_hovered                      :: proc (flags : Hovered_Flags = 0) -> bool ---;
     @(link_name = "igIsRootWindowFocused")              is_root_window_focused                 :: proc () -> bool ---;
     @(link_name = "igIsRootWindowOrAnyChildFocused")    is_root_window_or_any_child_focused    :: proc () -> bool ---;
-    @(link_name = "igIsRootWindowOrAnyChildHovered")    is_root_window_or_any_child_hovered    :: proc (flags : HoveredFlags = 0) -> bool ---;
+    @(link_name = "igIsRootWindowOrAnyChildHovered")    is_root_window_or_any_child_hovered    :: proc (flags : Hovered_Flags = 0) -> bool ---;
     @(link_name = "igIsRectVisible")                    is_rect_visible_size                   :: proc (item_size : Vec2) -> bool ---;
     @(link_name = "igIsRectVisible2")                   is_rect_visible_minmax                 :: proc (min : ^Vec2, max : ^Vec2) -> bool ---;
 }
@@ -1014,12 +1107,14 @@ foreign cimgui {
     @(link_name = "igIsPosHoveringAnyWindow")           is_pos_hovering_any_window             :: proc (pos : Vec2) -> bool ---;
     @(link_name = "igGetTime")                          get_time                               :: proc () -> f32 ---;
     @(link_name = "igGetFrameCount")                    get_frame_count                        :: proc () -> i32 ---;
+    @(link_name = "igGetOverlayDrawList")               get_overlay_draw_list                  :: proc () -> ^DrawList ---;
+    //@(link_name = "igGetDrawListSharedData")          get_draw_list_shared_data            :: proc () -> ^DrawListSharedData ---; NOTE(Hoej): Missing struct definiton.
     @(link_name = "igGetStyleColName")                  get_style_col_name                     :: proc (idx : Color) -> Cstring ---;
     @(link_name = "igCalcItemRectClosestPoint")         calc_item_rect_closest_point           :: proc (pOut : ^Vec2, pos : Vec2 , on_edge : bool, outward : f32 = 0) ---;
     @(link_name = "igCalcTextSize")                     calc_text_size                         :: proc (pOut : ^Vec2, text : Cstring, text_end : Cstring, hide_text_after_double_hash : bool, wrap_width : f32 = -1) ---;
     @(link_name = "igCalcListClipping")                 calc_list_clipping                     :: proc (items_count : i32, items_height : f32, out_items_display_start : ^i32, out_items_display_end : ^i32) ---;
 
-    @(link_name = "igBeginChildFrame")                  begin_child_frame                      :: proc(id : GuiId, size : Vec2, extra_flags : WindowFlags = 0) -> bool ---;
+    @(link_name = "igBeginChildFrame")                  begin_child_frame                      :: proc(id : GuiId, size : Vec2, extra_flags : Window_Flags = 0) -> bool ---;
     @(link_name = "igEndChildFrame")                    end_child_frame                        :: proc  () ---;
 
     @(link_name = "igColorConvertU32ToFloat4")          color_convert_u32_to_float4            :: proc(pOut : ^Vec4 , in_ : u32) ---;
@@ -1042,8 +1137,8 @@ foreign cimgui {
     @(link_name = "igGetMousePosOnOpeningCurrentPopup") get_mouse_pos_on_opening_current_popup :: proc (pOut : ^Vec2) ---;
     @(link_name = "igGetMouseDragDelta")                get_mouse_drag_delta                   :: proc (pOut : ^Vec2, button : i32 = 0, lock_threshold : f32 = -1) ---;
     @(link_name = "igResetMouseDragDelta")              reset_mouse_drag_delta                 :: proc (button : i32 = 0) ---;
-    @(link_name = "igGetMouseCursor")                   get_mouse_cursor                       :: proc () -> MouseCursor ---;
-    @(link_name = "igSetMouseCursor")                   set_mouse_cursor                       :: proc (type_ : MouseCursor) ---;
+    @(link_name = "igGetMouseCursor")                   get_mouse_cursor                       :: proc () -> Mouse_Cursor ---;
+    @(link_name = "igSetMouseCursor")                   set_mouse_cursor                       :: proc (type_ : Mouse_Cursor) ---;
     @(link_name = "igCaptureKeyboardFromApp")           capture_keyboard_from_app              :: proc (capture : bool) ---;
     @(link_name = "igCaptureMouseFromApp")              capture_mouse_from_app                 :: proc (capture : bool) ---;
 }
@@ -1174,8 +1269,10 @@ foreign cimgui {
     @(link_name = "ImDrawList_AddTextExt")               draw_list_add_text_ext                 :: proc(list : ^DrawList, font : ^Font, font_size : f32, pos : Vec2, col : u32, text_begin : Cstring, text_end : Cstring, wrap_width : f32, cpu_fine_clip_rect : ^Vec4) ---;
 
     @(link_name = "ImDrawList_AddImage")                 draw_list_add_image                    :: proc(list : ^DrawList, user_texture_id : TextureID, a : Vec2, b : Vec2, uv0 : Vec2, uv1 : Vec2, col : u32) ---;
-    @(link_name = "ImDrawList_AddPolyline")              draw_list_add_poly_line                :: proc(list : ^DrawList, points : ^Vec2, num_points : i32, col : u32, closed : bool, thickness : f32, anti_aliased : bool) ---;
-    @(link_name = "ImDrawList_AddConvexPolyFilled")      draw_list_add_convex_poly_filled       :: proc(list : ^DrawList, points : ^Vec2, num_points : i32, col : u32, anti_aliased : bool) ---;
+    @(link_name = "ImDrawList_AddImageQuad")             draw_list_add_image_quad               :: proc(list : ^DrawList, user_texture_id : TextureID, a : Vec2, b : Vec2, c : Vec2, d : Vec2, uv_a : Vec2, uv_b : Vec2, uv_c : Vec2, uv_d : Vec2, col : u32) ---;
+    @(link_name = "ImDrawList_AddImageRounded")          draw_list_add_image_rounded            :: proc(list : ^DrawList, user_texture_id : TextureID, a : Vec2, b : Vec2, uv_a : Vec2, uv_b : Vec2, col : u32, rounding : f32, rounding_corners : i32) ---;
+    @(link_name = "ImDrawList_AddPolyline")              draw_list_add_poly_line                :: proc(list : ^DrawList, points : ^Vec2, num_points : i32, col : u32, closed : bool, thickness : f32) ---;
+    @(link_name = "ImDrawList_AddConvexPolyFilled")      draw_list_add_convex_poly_filled       :: proc(list : ^DrawList, points : ^Vec2, num_points : i32, col : u32) ---;
     @(link_name = "ImDrawList_AddBezierCurve")           draw_list_add_bezier_curve             :: proc(list : ^DrawList, pos0 : Vec2, cp0 : Vec2, cp1 : Vec2, pos1 : Vec2, col : u32, thickness : f32, num_segments : i32) ---;
 
 ///// Stateful path API, add points then finish with PathFill() or PathStroke()
