@@ -6,7 +6,7 @@
  *  @Creation: 10-05-2017 21:11:30
  *
  *  @Last By:   Mikkel Hjortshoej
- *  @Last Time: 28-12-2017 11:12:04 UTC+1
+ *  @Last Time: 21-01-2018 23:21:47 UTC+1
  *
  *  @Description:
  *      Wrapper for Dear ImGui 1.52
@@ -98,9 +98,11 @@ FontConfig :: struct {
     over_sample_v            : i32,
     pixel_snap_h             : bool,
     glyph_extra_spacing      : Vec2,
+    glyph_offset             : Vec2,
     glyph_ranges             : ^Wchar,
     merge_mode               : bool,
-    merge_glyph_center_v     : bool,
+    rasterizer_flags         : u32, // Settings for custom font rasterizer (e.g. ImGuiFreeType). Leave as zero if you aren't using one.
+    rasterizer_multiply      : f32,
     name                     : [32]u8,
     dest_font                : ^Font,
 }
@@ -759,7 +761,7 @@ checkbox_flags   :: proc (label : string, flags : ^u32, flags_value : u32) -> bo
 radio_buttons    :: proc (label : string, active : bool) -> bool                                                                                                                                                      { return im_radio_buttons_bool(_make_label_string(label), active); }
 radio_button     :: proc (label : string, v : ^i32, v_button : i32) -> bool                                                                                                                                           { return im_radio_button(_make_label_string(label), v, v_button); }
 plot_histogram   :: proc (label : string, values : []f32, overlay_text : string = "\x00", scale_min : f32 = math.F32_MAX, scale_max : f32 = math.F32_MAX, graph_size : Vec2 = Vec2{0,0}, stride : i32 = size_of(f32)) { im_plot_histogram(_make_label_string(label), &values[0], i32(len(values)), 0, _make_misc_string(overlay_text), scale_min, scale_max, graph_size, stride); }
-progress_bar     :: proc (fraction : f32, size_arg : ^Vec2 = Vec2{0, 0}, overlay : string = "\x00")                                                                                                                   { im_progress_bar(fraction, size_arg, _make_misc_string(overlay)); }
+progress_bar     :: proc (fraction : f32, size_arg : ^Vec2, overlay : string = "\x00")                                                                                                                   { im_progress_bar(fraction, size_arg, _make_misc_string(overlay)); }
 
 @(default_calling_convention="c")
 foreign cimgui {
@@ -1220,7 +1222,7 @@ foreign cimgui {
 }
 
 ///// FontAtlas
-font_atlas_add_font_from_file_ttf :: proc(atlas : ^FontAtlas, filename : string, size_pixels : f32, font_cfg : ^FontConfig = nil, glyph_ranges : ^Wchar = nil) -> ^Font { return im_font_atlas_add_font_from_file_ttf(atlas, _make_misc_string(filename), size_pixels, font_cfg, glyph_ranges); }
+font_atlas_add_font_from_file_ttf :: proc(atlas : ^FontAtlas, filename : string, size_pixels : f32, font_cfg : ^FontConfig = nil, glyph_ranges : []Wchar = nil) -> ^Font { return im_font_atlas_add_font_from_file_ttf(atlas, _make_misc_string(filename), size_pixels, font_cfg, glyph_ranges == nil ? nil : &glyph_ranges[0]); }
 foreign cimgui {
     @(link_name = "ImFontAtlas_GetTexDataAsRGBA32")                   font_atlas_get_text_data_as_rgba32                    :: proc(atlas : ^FontAtlas, out_pixels : ^^u8, out_width : ^i32, out_height : ^i32, out_bytes_per_pixel : ^i32 = nil) ---;
     @(link_name = "ImFontAtlas_GetTexDataAsAlpha8")                   font_atlas_get_text_data_as_alpha8                    :: proc(atlas : ^FontAtlas, out_pixels : ^^u8, out_width : ^i32, out_height : ^i32, out_bytes_per_pixel : ^i32 = nil) ---;
