@@ -11,7 +11,12 @@
  *  @Description:
  *      Wrapper for Dear ImGui 1.52
  */
-foreign import "cimgui.lib";
+
+when ODIN_DEBUG {
+	foreign import "x64-binaries/debug/cimgui.lib";
+} else {
+	foreign import "x64-binaries/release/cimgui.lib";
+} 
 
 import "core:fmt.odin";
 import "core:mem.odin";
