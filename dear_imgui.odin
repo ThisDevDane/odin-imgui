@@ -6,16 +6,16 @@
  *  @Creation: 10-05-2017 21:11:30
  *
  *  @Last By:   Mikkel Hjortshoej
- *  @Last Time: 21-01-2018 23:21:47 UTC+1
+ *  @Last Time: 06-02-2018 00:29:49 UTC+1
  *
  *  @Description:
  *      Wrapper for Dear ImGui 1.52
  */
 
 when ODIN_DEBUG {
-	foreign import "x64-binaries/debug/cimgui.lib";
+    foreign import "x64-binaries/debug/cimgui.lib";
 } else {
-	foreign import "x64-binaries/release/cimgui.lib";
+    foreign import "x64-binaries/release/cimgui.lib";
 } 
 
 import "core:fmt.odin";
@@ -516,25 +516,29 @@ _MISC_BUF_SIZE         :: 1024;
 @(thread_local) _misc_buf        : [_MISC_BUF_SIZE       ]u8;
 
 _make_text_string :: proc       (fmt_: string, args: ...any) -> Cstring {
+    if fmt_ == "\x00" do return Cstring(nil);
     s := fmt.bprintf(_text_buf[..], fmt_, ...args);
     _text_buf[len(s)] = 0;
     return Cstring(&_text_buf[0]);
 }
 
 _make_label_string :: proc      (label : string) -> Cstring {
-    s := fmt.bprintf(_label_buf[..], "%s", label);
+    if label == "\x00" do return Cstring(nil);
+    s := fmt.bprint(_label_buf[..], label);
     _label_buf[len(s)] = 0;
     return Cstring(&_label_buf[0]);
 }
 
 _make_display_fmt_string :: proc(display_fmt : string) -> Cstring {
-    s := fmt.bprintf(_display_fmt_buf[..], "%s", display_fmt);
+    if display_fmt == "\x00" do return Cstring(nil);
+    s := fmt.bprint(_display_fmt_buf[..], display_fmt);
     _display_fmt_buf[len(s)] = 0;
     return Cstring(&_display_fmt_buf[0]);
 }
 
 _make_misc_string :: proc       (misc : string) -> Cstring {
-    s := fmt.bprintf(_misc_buf[..], "%s", misc);
+    if misc == "\x00" do return Cstring(nil);
+    s := fmt.bprint(_misc_buf[..], misc);
     _misc_buf[len(s)] = 0;
     return Cstring(&_misc_buf[0]);
 }
@@ -631,7 +635,7 @@ foreign cimgui {
     @(link_name = "igGetStateStorage")               get_state_storage                  :: proc () -> ^Storage ---;
 
     // Parameters stacks (shared)
-    @(link_name = "igPushFont")                      push_font                          :: proc (font : ^Font) ---;
+    @(link_name = "igPushFont")                      push_font                          :: proc (font : ^Font = nil) ---;
     @(link_name = "igPopFont")                       pop_font                           :: proc () ---;
     @(link_name = "igPushStyleColorU32")             push_style_colorU32                :: proc (idx : Color, col : u32) ---;
     @(link_name = "igPushStyleColor")                push_style_color_                  :: proc (idx : Color, col : Vec4) ---;
@@ -702,7 +706,7 @@ foreign cimgui {
 }
 
 //Columns
-columns :: proc (count : i32, id : string = "", border : bool = true) { im_columns(count, _make_label_string(id), border); }
+columns :: proc (count : i32, id : string = "\x00", border : bool = true) { im_columns(count, _make_label_string(id), border); }
 
 @(default_calling_convention="c")
 foreign cimgui {
