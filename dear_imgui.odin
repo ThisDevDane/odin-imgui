@@ -6,16 +6,16 @@
  *  @Creation: 10-05-2017 21:11:30
  *
  *  @Last By:   Mikkel Hjortshoej
- *  @Last Time: 06-02-2018 00:29:49 UTC+1
+ *  @Last Time: 09-02-2018 22:27:30 UTC+1
  *
  *  @Description:
  *      Wrapper for Dear ImGui 1.52
  */
 
 when ODIN_DEBUG {
-    foreign import "x64-binaries/debug/cimgui.lib";
+    foreign import cimgui "external/cimgui_debug.lib";
 } else {
-    foreign import "x64-binaries/release/cimgui.lib";
+    foreign import "external/cimgui.lib";
 } 
 
 import "core:fmt.odin";
