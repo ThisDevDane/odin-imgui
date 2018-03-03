@@ -1,3 +1,3 @@
 [submodule "cimgui"]
 	path = cimgui
-	url = https://github.com/ThisDrunkDane/odin-imgui.git
+	url = https://github.com/Extrawurst/cimgui.git
