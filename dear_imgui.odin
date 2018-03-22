@@ -6,7 +6,7 @@
  *  @Creation: 10-05-2017 21:11:30
  *
  *  @Last By:   Mikkel Hjortshoej
- *  @Last Time: 03-03-2018 19:42:42 UTC+1
+ *  @Last Time: 05-03-2018 10:42:00 UTC+1
  *
  *  @Description:
  *      Wrapper for Dear ImGui 1.52
@@ -54,7 +54,7 @@ TextEditCallbackData :: struct {
     read_only       : bool,
     event_char      : Wchar,
     event_key       : Key,
-    buf             : cstring,
+    buf             : ^u8,
     buf_text_len    : i32,
     buf_size        : i32,
     buf_dirty       : bool,
