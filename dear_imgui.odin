@@ -6,11 +6,13 @@
  *  @Creation: 10-05-2017 21:11:30
  *
  *  @Last By:   Mikkel Hjortshoej
- *  @Last Time: 05-03-2018 10:42:00 UTC+1
+ *  @Last Time: 15-06-2018 15:53:52 UTC+1
  *
  *  @Description:
  *      Wrapper for Dear ImGui 1.52
  */
+
+package imgui
 
 when ODIN_DEBUG {
     foreign import cimgui "external/cimgui_debug.lib";
@@ -18,10 +20,10 @@ when ODIN_DEBUG {
     foreign import "external/cimgui.lib";
 } 
 
-import "core:fmt.odin";
-import "core:mem.odin";
-import "core:math.odin";
-import "core:strings.odin";
+import "core:fmt";
+import "core:mem";
+import "core:math";
+import "core:strings";
 
 DrawIdx    :: u16;
 Wchar      :: u16;
