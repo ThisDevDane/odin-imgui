@@ -1,12 +1,12 @@
 /*
- *  @Name:     dear_imgui
+ *  @Name:     imgui
  *
  *  @Author:   Mikkel Hjortshoej
  *  @Email:    hoej@northwolfprod.com
  *  @Creation: 10-05-2017 21:11:30
  *
  *  @Last By:   Mikkel Hjortshoej
- *  @Last Time: 02-09-2018 19:05:11 UTC+1
+ *  @Last Time: 06-10-2018 14:15:29 UTC+1
  *
  *  @Description:
  *      Wrapper for Dear ImGui 1.52
@@ -698,9 +698,9 @@ foreign cimgui {
 
 ///// Misc
     @(link_name = "ImFontConfig_DefaultConstructor") font_config_default_constructor  :: proc(config : ^FontConfig) ---;
-    @(link_name = "ImGuiIO_AddInputCharacter")       gui_io_add_input_character       :: proc(self : ^IO, c : Wchar) ---;
-    @(link_name = "ImGuiIO_AddInputCharactersUTF8")  gui_io_add_input_characters_utf8 :: proc(self : ^IO, utf8_chars : ^u8) ---;
-    @(link_name = "ImGuiIO_ClearInputCharacters")    gui_io_clear_input_characters    :: proc(self : ^IO, ) ---;
+    @(link_name = "ImGuiIO_AddInputCharacter")       io_add_input_character           :: proc(self : ^IO, c : Wchar) ---;
+    @(link_name = "ImGuiIO_AddInputCharactersUTF8")  io_add_input_characters_utf8     :: proc(self : ^IO, utf8_chars : ^u8) ---;
+    @(link_name = "ImGuiIO_ClearInputCharacters")    io_clear_input_characters        :: proc(self : ^IO, ) ---;
 
 ///// TextFilter
     @(link_name = "igImGuiTextFilter_Create")      text_filter_create        :: proc(default_filter : cstring = "\x00") -> ^TextFilter ---;

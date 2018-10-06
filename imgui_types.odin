@@ -6,7 +6,7 @@
  *  @Creation: 02-09-2018 15:59:43 UTC+1
  *
  *  @Last By:   Mikkel Hjortshoej
- *  @Last Time: 02-09-2018 18:29:45 UTC+1
+ *  @Last Time: 06-10-2018 14:13:07 UTC+1
  *  
  *  @Description:
  *  
@@ -19,7 +19,7 @@ import "core:mem";
 ////////////////////////////
 // Types
 ID        :: distinct u32;
-DrawIdx   :: distinct u32; 
+DrawIdx   :: distinct u16; 
 Wchar     :: distinct u16; 
 TextureID :: distinct rawptr; 
 
