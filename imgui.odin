@@ -21,7 +21,7 @@ when ODIN_DEBUG {
 } 
 
 import "core:fmt";
-using import "core:math";
+import "core:math";
 import "core:strings";
 
 ///////////////////////// Odin UTIL /////////////////////////
@@ -87,29 +87,29 @@ foreign cimgui {
 
 // Window
 begin                         :: proc (name : string, open : ^bool = nil, flags : Window_Flags = cast(Window_Flags)0) -> bool                                      { return im_begin(_make_label_string(name), open, flags); }
-begin_child                   :: proc (str_id : string, size : Vec2 = Vec2{0,0}, border : bool = true, extra_flags : Window_Flags = cast(Window_Flags)0) -> bool   { return im_begin_child(_make_label_string(str_id), size, border, extra_flags); }
-get_content_region_max        :: proc() -> Vec2                                                                                                  { res : Vec2 = ---; im_get_content_region_max(&res); return res; }
-get_content_region_avail      :: proc() -> Vec2                                                                                                  { res : Vec2 = ---; im_get_content_region_avail(&res); return res; }
-get_window_content_region_min :: proc() -> Vec2                                                                                                  { res : Vec2 = ---; im_get_window_content_region_min(&res); return res; }
-get_window_content_region_max :: proc() -> Vec2                                                                                                  { res : Vec2 = ---; im_get_window_content_region_max(&res); return res; }
-get_window_pos                :: proc() -> Vec2                                                                                                  { res : Vec2 = ---; im_get_window_pos(&res); return res; }
-get_window_size               :: proc() -> Vec2                                                                                                  { res : Vec2 = ---; im_get_content_region_max(&res); return res; }
+begin_child                   :: proc (str_id : string, size : math.Vec2 = math.Vec2{0,0}, border : bool = true, extra_flags : Window_Flags = cast(Window_Flags)0) -> bool   { return im_begin_child(_make_label_string(str_id), size, border, extra_flags); }
+get_content_region_max        :: proc() -> math.Vec2                                                                                                  { res : math.Vec2 = ---; im_get_content_region_max(&res); return res; }
+get_content_region_avail      :: proc() -> math.Vec2                                                                                                  { res : math.Vec2 = ---; im_get_content_region_avail(&res); return res; }
+get_window_content_region_min :: proc() -> math.Vec2                                                                                                  { res : math.Vec2 = ---; im_get_window_content_region_min(&res); return res; }
+get_window_content_region_max :: proc() -> math.Vec2                                                                                                  { res : math.Vec2 = ---; im_get_window_content_region_max(&res); return res; }
+get_window_pos                :: proc() -> math.Vec2                                                                                                  { res : math.Vec2 = ---; im_get_window_pos(&res); return res; }
+get_window_size               :: proc() -> math.Vec2                                                                                                  { res : math.Vec2 = ---; im_get_content_region_max(&res); return res; }
 
 @(default_calling_convention="c")
 foreign cimgui {
     @(link_name = "igBegin")                       im_begin                         :: proc(name : cstring, p_open : ^bool, flags : Window_Flags) -> bool ---;
     @(link_name = "igEnd")                         end                              :: proc() ---;
-    @(link_name = "igBeginChild")                  im_begin_child                   :: proc(str_id : cstring, size : Vec2, border : bool, extra_flags : Window_Flags) -> bool ---;
+    @(link_name = "igBeginChild")                  im_begin_child                   :: proc(str_id : cstring, size : math.Vec2, border : bool, extra_flags : Window_Flags) -> bool ---;
     @(link_name = "igEndChild")                    end_child                        :: proc() ---;
-    @(link_name = "igGetContentRegionMax")         im_get_content_region_max        :: proc(out : ^Vec2) ---;
-    @(link_name = "igGetContentRegionAvail")       im_get_content_region_avail      :: proc(out : ^Vec2) ---;
+    @(link_name = "igGetContentRegionMax")         im_get_content_region_max        :: proc(out : ^math.Vec2) ---;
+    @(link_name = "igGetContentRegionAvail")       im_get_content_region_avail      :: proc(out : ^math.Vec2) ---;
     @(link_name = "igGetContentRegionAvailWidth")  get_content_region_avail_width   :: proc() -> f32 ---;
-    @(link_name = "igGetWindowContentRegionMin")   im_get_window_content_region_min :: proc(out : ^Vec2) ---;
-    @(link_name = "igGetWindowContentRegionMax")   im_get_window_content_region_max :: proc(out : ^Vec2) ---;
+    @(link_name = "igGetWindowContentRegionMin")   im_get_window_content_region_min :: proc(out : ^math.Vec2) ---;
+    @(link_name = "igGetWindowContentRegionMax")   im_get_window_content_region_max :: proc(out : ^math.Vec2) ---;
     @(link_name = "igGetWindowContentRegionWidth") get_window_content_region_width  :: proc() -> f32 ---;
     @(link_name = "igGetWindowDrawList")           get_window_draw_list             :: proc() -> ^DrawList ---;
-    @(link_name = "igGetWindowPos")                im_get_window_pos                :: proc(out : ^Vec2) ---;
-    @(link_name = "igGetWindowSize")               im_get_window_size               :: proc(out : ^Vec2) ---;
+    @(link_name = "igGetWindowPos")                im_get_window_pos                :: proc(out : ^math.Vec2) ---;
+    @(link_name = "igGetWindowSize")               im_get_window_size               :: proc(out : ^math.Vec2) ---;
     @(link_name = "igGetWindowWidth")              get_window_width                 :: proc() -> f32 ---;
     @(link_name = "igGetWindowHeight")             get_window_height                :: proc() -> f32 ---;
     @(link_name = "igIsWindowCollapsed")           is_window_collapsed              :: proc() -> bool ---;
@@ -118,30 +118,30 @@ foreign cimgui {
 }
 
 set_window_collapsed  :: proc (name : string, collapsed : bool, cond : Set_Cond)    { im_set_window_collapsed(_make_label_string(name), collapsed, cond); }
-set_window_size       :: proc (name : string, size : Vec2, cond : Set_Cond)         { im_set_window_size(_make_label_string(name), size, cond); }
+set_window_size       :: proc (name : string, size : math.Vec2, cond : Set_Cond)         { im_set_window_size(_make_label_string(name), size, cond); }
 set_window_focus      :: proc (name : string)                                      { im_set_window_focus(_make_label_string(name)); }
-set_window_pos        :: proc (name : string, pos : Vec2, cond : Set_Cond)          { im_set_window_pos(_make_label_string(name), pos, cond); }
-get_cursor_pos        :: proc () -> Vec2                                           { res : Vec2 = ---; im_get_cursor_pos(&res); return res; }
-get_cursor_start_pos  :: proc () -> Vec2                                           { res : Vec2 = ---; im_get_cursor_start_pos(&res); return res; }
-get_cursor_screen_pos :: proc () -> Vec2                                           { res : Vec2 = ---; im_get_cursor_screen_pos(&res); return res;}
+set_window_pos        :: proc (name : string, pos : math.Vec2, cond : Set_Cond)          { im_set_window_pos(_make_label_string(name), pos, cond); }
+get_cursor_pos        :: proc () -> math.Vec2                                           { res : math.Vec2 = ---; im_get_cursor_pos(&res); return res; }
+get_cursor_start_pos  :: proc () -> math.Vec2                                           { res : math.Vec2 = ---; im_get_cursor_start_pos(&res); return res; }
+get_cursor_screen_pos :: proc () -> math.Vec2                                           { res : math.Vec2 = ---; im_get_cursor_screen_pos(&res); return res;}
 
 
 
 @(default_calling_convention="c")
 foreign cimgui {
-    @(link_name = "igSetNextWindowPos")              set_next_window_pos                :: proc (pos : Vec2, cond : Set_Cond = Set_Cond(0), pivot : Vec2 = Vec2{0, 0}) ---;
-    @(link_name = "igSetNextWindowSize")             set_next_window_size               :: proc (size : Vec2, cond : Set_Cond = Set_Cond(0)) ---;
-    @(link_name = "igSetNextWindowSizeConstraints")  set_next_window_size_constraints   :: proc (size_min : Vec2, size_max : Vec2, custom_callback : size_constraint_callback =  nil, custom_callback_data : rawptr = nil) ---;
-    @(link_name = "igSetNextWindowContentSize")      set_next_window_content_size       :: proc (size : Vec2) ---;
+    @(link_name = "igSetNextWindowPos")              set_next_window_pos                :: proc (pos : math.Vec2, cond : Set_Cond = Set_Cond(0), pivot : math.Vec2 = math.Vec2{0, 0}) ---;
+    @(link_name = "igSetNextWindowSize")             set_next_window_size               :: proc (size : math.Vec2, cond : Set_Cond = Set_Cond(0)) ---;
+    @(link_name = "igSetNextWindowSizeConstraints")  set_next_window_size_constraints   :: proc (size_min : math.Vec2, size_max : math.Vec2, custom_callback : size_constraint_callback =  nil, custom_callback_data : rawptr = nil) ---;
+    @(link_name = "igSetNextWindowContentSize")      set_next_window_content_size       :: proc (size : math.Vec2) ---;
     @(link_name = "igSetNextWindowContentWidth")     set_next_window_content_width      :: proc (width : f32) ---;
     @(link_name = "igSetNextWindowCollapsed")        set_next_window_collapsed          :: proc (collapsed : bool, cond : Set_Cond = Set_Cond(0)) ---;
     @(link_name = "igSetNextWindowFocus")            set_next_window_focus              :: proc () ---;
-    @(link_name = "igSetWindowPos")                  set_window_pos_                    :: proc (pos : Vec2, cond : Set_Cond = Set_Cond(0)) ---;
-    @(link_name = "igSetWindowSize")                 set_window_size_                    :: proc (size : Vec2, cond : Set_Cond = Set_Cond(0)) ---;
+    @(link_name = "igSetWindowPos")                  set_window_pos_                    :: proc (pos : math.Vec2, cond : Set_Cond = Set_Cond(0)) ---;
+    @(link_name = "igSetWindowSize")                 set_window_size_                    :: proc (size : math.Vec2, cond : Set_Cond = Set_Cond(0)) ---;
     @(link_name = "igSetWindowCollapsed")            set_window_collapsed_               :: proc (collapsed : bool, cond : Set_Cond = Set_Cond(0)) ---;
     @(link_name = "igSetWindowFocus")                set_window_focus_                   :: proc () ---;
-    @(link_name = "igSetWindowPosByName")            im_set_window_pos                  :: proc (name : cstring, pos : Vec2, cond : Set_Cond = Set_Cond(0)) ---;
-    @(link_name = "igSetWindowSize2")                im_set_window_size                 :: proc (name : cstring, size : Vec2, cond : Set_Cond = Set_Cond(0)) ---;
+    @(link_name = "igSetWindowPosByName")            im_set_window_pos                  :: proc (name : cstring, pos : math.Vec2, cond : Set_Cond = Set_Cond(0)) ---;
+    @(link_name = "igSetWindowSize2")                im_set_window_size                 :: proc (name : cstring, size : math.Vec2, cond : Set_Cond = Set_Cond(0)) ---;
     @(link_name = "igSetWindowCollapsed2")           im_set_window_collapsed            :: proc (name : cstring, collapsed : bool, cond : Set_Cond = Set_Cond(0)) ---;
     @(link_name = "igSetWindowFocus2")               im_set_window_focus                :: proc (name : cstring) ---;
 
@@ -161,7 +161,7 @@ foreign cimgui {
     @(link_name = "igPushFont")                      push_font                          :: proc (font : ^Font = nil) ---;
     @(link_name = "igPopFont")                       pop_font                           :: proc () ---;
     @(link_name = "igPushStyleColorU32")             push_style_colorU32                :: proc (idx : Color, col : u32) ---;
-    @(link_name = "igPushStyleColor")                push_style_color_                  :: proc (idx : Color, col : Vec4) ---;
+    @(link_name = "igPushStyleColor")                push_style_color_                  :: proc (idx : Color, col : math.Vec4) ---;
 }
 
 push_style_color :: proc{push_style_color_, push_style_colorU32};
@@ -170,7 +170,7 @@ push_style_color :: proc{push_style_color_, push_style_colorU32};
 foreign cimgui {
     @(link_name = "igPopStyleColor")                 pop_style_color                    :: proc (count : i32 = 1) ---;
     @(link_name = "igPushStyleVar")                  push_style_var_                    :: proc (idx : Style_Var, val : f32) ---;
-    @(link_name = "igPushStyleVarVec")               push_style_var_vec                 :: proc (idx : Style_Var, val : Vec2) ---;
+    @(link_name = "igPushStyleVarVec")               push_style_var_vec                 :: proc (idx : Style_Var, val : math.Vec2) ---;
 }
 
 push_style_var :: proc{push_style_var_, push_style_var_vec};
@@ -178,12 +178,12 @@ push_style_var :: proc{push_style_var_, push_style_var_vec};
 @(default_calling_convention="c")
 foreign cimgui {
     @(link_name = "igPopStyleVar")                   pop_style_var                      :: proc (count : i32 = 1) ---;
-    @(link_name = "igGetStyleColorVec4")             get_style_color_vec4               :: proc (idx : Color) ---;
+    @(link_name = "igGetStyleColormath.Vec4")             get_style_color_vec4               :: proc (idx : Color) ---;
     @(link_name = "igGetFont")                       get_font                           :: proc () -> ^Font ---;
     @(link_name = "igGetFontSize")                   get_font_size                      :: proc () -> f32 ---;
-    @(link_name = "igGetFontTexUvWhitePixel")        get_font_tex_uv_white_pixel        :: proc (pOut : ^Vec2) ---;
+    @(link_name = "igGetFontTexUvWhitePixel")        get_font_tex_uv_white_pixel        :: proc (pOut : ^math.Vec2) ---;
     @(link_name = "igGetColorU32")                   get_color_u32_                     :: proc (idx : Color, alpha_mul : f32 = 1.0) -> u32 ---;
-    @(link_name = "igGetColorU32Vec")                get_color_u32_vec                  :: proc (col : ^Vec4) -> u32 ---;
+    @(link_name = "igGetColorU32Vec")                get_color_u32_vec                  :: proc (col : ^math.Vec4) -> u32 ---;
     @(link_name = "igGetColorU32U32c")               get_color_u32_u32                  :: proc (col : u32) -> u32 ---;
 }
 
@@ -207,20 +207,20 @@ foreign cimgui {
     @(link_name = "igSameLine")                      same_line                          :: proc (pos_x : f32 = 0, spacing_w : f32 = -1) ---;
     @(link_name = "igNewLine")                       new_line                           :: proc () ---;
     @(link_name = "igSpacing")                       spacing                            :: proc () ---;
-    @(link_name = "igDummy")                         dummy                              :: proc (size : ^Vec2) ---;
+    @(link_name = "igDummy")                         dummy                              :: proc (size : ^math.Vec2) ---;
     @(link_name = "igIndent")                        indent                             :: proc (indent_w : f32 = 0.0) ---;
     @(link_name = "igUnindent")                      unindent                           :: proc (indent_w : f32 = 0.0) ---;
     @(link_name = "igBeginGroup")                    begin_group                        :: proc () ---;
     @(link_name = "igEndGroup")                      end_group                          :: proc () ---;
-    @(link_name = "igGetCursorPos")                  im_get_cursor_pos                  :: proc (pOut : ^Vec2) ---;
+    @(link_name = "igGetCursorPos")                  im_get_cursor_pos                  :: proc (pOut : ^math.Vec2) ---;
     @(link_name = "igGetCursorPosX")                 get_cursor_pos_x                   :: proc () -> f32 ---;
     @(link_name = "igGetCursorPosY")                 get_cursor_pos_y                   :: proc () -> f32 ---;
-    @(link_name = "igSetCursorPos")                  set_cursor_pos                     :: proc (local_pos : Vec2) ---;
+    @(link_name = "igSetCursorPos")                  set_cursor_pos                     :: proc (local_pos : math.Vec2) ---;
     @(link_name = "igSetCursorPosX")                 set_cursor_pos_x                   :: proc (x : f32) ---;
     @(link_name = "igSetCursorPosY")                 set_cursor_pos_y                   :: proc (y : f32) ---;
-    @(link_name = "igGetCursorStartPos")             im_get_cursor_start_pos            :: proc (pOut : ^Vec2) ---;
-    @(link_name = "igGetCursorScreenPos")            im_get_cursor_screen_pos           :: proc (pOut : ^Vec2) ---;
-    @(link_name = "igSetCursorScreenPos")            set_cursor_screen_pos              :: proc (pos : Vec2) ---;
+    @(link_name = "igGetCursorStartPos")             im_get_cursor_start_pos            :: proc (pOut : ^math.Vec2) ---;
+    @(link_name = "igGetCursorScreenPos")            im_get_cursor_screen_pos           :: proc (pOut : ^math.Vec2) ---;
+    @(link_name = "igSetCursorScreenPos")            set_cursor_screen_pos              :: proc (pos : math.Vec2) ---;
     @(link_name = "igAlignTextToFramePadding")       align_text_to_frame_padding        :: proc () ---;
     @(link_name = "igGetTextLineHeight")             get_text_line_height               :: proc () -> f32 ---;
     @(link_name = "igGetTextLineHeightWithSpacing")  get_text_line_height_with_spacing  :: proc () -> f32 ---;
@@ -266,7 +266,7 @@ get_id :: proc{get_id_str, get_id_str_range, get_id_ptr};
 /////// Widgtes: Text
 text_unformatted :: proc (fmt_  : string)                                 { im_text_unformatted(_make_text_string(fmt_)); }
 text             :: proc (fmt_  : string, args: ..any)                   { im_text_unformatted(_make_text_string(fmt_, ..args)); }
-text_colored     :: proc (col   : Vec4,   fmt_: string,  args: ..any)    { im_text_colored(col, _make_text_string(fmt_, ..args)); }
+text_colored     :: proc (col   : math.Vec4,   fmt_: string,  args: ..any)    { im_text_colored(col, _make_text_string(fmt_, ..args)); }
 text_disabled    :: proc (fmt_  : string, args: ..any)                   { im_text_disabled(_make_text_string(fmt_, ..args)); }
 text_wrapped     :: proc (fmt_  : string, args: ..any)                   { im_text_wrapped(_make_text_string(fmt_, ..args)); }
 label_text       :: proc (label : string, fmt_ : string, args : ..any)   { im_label_text(_make_label_string(label), _make_text_string(fmt_, ..args)); }
@@ -275,7 +275,7 @@ bullet_text      :: proc (fmt_  : string, args: ..any)                   { im_bu
 @(default_calling_convention="c")
 foreign cimgui {
     @(link_name = "igText")            im_text             :: proc(fmt: cstring) ---;
-    @(link_name = "igTextColored")     im_text_colored     :: proc(col : Vec4, fmt_ : cstring) ---;
+    @(link_name = "igTextColored")     im_text_colored     :: proc(col : math.Vec4, fmt_ : cstring) ---;
     @(link_name = "igTextDisabled")    im_text_disabled    :: proc(fmt_ : cstring) ---;
     @(link_name = "igTextWrapped")     im_text_wrapped     :: proc(fmt: cstring) ---;
     @(link_name = "igLabelText")       im_label_text       :: proc(label : cstring, fmt_ : cstring) ---;
@@ -285,32 +285,32 @@ foreign cimgui {
 }
 
 ///// Widgets: Main
-button           :: proc (label : string, size : Vec2 = Vec2{0, 0}) -> bool                                                                                                                                           { return im_button(_make_label_string(label), size); }
+button           :: proc (label : string, size : math.Vec2 = math.Vec2{0, 0}) -> bool                                                                                                                                           { return im_button(_make_label_string(label), size); }
 small_button     :: proc (label : string) -> bool                                                                                                                                                                     { return im_small_button(_make_label_string(label)); }
-invisible_button :: proc (str_id : string, size : Vec2) -> bool                                                                                                                                                       { return im_invisible_button(_make_label_string(str_id), size);}
+invisible_button :: proc (str_id : string, size : math.Vec2) -> bool                                                                                                                                                       { return im_invisible_button(_make_label_string(str_id), size);}
 checkbox         :: proc (label : string, v : ^bool) -> bool                                                                                                                                                          { return im_checkbox(_make_label_string(label), v); }
 checkbox_flags   :: proc (label : string, flags : ^u32, flags_value : u32) -> bool                                                                                                                                    { return im_checkbox_flags(_make_label_string(label), flags, flags_value); }
 radio_buttons    :: proc (label : string, active : bool) -> bool                                                                                                                                                      { return im_radio_buttons_bool(_make_label_string(label), active); }
 radio_button     :: proc (label : string, v : ^i32, v_button : i32) -> bool                                                                                                                                           { return im_radio_button(_make_label_string(label), v, v_button); }
-plot_histogram   :: proc (label : string, values : []f32, overlay_text : string = "\x00", scale_min : f32 = math.F32_MAX, scale_max : f32 = math.F32_MAX, graph_size : Vec2 = Vec2{0,0}, stride : i32 = size_of(f32)) { im_plot_histogram(_make_label_string(label), &values[0], i32(len(values)), 0, _make_misc_string(overlay_text), scale_min, scale_max, graph_size, stride); }
-progress_bar     :: proc (fraction : f32, size_arg : ^Vec2, overlay : string = "\x00")                                                                                                                   { im_progress_bar(fraction, size_arg, _make_misc_string(overlay)); }
+plot_histogram   :: proc (label : string, values : []f32, overlay_text : string = "\x00", scale_min : f32 = math.F32_MAX, scale_max : f32 = math.F32_MAX, graph_size : math.Vec2 = math.Vec2{0,0}, stride : i32 = size_of(f32)) { im_plot_histogram(_make_label_string(label), &values[0], i32(len(values)), 0, _make_misc_string(overlay_text), scale_min, scale_max, graph_size, stride); }
+progress_bar     :: proc (fraction : f32, size_arg : ^math.Vec2, overlay : string = "\x00")                                                                                                                   { im_progress_bar(fraction, size_arg, _make_misc_string(overlay)); }
 
 @(default_calling_convention="c")
 foreign cimgui {
-    @(link_name = "igButton")          im_button             :: proc (label : cstring, size : Vec2) -> bool ---;
+    @(link_name = "igButton")          im_button             :: proc (label : cstring, size : math.Vec2) -> bool ---;
     @(link_name = "igSmallButton")     im_small_button       :: proc(label : cstring) -> bool ---;
-    @(link_name = "igInvisibleButton") im_invisible_button   :: proc(str_id : cstring, size : Vec2) -> bool ---;
-    @(link_name = "igImage")           image                 :: proc(user_texture_id : TextureID, size : Vec2, uv0 : Vec2 = Vec2{0, 0}, uv1 : Vec2 = Vec2{1, 1}, tint_col : Vec4 = Vec4{1, 1, 1, 1}, border_col : Vec4 = Vec4{0, 0, 0, 0}) ---;
-    @(link_name = "igImageButton")     image_button          :: proc(user_texture_id : TextureID, size : Vec2, uv0 : Vec2 = Vec2{0, 0}, uv1 : Vec2 = Vec2{1, 1}, frame_padding : i32 = -1, bg_col : Vec4 = Vec4{0, 0, 0, 0}, tint_col : Vec4 = Vec4{1, 1, 1, 1}) -> bool ---;
+    @(link_name = "igInvisibleButton") im_invisible_button   :: proc(str_id : cstring, size : math.Vec2) -> bool ---;
+    @(link_name = "igImage")           image                 :: proc(user_texture_id : TextureID, size : math.Vec2, uv0 : math.Vec2 = math.Vec2{0, 0}, uv1 : math.Vec2 = math.Vec2{1, 1}, tint_col : math.Vec4 = math.Vec4{1, 1, 1, 1}, border_col : math.Vec4 = math.Vec4{0, 0, 0, 0}) ---;
+    @(link_name = "igImageButton")     image_button          :: proc(user_texture_id : TextureID, size : math.Vec2, uv0 : math.Vec2 = math.Vec2{0, 0}, uv1 : math.Vec2 = math.Vec2{1, 1}, frame_padding : i32 = -1, bg_col : math.Vec4 = math.Vec4{0, 0, 0, 0}, tint_col : math.Vec4 = math.Vec4{1, 1, 1, 1}) -> bool ---;
     @(link_name = "igCheckbox")        im_checkbox           :: proc(label : cstring, v : ^bool) -> bool ---;
     @(link_name = "igCheckboxFlags")   im_checkbox_flags     :: proc(label : cstring, flags : ^u32, flags_value : u32) -> bool ---;
     @(link_name = "igRadioButtonBool") im_radio_buttons_bool :: proc(label : cstring, active : bool) -> bool ---;
     @(link_name = "igRadioButton")     im_radio_button       :: proc(label : cstring, v : ^i32, v_button : i32) -> bool ---;
-    @(link_name = "igPlotLines")       plot_lines            :: proc(label : cstring, values : ^f32, values_count : i32, values_offset : i32, overlay_text : cstring, scale_min : f32, scale_max : f32, graph_size : Vec2, stride : i32) ---;
-    @(link_name = "igPlotLines2")      plot_lines2           :: proc(label : cstring, values_getter : proc(data : rawptr, idx : i32) -> f32, data : rawptr, values_count : i32, values_offset : i32, overlay_text : cstring, scale_min : f32, scale_max : f32, graph_size : Vec2) ---;
-    @(link_name = "igPlotHistogram")   im_plot_histogram     :: proc(label : cstring, values : ^f32, values_count : i32, values_offset : i32, overlay_text : cstring, scale_min : f32, scale_max : f32, graph_size : Vec2, stride : i32) ---;
-    @(link_name = "igPlotHistogram2")  plot_histogram2       :: proc(label : cstring, values_getter : proc(data : rawptr, idx : i32) -> f32, data : rawptr, values_count : i32, values_offset : i32, overlay_text : cstring, scale_min : f32, scale_max : f32, graph_size : Vec2) ---;
-    @(link_name = "igProgressBar")     im_progress_bar       :: proc(fraction : f32, size_arg : ^Vec2, overlay : cstring) ---;
+    @(link_name = "igPlotLines")       plot_lines            :: proc(label : cstring, values : ^f32, values_count : i32, values_offset : i32, overlay_text : cstring, scale_min : f32, scale_max : f32, graph_size : math.Vec2, stride : i32) ---;
+    @(link_name = "igPlotLines2")      plot_lines2           :: proc(label : cstring, values_getter : proc(data : rawptr, idx : i32) -> f32, data : rawptr, values_count : i32, values_offset : i32, overlay_text : cstring, scale_min : f32, scale_max : f32, graph_size : math.Vec2) ---;
+    @(link_name = "igPlotHistogram")   im_plot_histogram     :: proc(label : cstring, values : ^f32, values_count : i32, values_offset : i32, overlay_text : cstring, scale_min : f32, scale_max : f32, graph_size : math.Vec2, stride : i32) ---;
+    @(link_name = "igPlotHistogram2")  plot_histogram2       :: proc(label : cstring, values_getter : proc(data : rawptr, idx : i32) -> f32, data : rawptr, values_count : i32, values_offset : i32, overlay_text : cstring, scale_min : f32, scale_max : f32, graph_size : math.Vec2) ---;
+    @(link_name = "igProgressBar")     im_progress_bar       :: proc(fraction : f32, size_arg : ^math.Vec2, overlay : cstring) ---;
     @(link_name = "igBeginCombo")      im_begin_combo        :: proc(label : cstring, preview_value : cstring, flags : Combo_Flags) -> bool ---;
     @(link_name = "igEndCombo")        end_combo             :: proc() -> bool ---;
     @(link_name = "igCombo")           im_combo              :: proc(label : cstring, current_item : ^i32, items : ^cstring, items_count : i32, height_in_items : i32) -> bool ---;
@@ -368,7 +368,7 @@ foreign cimgui {
 
 // Widgets: Input with Keyboard
 input_text           :: proc(label : string, buf : []u8, flags : Input_Text_Flags = Input_Text_Flags(0), callback : text_edit_callback = nil, user_data : rawptr = nil) -> bool              { return im_input_text(_make_label_string(label), cstring(&buf[0]), uint(len(buf)), flags, callback, user_data); }
-input_text_multiline :: proc(label : string, buf : []u8, size : Vec2, flags : Input_Text_Flags = Input_Text_Flags(0), callback : text_edit_callback = nil, user_data : rawptr = nil) -> bool { return im_input_text_multiline(_make_label_string(label), cstring(&buf[0]), uint(len(buf)), size, flags, callback, user_data); }
+input_text_multiline :: proc(label : string, buf : []u8, size : math.Vec2, flags : Input_Text_Flags = Input_Text_Flags(0), callback : text_edit_callback = nil, user_data : rawptr = nil) -> bool { return im_input_text_multiline(_make_label_string(label), cstring(&buf[0]), uint(len(buf)), size, flags, callback, user_data); }
 
 input_float          :: proc{input_float1, input_float2, input_float3, input_float4};
 input_float1         :: proc(label : string, v : ^f32, step : f32 = 0, step_fast : f32 = 0, decimal_precision : i32 = -1, extra_flags : Input_Text_Flags = Input_Text_Flags(0)) -> bool          { return im_input_float(_make_label_string(label), v, step, step_fast, decimal_precision, extra_flags); }
@@ -385,7 +385,7 @@ input_int4           :: proc(label : string, v : ^[4]i32, extra_flags : Input_Te
 @(default_calling_convention="c")
 foreign cimgui {
     @(link_name = "igInputText")          im_input_text           :: proc(label : cstring, buf : cstring, buf_size : uint /*size_t*/, flags : Input_Text_Flags, callback : text_edit_callback, user_data : rawptr) -> bool ---;
-    @(link_name = "igInputTextMultiline") im_input_text_multiline :: proc(label : cstring, buf : cstring, buf_size : uint /*size_t*/, size : Vec2, flags : Input_Text_Flags, callback : text_edit_callback, user_data : rawptr) -> bool ---;
+    @(link_name = "igInputTextMultiline") im_input_text_multiline :: proc(label : cstring, buf : cstring, buf_size : uint /*size_t*/, size : math.Vec2, flags : Input_Text_Flags, callback : text_edit_callback, user_data : rawptr) -> bool ---;
     @(link_name = "igInputFloat")         im_input_float          :: proc(label : cstring, v : ^f32, step : f32, step_fast : f32, decimal_precision : i32, extra_flags : Input_Text_Flags) -> bool ---;
     @(link_name = "igInputFloat2")        im_input_float2         :: proc(label : cstring, v : ^f32, decimal_precision : i32, extra_flags : Input_Text_Flags) -> bool ---;
     @(link_name = "igInputFloat3")        im_input_float3         :: proc(label : cstring, v : ^f32, decimal_precision : i32, extra_flags : Input_Text_Flags) -> bool ---;
@@ -409,8 +409,8 @@ slider_int1    :: proc(label : string, v : ^i32, v_min : i32, v_max : i32, displ
 slider_int2    :: proc(label : string, v : ^[2]i32, v_min : i32, v_max : i32, display_format : string = "%d") -> bool                               { return im_slider_int2(_make_label_string(label), &v[0], v_min, v_max, _make_display_fmt_string(display_format)); }
 slider_int3    :: proc(label : string, v : ^[3]i32, v_min : i32, v_max : i32, display_format : string = "%d") -> bool                               { return im_slider_int3(_make_label_string(label), &v[0], v_min, v_max, _make_display_fmt_string(display_format)); }
 slider_int4    :: proc(label : string, v : ^[4]i32, v_min : i32, v_max : i32, display_format : string = "%d") -> bool                               { return im_slider_int4(_make_label_string(label), &v[0], v_min, v_max, _make_display_fmt_string(display_format)); }
-vslider_float  :: proc(label : string, size : Vec2, v : ^f32, v_min : f32 , v_max : f32, display_format : string = "%.3f", power : f32 = 1) -> bool { return im_vslider_float(_make_label_string(label), size, v, v_min, v_max, _make_display_fmt_string(display_format), power); }
-vslider_int    :: proc(label : string, size : Vec2, v : ^i32, v_min : i32, v_max : i32, display_format : string = "%d") -> bool                     { return im_vslider_int(_make_label_string(label), size, v, v_min, v_max, _make_display_fmt_string(display_format)); }
+vslider_float  :: proc(label : string, size : math.Vec2, v : ^f32, v_min : f32 , v_max : f32, display_format : string = "%.3f", power : f32 = 1) -> bool { return im_vslider_float(_make_label_string(label), size, v, v_min, v_max, _make_display_fmt_string(display_format), power); }
+vslider_int    :: proc(label : string, size : math.Vec2, v : ^i32, v_min : i32, v_max : i32, display_format : string = "%d") -> bool                     { return im_vslider_int(_make_label_string(label), size, v, v_min, v_max, _make_display_fmt_string(display_format)); }
 
 @(default_calling_convention="c")
 foreign cimgui {
@@ -423,8 +423,8 @@ foreign cimgui {
     @(link_name = "igSliderInt2")   im_slider_int2   :: proc(label : cstring, v : ^i32, v_min : i32, v_max : i32, display_format : cstring) -> bool ---;
     @(link_name = "igSliderInt3")   im_slider_int3   :: proc(label : cstring, v : ^i32, v_min : i32, v_max : i32, display_format : cstring) -> bool ---;
     @(link_name = "igSliderInt4")   im_slider_int4   :: proc(label : cstring, v : ^i32, v_min : i32, v_max : i32, display_format : cstring) -> bool ---;
-    @(link_name = "igVSliderFloat") im_vslider_float :: proc(label : cstring, size : Vec2, v : ^f32, v_min : f32 , v_max : f32, display_format : cstring, power : f32) -> bool ---;
-    @(link_name = "igVSliderInt")   im_vslider_int   :: proc(label : cstring, size : Vec2, v : ^i32, v_min : i32, v_max : i32, display_format : cstring) -> bool               ---;
+    @(link_name = "igVSliderFloat") im_vslider_float :: proc(label : cstring, size : math.Vec2, v : ^f32, v_min : f32 , v_max : f32, display_format : cstring, power : f32) -> bool ---;
+    @(link_name = "igVSliderInt")   im_vslider_int   :: proc(label : cstring, size : math.Vec2, v : ^i32, v_min : i32, v_max : i32, display_format : cstring) -> bool               ---;
 }
 
 color_edit    :: proc{color_edit3, color_edit4};
@@ -434,7 +434,7 @@ color_edit4   :: proc(label : string, col : [4]f32, flags : Color_Edit_Flags = C
 color_picker  :: proc{color_picker3, color_picker4};
 color_picker3 :: proc(label : string, col : [3]f32, flags : Color_Edit_Flags = Color_Edit_Flags(0)) -> bool                           { return im_color_picker3(_make_label_string(label), &col[0], flags) }
 color_picker4 :: proc(label : string, col : [4]f32, flags : Color_Edit_Flags = Color_Edit_Flags(0)) -> bool                           { return im_color_picker4(_make_label_string(label), &col[0], flags) }
-color_button  :: proc(desc_id : string, col : Vec4, flags : Color_Edit_Flags = Color_Edit_Flags(0), size : Vec2 = Vec2{0, 0}) -> bool { return im_color_button(_make_label_string(desc_id), col, flags, size) }
+color_button  :: proc(desc_id : string, col : math.Vec4, flags : Color_Edit_Flags = Color_Edit_Flags(0), size : math.Vec2 = math.Vec2{0, 0}) -> bool { return im_color_button(_make_label_string(desc_id), col, flags, size) }
 
 @(default_calling_convention="c")
 foreign cimgui {
@@ -442,7 +442,7 @@ foreign cimgui {
     @(link_name = "igColorEdit4")          im_color_edit4         :: proc(label : cstring, col : ^f32, flags : Color_Edit_Flags) -> bool ---;
     @(link_name = "igColorPicker3")        im_color_picker3       :: proc(label : cstring, col : ^f32, flags : Color_Edit_Flags) -> bool ---;
     @(link_name = "igColorPicker4")        im_color_picker4       :: proc(label : cstring, col : ^f32, flags : Color_Edit_Flags, ref_col : ^f32 = nil) -> bool ---;
-    @(link_name = "igColorButton")         im_color_button        :: proc(desc_id : cstring, col : Vec4, flags : Color_Edit_Flags, size : Vec2) -> bool ---;
+    @(link_name = "igColorButton")         im_color_button        :: proc(desc_id : cstring, col : math.Vec4, flags : Color_Edit_Flags, size : math.Vec2) -> bool ---;
     @(link_name = "igSetColorEditOptions") set_color_edit_options :: proc(flags : Color_Edit_Flags)  ---;
 }
 
@@ -485,17 +485,17 @@ foreign cimgui {
 
 // Widgets: Selectable / Lists
 selectable      :: proc{selectable_val, selectable_ptr};
-selectable_val  :: proc(label : string, selected : bool = false, flags : Selectable_Flags = Selectable_Flags(0), size : Vec2 = Vec2{0,0}) -> bool { return im_selectable(_make_label_string(label), selected, flags, size); }
-selectable_ptr  :: proc(label : string, p_selected : ^bool, flags : Selectable_Flags = Selectable_Flags(0), size : Vec2 = Vec2{0,0}) -> bool      { return im_selectable_ex(_make_label_string(label), p_selected, flags, size); }
+selectable_val  :: proc(label : string, selected : bool = false, flags : Selectable_Flags = Selectable_Flags(0), size : math.Vec2 = math.Vec2{0,0}) -> bool { return im_selectable(_make_label_string(label), selected, flags, size); }
+selectable_ptr  :: proc(label : string, p_selected : ^bool, flags : Selectable_Flags = Selectable_Flags(0), size : math.Vec2 = math.Vec2{0,0}) -> bool      { return im_selectable_ex(_make_label_string(label), p_selected, flags, size); }
 
 list_box_header        :: proc{list_box_header_simple, list_box_header_count};
-list_box_header_simple :: proc(label : string, size : Vec2 = Vec2{0, 0}) -> bool                      { return im_list_box_header(_make_label_string(label), size); }
+list_box_header_simple :: proc(label : string, size : math.Vec2 = math.Vec2{0, 0}) -> bool                      { return im_list_box_header(_make_label_string(label), size); }
 list_box_header_count  :: proc(label : string, items_count : i32, height_in_items : i32 = -1) -> bool { return im_list_box_header2(_make_label_string(label), items_count, height_in_items); }
 
 @(default_calling_convention="c")
 foreign cimgui {
-    @(link_name = "igSelectable")     im_selectable      :: proc(label : cstring, selected : bool, flags : Selectable_Flags, size : Vec2) -> bool ---;
-    @(link_name = "igSelectableEx")   im_selectable_ex   :: proc(label : cstring, p_selected : ^bool, flags : Selectable_Flags, size : Vec2) -> bool ---;
+    @(link_name = "igSelectable")     im_selectable      :: proc(label : cstring, selected : bool, flags : Selectable_Flags, size : math.Vec2) -> bool ---;
+    @(link_name = "igSelectableEx")   im_selectable_ex   :: proc(label : cstring, p_selected : ^bool, flags : Selectable_Flags, size : math.Vec2) -> bool ---;
     @(link_name = "igListBox")        list_box1          :: proc(label : cstring, current_item : ^i32, items : ^^u8, items_count : i32, height_in_items : i32) -> bool ---;
     @(link_name = "igListBox2")       list_box2          :: proc(label : cstring, current_item : ^i32, items_getter : proc "cdecl"(data : rawptr, idx : i32, out_text : ^^u8) -> bool, data : rawptr, items_count : i32, height_in_items : i32) -> bool ---;
 }
@@ -504,7 +504,7 @@ list_box :: proc{list_box1, list_box2};
 
 @(default_calling_convention="c")
 foreign cimgui {
-    @(link_name = "igListBoxHeader")  im_list_box_header :: proc(label : cstring, size : Vec2) -> bool ---;
+    @(link_name = "igListBoxHeader")  im_list_box_header :: proc(label : cstring, size : math.Vec2) -> bool ---;
     @(link_name = "igListBoxHeader2") im_list_box_header2 :: proc(label : cstring, items_count : i32, height_in_items : i32) -> bool ---;
     @(link_name = "igListBoxFooter")  list_box_footer    :: proc() ---;
 }
@@ -515,7 +515,7 @@ value_bool  :: proc(prefix : string, b : bool)                          { im_val
 value_int   :: proc(prefix : string, v : i32)                           { im_value_int(_make_label_string(prefix), v); }
 value_uint  :: proc(prefix : string, v : u32)                           { im_value_uint(_make_label_string(prefix), v); }
 value_float :: proc(prefix : string, v : f32, format : string = "\x00") { im_value_float(_make_label_string(prefix), v, _make_misc_string(format)); }
-value_color :: proc(prefix : string, v : Vec4)                          { im_value_color(_make_label_string(prefix), v); }
+value_color :: proc(prefix : string, v : math.Vec4)                          { im_value_color(_make_label_string(prefix), v); }
 
 @(default_calling_convention="c")
 foreign cimgui {
@@ -523,7 +523,7 @@ foreign cimgui {
     @(link_name = "igValueInt")   im_value_int   :: proc(prefix : cstring, v : i32) ---;
     @(link_name = "igValueUInt")  im_value_uint  :: proc(prefix : cstring, v : u32) ---;
     @(link_name = "igValueFloat") im_value_float :: proc(prefix : cstring, v : f32, float_format : cstring) ---;
-    @(link_name = "igValueColor") im_value_color :: proc(prefix : cstring, v : Vec4) ---;
+    @(link_name = "igValueColor") im_value_color :: proc(prefix : cstring, v : math.Vec4) ---;
 }
 
 // Tooltip
@@ -606,7 +606,7 @@ accept_drag_drop_payload :: proc(type_ : string, flags : Drag_Drop_Flags) -> ^Pa
 @(default_calling_convention="c")
 foreign cimgui {
     // Clipping
-    @(link_name = "igPushClipRect")                     push_clip_rect                         :: proc(clip_rect_min : Vec2, clip_rect_max : Vec2, intersect_with_current_clip_rect : bool) ---;
+    @(link_name = "igPushClipRect")                     push_clip_rect                         :: proc(clip_rect_min : math.Vec2, clip_rect_max : math.Vec2, intersect_with_current_clip_rect : bool) ---;
     @(link_name = "igPopClipRect")                      pop_clip_rect                          :: proc() ---;
 
     // Styles
@@ -621,38 +621,38 @@ foreign cimgui {
     @(link_name = "igIsItemVisible")                    is_item_visible                        :: proc () -> bool ---;
     @(link_name = "igIsAnyItemHovered")                 is_any_item_hovered                    :: proc () -> bool ---;
     @(link_name = "igIsAnyItemActive")                  is_any_item_active                     :: proc () -> bool ---;
-    @(link_name = "igGetItemRectMin")                   get_item_rect_min                      :: proc (pOut : ^Vec2) ---;
-    @(link_name = "igGetItemRectMax")                   get_item_rect_max                      :: proc (pOut : ^Vec2) ---;
-    @(link_name = "igGetItemRectSize")                  get_item_rect_size                     :: proc (pOut : ^Vec2) ---;
+    @(link_name = "igGetItemRectMin")                   get_item_rect_min                      :: proc (pOut : ^math.Vec2) ---;
+    @(link_name = "igGetItemRectMax")                   get_item_rect_max                      :: proc (pOut : ^math.Vec2) ---;
+    @(link_name = "igGetItemRectSize")                  get_item_rect_size                     :: proc (pOut : ^math.Vec2) ---;
     @(link_name = "igSetItemAllowOverlap")              set_item_allow_overlap                 :: proc () ---;
     @(link_name = "igIsWindowFocused")                  is_window_focused                      :: proc (flags : Hovered_Flags = Hovered_Flags(0)) -> bool ---;
     @(link_name = "igIsWindowHovered")                  is_window_hovered                      :: proc (flags : Hovered_Flags = Hovered_Flags(0)) -> bool ---;
     @(link_name = "igIsRootWindowFocused")              is_root_window_focused                 :: proc () -> bool ---;
     @(link_name = "igIsRootWindowOrAnyChildFocused")    is_root_window_or_any_child_focused    :: proc () -> bool ---;
     @(link_name = "igIsRootWindowOrAnyChildHovered")    is_root_window_or_any_child_hovered    :: proc (flags : Hovered_Flags = Hovered_Flags(0)) -> bool ---;
-    @(link_name = "igIsRectVisible")                    is_rect_visible_size                   :: proc (item_size : Vec2) -> bool ---;
-    @(link_name = "igIsRectVisible2")                   is_rect_visible_minmax                 :: proc (min : ^Vec2, max : ^Vec2) -> bool ---;
+    @(link_name = "igIsRectVisible")                    is_rect_visible_size                   :: proc (item_size : math.Vec2) -> bool ---;
+    @(link_name = "igIsRectVisible2")                   is_rect_visible_minmax                 :: proc (min : ^math.Vec2, max : ^math.Vec2) -> bool ---;
 }
 
 is_rect_visible :: proc{is_rect_visible_size, is_rect_visible_minmax};
 
 @(default_calling_convention="c")
 foreign cimgui {
-    @(link_name = "igIsPosHoveringAnyWindow")           is_pos_hovering_any_window             :: proc (pos : Vec2) -> bool ---;
+    @(link_name = "igIsPosHoveringAnyWindow")           is_pos_hovering_any_window             :: proc (pos : math.Vec2) -> bool ---;
     @(link_name = "igGetTime")                          get_time                               :: proc () -> f32 ---;
     @(link_name = "igGetFrameCount")                    get_frame_count                        :: proc () -> i32 ---;
     @(link_name = "igGetOverlayDrawList")               get_overlay_draw_list                  :: proc () -> ^DrawList ---;
     //@(link_name = "igGetDrawListSharedData")          get_draw_list_shared_data            :: proc () -> ^DrawListSharedData ---; NOTE(Hoej): Missing struct definiton.
     @(link_name = "igGetStyleColName")                  get_style_col_name                     :: proc (idx : Color) -> cstring ---;
-    @(link_name = "igCalcItemRectClosestPoint")         calc_item_rect_closest_point           :: proc (pOut : ^Vec2, pos : Vec2 , on_edge : bool, outward : f32 = 0) ---;
-    @(link_name = "igCalcTextSize")                     calc_text_size                         :: proc (pOut : ^Vec2, text : cstring, text_end : cstring, hide_text_after_double_hash : bool, wrap_width : f32 = -1) ---;
+    @(link_name = "igCalcItemRectClosestPoint")         calc_item_rect_closest_point           :: proc (pOut : ^math.Vec2, pos : math.Vec2 , on_edge : bool, outward : f32 = 0) ---;
+    @(link_name = "igCalcTextSize")                     calc_text_size                         :: proc (pOut : ^math.Vec2, text : cstring, text_end : cstring, hide_text_after_double_hash : bool, wrap_width : f32 = -1) ---;
     @(link_name = "igCalcListClipping")                 calc_list_clipping                     :: proc (items_count : i32, items_height : f32, out_items_display_start : ^i32, out_items_display_end : ^i32) ---;
 
-    @(link_name = "igBeginChildFrame")                  begin_child_frame                      :: proc(id : ID, size : Vec2, extra_flags : Window_Flags = Window_Flags(0)) -> bool ---;
+    @(link_name = "igBeginChildFrame")                  begin_child_frame                      :: proc(id : ID, size : math.Vec2, extra_flags : Window_Flags = Window_Flags(0)) -> bool ---;
     @(link_name = "igEndChildFrame")                    end_child_frame                        :: proc  () ---;
 
-    @(link_name = "igColorConvertU32ToFloat4")          color_convert_u32_to_float4            :: proc(pOut : ^Vec4 , in_ : u32) ---;
-    @(link_name = "igColorConvertFloat4ToU32")          color_convert_float4_to_u32            :: proc(in_ : Vec4) -> u32 ---;
+    @(link_name = "igColorConvertU32ToFloat4")          color_convert_u32_to_float4            :: proc(pOut : ^math.Vec4 , in_ : u32) ---;
+    @(link_name = "igColorConvertFloat4ToU32")          color_convert_float4_to_u32            :: proc(in_ : math.Vec4) -> u32 ---;
     @(link_name = "igColorConvertRGBtoHSV")             color_convert_rgb_to_hsv               :: proc(r : f32, g : f32, b : f32, out_h : ^f32, out_s : ^f32, out_v : ^f32) ---;
     @(link_name = "igColorConvertHSVtoRGB")             color_convert_hsv_to_rgb               :: proc(h : f32, s : f32, v : f32, out_r : ^f32, out_g : ^f32, out_b : ^f32) ---;
 
@@ -666,10 +666,10 @@ foreign cimgui {
     @(link_name = "igIsMouseDoubleClicked")             is_mouse_double_clicked                :: proc (button : i32) -> bool ---;
     @(link_name = "igIsMouseReleased")                  is_mouse_released                      :: proc (button : i32) -> bool ---;
     @(link_name = "igIsMouseDragging")                  is_mouse_dragging                      :: proc (button : i32 = 0, lock_threshold : f32 = -1) -> bool ---;
-    @(link_name = "igIsMouseHoveringRect")              is_mouse_hovering_rect                 :: proc (r_min : Vec2, r_max : Vec2, clip : bool = true) -> bool ---;
-    @(link_name = "igGetMousePos")                      get_mouse_pos                          :: proc (pOut : ^Vec2) ---;
-    @(link_name = "igGetMousePosOnOpeningCurrentPopup") get_mouse_pos_on_opening_current_popup :: proc (pOut : ^Vec2) ---;
-    @(link_name = "igGetMouseDragDelta")                get_mouse_drag_delta                   :: proc (pOut : ^Vec2, button : i32 = 0, lock_threshold : f32 = -1) ---;
+    @(link_name = "igIsMouseHoveringRect")              is_mouse_hovering_rect                 :: proc (r_min : math.Vec2, r_max : math.Vec2, clip : bool = true) -> bool ---;
+    @(link_name = "igGetMousePos")                      get_mouse_pos                          :: proc (pOut : ^math.Vec2) ---;
+    @(link_name = "igGetMousePosOnOpeningCurrentPopup") get_mouse_pos_on_opening_current_popup :: proc (pOut : ^math.Vec2) ---;
+    @(link_name = "igGetMouseDragDelta")                get_mouse_drag_delta                   :: proc (pOut : ^math.Vec2, button : i32 = 0, lock_threshold : f32 = -1) ---;
     @(link_name = "igResetMouseDragDelta")              reset_mouse_drag_delta                 :: proc (button : i32 = 0) ---;
     @(link_name = "igGetMouseCursor")                   get_mouse_cursor                       :: proc () -> Mouse_Cursor ---;
     @(link_name = "igSetMouseCursor")                   set_mouse_cursor                       :: proc (type_ : Mouse_Cursor) ---;
@@ -771,49 +771,49 @@ foreign cimgui {
 ///// DrawList
 @(default_calling_convention="c")
 foreign cimgui {
-    @(link_name = "ImDrawData_ScaleClipRects")           draw_data_scale_clip_rects             :: proc(self : ^DrawData, sc : Vec2) ---;
+    @(link_name = "ImDrawData_ScaleClipRects")           draw_data_scale_clip_rects             :: proc(self : ^DrawData, sc : math.Vec2) ---;
 
     @(link_name = "ImDrawList_Clear")                    draw_list_clear                        :: proc(list : ^DrawList) ---;
     @(link_name = "ImDrawList_ClearFreeMemory")          draw_list_clear_free_memory            :: proc(list : ^DrawList) ---;
-    @(link_name = "ImDrawList_PushClipRect")             draw_list_push_clip_rect               :: proc(list : ^DrawList, clip_rect_min : Vec2, clip_rect_max : Vec2, intersect_with_current_clip_rect : bool) ---;
+    @(link_name = "ImDrawList_PushClipRect")             draw_list_push_clip_rect               :: proc(list : ^DrawList, clip_rect_min : math.Vec2, clip_rect_max : math.Vec2, intersect_with_current_clip_rect : bool) ---;
     @(link_name = "ImDrawList_PushClipRectFullScreen")   draw_list_push_clip_rect_full_screen   :: proc(list : ^DrawList) ---;
     @(link_name = "ImDrawList_PopClipRect")              draw_list_pop_clip_rect                :: proc(list : ^DrawList) ---;
     @(link_name = "ImDrawList_PushTextureID")            draw_list_push_texture_id              :: proc(list : ^DrawList, texture_id : TextureID) ---;
     @(link_name = "ImDrawList_PopTextureID")             draw_list_pop_texture_id               :: proc(list : ^DrawList) ---;
 
 ///// Primitives
-    @(link_name = "ImDrawList_AddLine")                  draw_list_add_line                     :: proc(list : ^DrawList, a : Vec2, b : Vec2, col : u32, thickness : f32) ---;
-    @(link_name = "ImDrawList_AddRect")                  draw_list_add_rect                     :: proc(list : ^DrawList, a : Vec2, b : Vec2, col : u32, rounding : f32, rounding_corners : i32, thickness : f32) ---;
-    @(link_name = "ImDrawList_AddRectFilled")            draw_list_add_rect_filled              :: proc(list : ^DrawList, a : Vec2, b : Vec2, col : u32, rounding : f32, rounding_corners : i32) ---;
-    @(link_name = "ImDrawList_AddRectFilledMultiColor")  draw_list_add_rect_filled_multi_color  :: proc(list : ^DrawList, a : Vec2, b : Vec2, col_upr_left : u32, col_upr_right : u32, col_bot_right : u32, col_bot_left : u32) ---;
-    @(link_name = "ImDrawList_AddQuad")                  draw_list_add_quad                     :: proc(list : ^DrawList, a : Vec2, b : Vec2, c : Vec2, d : Vec2, col : u32, thickness : f32) ---;
-    @(link_name = "ImDrawList_AddQuadFilled")            draw_list_add_quad_filled              :: proc(list : ^DrawList, a : Vec2, b : Vec2, c : Vec2, d : Vec2, col : u32) ---;
-    @(link_name = "ImDrawList_AddTriangle")              draw_list_add_triangle                 :: proc(list : ^DrawList, a : Vec2, b : Vec2, c : Vec2, col : u32, thickness : f32) ---;
-    @(link_name = "ImDrawList_AddTriangleFilled")        draw_list_add_triangle_filled          :: proc(list : ^DrawList, a : Vec2, b : Vec2, c : Vec2, col : u32) ---;
-    @(link_name = "ImDrawList_AddCircle")                draw_list_add_circle                   :: proc(list : ^DrawList, centre : Vec2, radius : f32, col : u32, num_segments : i32, thickness : f32) ---;
-    @(link_name = "ImDrawList_AddCircleFilled")          draw_list_add_circle_filled            :: proc(list : ^DrawList, centre : Vec2, radius : f32, col : u32, num_segments : i32) ---;
+    @(link_name = "ImDrawList_AddLine")                  draw_list_add_line                     :: proc(list : ^DrawList, a : math.Vec2, b : math.Vec2, col : u32, thickness : f32) ---;
+    @(link_name = "ImDrawList_AddRect")                  draw_list_add_rect                     :: proc(list : ^DrawList, a : math.Vec2, b : math.Vec2, col : u32, rounding : f32, rounding_corners : i32, thickness : f32) ---;
+    @(link_name = "ImDrawList_AddRectFilled")            draw_list_add_rect_filled              :: proc(list : ^DrawList, a : math.Vec2, b : math.Vec2, col : u32, rounding : f32, rounding_corners : i32) ---;
+    @(link_name = "ImDrawList_AddRectFilledMultiColor")  draw_list_add_rect_filled_multi_color  :: proc(list : ^DrawList, a : math.Vec2, b : math.Vec2, col_upr_left : u32, col_upr_right : u32, col_bot_right : u32, col_bot_left : u32) ---;
+    @(link_name = "ImDrawList_AddQuad")                  draw_list_add_quad                     :: proc(list : ^DrawList, a : math.Vec2, b : math.Vec2, c : math.Vec2, d : math.Vec2, col : u32, thickness : f32) ---;
+    @(link_name = "ImDrawList_AddQuadFilled")            draw_list_add_quad_filled              :: proc(list : ^DrawList, a : math.Vec2, b : math.Vec2, c : math.Vec2, d : math.Vec2, col : u32) ---;
+    @(link_name = "ImDrawList_AddTriangle")              draw_list_add_triangle                 :: proc(list : ^DrawList, a : math.Vec2, b : math.Vec2, c : math.Vec2, col : u32, thickness : f32) ---;
+    @(link_name = "ImDrawList_AddTriangleFilled")        draw_list_add_triangle_filled          :: proc(list : ^DrawList, a : math.Vec2, b : math.Vec2, c : math.Vec2, col : u32) ---;
+    @(link_name = "ImDrawList_AddCircle")                draw_list_add_circle                   :: proc(list : ^DrawList, centre : math.Vec2, radius : f32, col : u32, num_segments : i32, thickness : f32) ---;
+    @(link_name = "ImDrawList_AddCircleFilled")          draw_list_add_circle_filled            :: proc(list : ^DrawList, centre : math.Vec2, radius : f32, col : u32, num_segments : i32) ---;
 
 
-    @(link_name = "ImDrawList_AddText")                  draw_list_add_text                     :: proc(list : ^DrawList, pos : Vec2, col : u32, text_begin : cstring, text_end : cstring) ---;
-    @(link_name = "ImDrawList_AddTextExt")               draw_list_add_text_ext                 :: proc(list : ^DrawList, font : ^Font, font_size : f32, pos : Vec2, col : u32, text_begin : cstring, text_end : cstring, wrap_width : f32, cpu_fine_clip_rect : ^Vec4) ---;
+    @(link_name = "ImDrawList_AddText")                  draw_list_add_text                     :: proc(list : ^DrawList, pos : math.Vec2, col : u32, text_begin : cstring, text_end : cstring) ---;
+    @(link_name = "ImDrawList_AddTextExt")               draw_list_add_text_ext                 :: proc(list : ^DrawList, font : ^Font, font_size : f32, pos : math.Vec2, col : u32, text_begin : cstring, text_end : cstring, wrap_width : f32, cpu_fine_clip_rect : ^math.Vec4) ---;
 
-    @(link_name = "ImDrawList_AddImage")                 draw_list_add_image                    :: proc(list : ^DrawList, user_texture_id : TextureID, a : Vec2, b : Vec2, uv0 : Vec2, uv1 : Vec2, col : u32) ---;
-    @(link_name = "ImDrawList_AddImageQuad")             draw_list_add_image_quad               :: proc(list : ^DrawList, user_texture_id : TextureID, a : Vec2, b : Vec2, c : Vec2, d : Vec2, uv_a : Vec2, uv_b : Vec2, uv_c : Vec2, uv_d : Vec2, col : u32) ---;
-    @(link_name = "ImDrawList_AddImageRounded")          draw_list_add_image_rounded            :: proc(list : ^DrawList, user_texture_id : TextureID, a : Vec2, b : Vec2, uv_a : Vec2, uv_b : Vec2, col : u32, rounding : f32, rounding_corners : i32) ---;
-    @(link_name = "ImDrawList_AddPolyline")              draw_list_add_poly_line                :: proc(list : ^DrawList, points : ^Vec2, num_points : i32, col : u32, closed : bool, thickness : f32) ---;
-    @(link_name = "ImDrawList_AddConvexPolyFilled")      draw_list_add_convex_poly_filled       :: proc(list : ^DrawList, points : ^Vec2, num_points : i32, col : u32) ---;
-    @(link_name = "ImDrawList_AddBezierCurve")           draw_list_add_bezier_curve             :: proc(list : ^DrawList, pos0 : Vec2, cp0 : Vec2, cp1 : Vec2, pos1 : Vec2, col : u32, thickness : f32, num_segments : i32) ---;
+    @(link_name = "ImDrawList_AddImage")                 draw_list_add_image                    :: proc(list : ^DrawList, user_texture_id : TextureID, a : math.Vec2, b : math.Vec2, uv0 : math.Vec2, uv1 : math.Vec2, col : u32) ---;
+    @(link_name = "ImDrawList_AddImageQuad")             draw_list_add_image_quad               :: proc(list : ^DrawList, user_texture_id : TextureID, a : math.Vec2, b : math.Vec2, c : math.Vec2, d : math.Vec2, uv_a : math.Vec2, uv_b : math.Vec2, uv_c : math.Vec2, uv_d : math.Vec2, col : u32) ---;
+    @(link_name = "ImDrawList_AddImageRounded")          draw_list_add_image_rounded            :: proc(list : ^DrawList, user_texture_id : TextureID, a : math.Vec2, b : math.Vec2, uv_a : math.Vec2, uv_b : math.Vec2, col : u32, rounding : f32, rounding_corners : i32) ---;
+    @(link_name = "ImDrawList_AddPolyline")              draw_list_add_poly_line                :: proc(list : ^DrawList, points : ^math.Vec2, num_points : i32, col : u32, closed : bool, thickness : f32) ---;
+    @(link_name = "ImDrawList_AddConvexPolyFilled")      draw_list_add_convex_poly_filled       :: proc(list : ^DrawList, points : ^math.Vec2, num_points : i32, col : u32) ---;
+    @(link_name = "ImDrawList_AddBezierCurve")           draw_list_add_bezier_curve             :: proc(list : ^DrawList, pos0 : math.Vec2, cp0 : math.Vec2, cp1 : math.Vec2, pos1 : math.Vec2, col : u32, thickness : f32, num_segments : i32) ---;
 
 ///// Stateful path API, add points then finish with PathFill() or PathStroke()
     @(link_name = "ImDrawList_PathClear")                draw_list_path_clear                   :: proc(list : ^DrawList) ---;
-    @(link_name = "ImDrawList_PathLineTo")               draw_list_path_line_to                 :: proc(list : ^DrawList, pos : Vec2) ---;
-    @(link_name = "ImDrawList_PathLineToMergeDuplicate") draw_list_path_line_to_merge_duplicate :: proc(list : ^DrawList, pos : Vec2) ---;
+    @(link_name = "ImDrawList_PathLineTo")               draw_list_path_line_to                 :: proc(list : ^DrawList, pos : math.Vec2) ---;
+    @(link_name = "ImDrawList_PathLineToMergeDuplicate") draw_list_path_line_to_merge_duplicate :: proc(list : ^DrawList, pos : math.Vec2) ---;
     @(link_name = "ImDrawList_PathFill")                 draw_list_path_fill                    :: proc(list : ^DrawList, col : u32) ---;
     @(link_name = "ImDrawList_PathStroke")               draw_list_path_stroke                  :: proc(list : ^DrawList, col : u32, closed : bool, thickness : f32) ---;
-    @(link_name = "ImDrawList_PathArcTo")                draw_list_path_arc_to                  :: proc(list : ^DrawList, centre : Vec2, radius : f32, a_min : f32, a_max : f32, num_segments : i32) ---;
-    @(link_name = "ImDrawList_PathArcToFast")            draw_list_path_arc_to_fast             :: proc(list : ^DrawList, centre : Vec2, radius : f32, a_min_of_12 : i32, a_max_of_12 : i32) ---; // Use precomputed angles for a 12 steps circle
-    @(link_name = "ImDrawList_PathBezierCurveTo")        draw_list_path_bezier_curve_to         :: proc(list : ^DrawList, p1 : Vec2, p2 : Vec2, p3 : Vec2, num_segments : i32) ---;
-    @(link_name = "ImDrawList_PathRect")                 draw_list_path_rect                    :: proc(list : ^DrawList, rect_min : Vec2, rect_max : Vec2, rounding : f32, rounding_corners : i32) ---;
+    @(link_name = "ImDrawList_PathArcTo")                draw_list_path_arc_to                  :: proc(list : ^DrawList, centre : math.Vec2, radius : f32, a_min : f32, a_max : f32, num_segments : i32) ---;
+    @(link_name = "ImDrawList_PathArcToFast")            draw_list_path_arc_to_fast             :: proc(list : ^DrawList, centre : math.Vec2, radius : f32, a_min_of_12 : i32, a_max_of_12 : i32) ---; // Use precomputed angles for a 12 steps circle
+    @(link_name = "ImDrawList_PathBezierCurveTo")        draw_list_path_bezier_curve_to         :: proc(list : ^DrawList, p1 : math.Vec2, p2 : math.Vec2, p3 : math.Vec2, num_segments : i32) ---;
+    @(link_name = "ImDrawList_PathRect")                 draw_list_path_rect                    :: proc(list : ^DrawList, rect_min : math.Vec2, rect_max : math.Vec2, rounding : f32, rounding_corners : i32) ---;
 
 ///// Channels
     @(link_name = "ImDrawList_ChannelsSplit")            draw_list_channels_split               :: proc(list : ^DrawList, channels_count : i32) ---;
@@ -827,12 +827,12 @@ foreign cimgui {
     @(link_name = "ImDrawList_AddDrawCmd")               draw_list_add_draw_cmd                 :: proc(list : ^DrawList) ---;
     // Internal helpers
     @(link_name = "ImDrawList_PrimReserve")              draw_list_prim_reserve                 :: proc(list : ^DrawList, idx_count : i32, vtx_count : i32) ---;
-    @(link_name = "ImDrawList_PrimRect")                 draw_list_prim_rect                    :: proc(list : ^DrawList, a : Vec2, b : Vec2, col : u32) ---;
-    @(link_name = "ImDrawList_PrimRectUV")               draw_list_prim_rectuv                  :: proc(list : ^DrawList, a : Vec2, b : Vec2, uv_a : Vec2, uv_b : Vec2, col : u32) ---;
-    @(link_name = "ImDrawList_PrimQuadUV")               draw_list_prim_quaduv                  :: proc(list : ^DrawList,a : Vec2, b : Vec2, c : Vec2, d : Vec2, uv_a : Vec2, uv_b : Vec2, uv_c : Vec2, uv_d : Vec2, col : u32) ---;
-    @(link_name = "ImDrawList_PrimWriteVtx")             draw_list_prim_writevtx                :: proc(list : ^DrawList, pos : Vec2, uv : Vec2, col : u32) ---;
+    @(link_name = "ImDrawList_PrimRect")                 draw_list_prim_rect                    :: proc(list : ^DrawList, a : math.Vec2, b : math.Vec2, col : u32) ---;
+    @(link_name = "ImDrawList_PrimRectUV")               draw_list_prim_rectuv                  :: proc(list : ^DrawList, a : math.Vec2, b : math.Vec2, uv_a : math.Vec2, uv_b : math.Vec2, col : u32) ---;
+    @(link_name = "ImDrawList_PrimQuadUV")               draw_list_prim_quaduv                  :: proc(list : ^DrawList,a : math.Vec2, b : math.Vec2, c : math.Vec2, d : math.Vec2, uv_a : math.Vec2, uv_b : math.Vec2, uv_c : math.Vec2, uv_d : math.Vec2, col : u32) ---;
+    @(link_name = "ImDrawList_PrimWriteVtx")             draw_list_prim_writevtx                :: proc(list : ^DrawList, pos : math.Vec2, uv : math.Vec2, col : u32) ---;
     @(link_name = "ImDrawList_PrimWriteIdx")             draw_list_prim_writeidx                :: proc(list : ^DrawList, idx : DrawIdx) ---;
-    @(link_name = "ImDrawList_PrimVtx")                  draw_list_prim_vtx                     :: proc(list : ^DrawList, pos : Vec2, uv : Vec2, col : u32) ---;
+    @(link_name = "ImDrawList_PrimVtx")                  draw_list_prim_vtx                     :: proc(list : ^DrawList, pos : math.Vec2, uv : math.Vec2, col : u32) ---;
     @(link_name = "ImDrawList_UpdateClipRect")           draw_list_update_clip_rect             :: proc(list : ^DrawList) ---;
     @(link_name = "ImDrawList_UpdateTextureID")          draw_list_update_texture_id            :: proc(list : ^DrawList) ---;
 }
