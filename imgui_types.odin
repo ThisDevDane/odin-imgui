@@ -14,8 +14,6 @@
 
 package imgui
 
-import "core:mem";
-
 ////////////////////////////
 // Types
 ID        :: distinct u32;
@@ -149,7 +147,7 @@ IO :: struct {
     nav_inputs_down_duration_prev    : [Nav_Input.COUNT]f32,
 }
 
-ImVector :: struct(T : type) {
+ImVector :: struct(T: typeid) {
     size     : i32,
     capacity : i32,
     data     : ^T,
