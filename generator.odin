@@ -8,21 +8,18 @@ import "core:os";
 import "core:unicode/utf8";
 
 main :: proc() {
-    fmt.println("Generator for odin-imgui v0.1 by ThisDrunkDane (Mikkel Hjortshoej)");
-
    {
         data, _ := os.read_entire_file("test.json");
         value, err := json.parse(data);
 
         if err == json.Error.None {
-            fmt.println("JSON parsed successfully!");
             obj := value.value.(json.Object);
 
             enums := obj["enums"].value.(json.Object);
-            //print_enums(enums);
+            print_enums(enums);
 
             structs := obj["structs"].value.(json.Object);
-            //print_structs(structs);
+            print_structs(structs);
 
         } else {
             fmt.eprintln("Error in json!", err);
@@ -33,7 +30,6 @@ main :: proc() {
         value, err := json.parse(data);
 
         if err == json.Error.None {
-            fmt.println("JSON parsed successfully!");
             obj := value.value.(json.Object);
 
             print_procedures(obj);
@@ -122,6 +118,10 @@ print_procedures :: proc(obj : json.Object) {
         if has_stname {
             stname := stname_v.value.(json.String);
             if stname == "ImVector" do return true;
+            if stname == "ImVec2" do return true;
+            if stname == "ImVec4" do return true;
+            if stname == "ImGuiStoragePair" do return true;
+            if stname == "ImGuiOnceUponAFrame" do return true;
         }
 
         return false;
