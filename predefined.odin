@@ -43,6 +43,10 @@ structs_predefined := map[string]string {
     "ImDrawListSharedData" = "DrawListSharedData",
 };
 
+predefined_defaults_by_value := map[string]string {
+    "(((ImU32)(255)<<24)|((ImU32)(255)<<16)|((ImU32)(255)<<8)|((ImU32)(255)<<0))" = "0xffffffff"
+};
+
 proc_name_by_link_name := map[string]string {
     "ImGuiStoragePair_ImGuiStoragePairInt" = "StoragePair_i32_ctor",
     "ImGuiStoragePair_ImGuiStoragePairFloat" = "StoragePair_f32_ctor",

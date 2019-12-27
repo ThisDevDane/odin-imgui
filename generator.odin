@@ -69,21 +69,34 @@ print_procedures :: proc(obj : json.Object) {
         return res;
     }
 
-    figure_out_default_val :: proc(b : ^strings.Builder, c_name : string, overload : json.Object) {
+    figure_out_default_val :: proc(b : ^strings.Builder, c_name : string, overload : json.Object) -> bool {
         obj, has_defaults := overload["defaults"].value.(json.Object);
-        if has_defaults == false do return;
+        if has_defaults == false do return false;
 
         default_v, name_has_default := obj[c_name];
-        if name_has_default == false do return; 
-        val := clean_imgui_namespacing(default_v.value.(json.String));
+        if name_has_default == false do return false; 
         
-        if val == "((void*)0)" do val = "nil";
-        else if utf8.rune_at_pos(val, 0) != '(' {
-            val, _ = strings.replace_all(val, "(", "{");
-            val, _ = strings.replace_all(val, ")", "}");
+        c_val := default_v.value.(json.String);
+        val := "ERROR";
+        strings.write_rune(b, ' ');
+
+        if pre, has_predefind := predefined_defaults_by_value[c_val]; has_predefind {
+            val = pre;
+        } else if c_val == "((void*)0)" {
+            val = "nil";
+        } else {
+            val = clean_imgui_namespacing(c_val);
+        
+            if utf8.rune_at_pos(val, 0) != '(' {
+                val, _ = strings.replace_all(val, "(", "{");
+                val, _ = strings.replace_all(val, ")", "}");
+            }
+
+            if strings.has_suffix(val, "f") do val = strings.trim_right(val, "f");
         }
         
-        strings.write_string(b, fmt.tprintf(" = %v", strings.trim_right(val, "f")));
+        strings.write_string(b, fmt.tprintf("= %v", val));
+        return true;
     }
 
     should_skip :: proc(overload : json.Object) -> bool {
@@ -256,6 +269,12 @@ print_procedures :: proc(obj : json.Object) {
         if strings.has_prefix(p.name, "ig") == true do continue;
         print_proc(p, longest_link_name, longest_proc_name);
     }
+
+    fmt.println("");
+    fmt.println("////////////////////////////");
+    fmt.println("/// NEEDS OVERLOADING!!!");
+    fmt.println("");
+
     for p in procs {
         if strings.has_prefix(p.name, "ig") == false do continue;
         print_proc(p, longest_link_name, longest_proc_name);
