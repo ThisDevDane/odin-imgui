@@ -45,8 +45,12 @@ main :: proc() {
 }
 
 print_procedures :: proc(obj : json.Object) {
-    fmt.println("@(default_calling_convention=\"c\")");
-    fmt.println("foreign cimgui {");
+    Foreign_Group :: struct {
+        name : string,
+        procs : [dynamic]Foreign_Proc,
+        longest_link_name : int,
+        longest_proc_name : int,
+    };
 
     Foreign_Proc :: struct {
         link_name : string,
@@ -56,7 +60,7 @@ print_procedures :: proc(obj : json.Object) {
         var_args  : bool,
     };
 
-    procs : [dynamic]Foreign_Proc;
+    groups : map[string]^Foreign_Group;
 
     count_overloads :: proc(overloads: json.Array) -> int {
         res := 0;
@@ -231,17 +235,22 @@ print_procedures :: proc(obj : json.Object) {
                 res.ret_type = strings.to_string(b);
             }
 
-            append(&procs, res);
-        } 
-    }
+            group_name := clean_imgui_namespacing(overload["stname"].value.(json.String));
+            if group, ok := groups[group_name]; ok {
+                append(&group.procs, res);                
+                group.longest_link_name = max(group.longest_link_name, len(res.link_name));
+                group.longest_proc_name = max(group.longest_proc_name, len(res.name));
+            } else {
+                group := new(Foreign_Group);
+                group.name = group_name;
+                group.longest_link_name = min(int);
+                group.longest_proc_name = min(int);
 
-    longest_link_name := min(int);
-    for x in procs {
-        longest_link_name = max(longest_link_name, len(x.link_name));
-    }
-    longest_proc_name := min(int);
-    for x in procs {
-        longest_proc_name = max(longest_proc_name, len(x.name));
+                append(&group.procs, res);
+                
+                groups[group_name] = group;
+            }
+        }
     }
 
     print_proc :: proc(p : Foreign_Proc, longest_link_name : int, longest_proc_name : int) {
@@ -265,24 +274,32 @@ print_procedures :: proc(obj : json.Object) {
         fmt.println("---;");
     }
 
-    for p in procs {
-        if strings.has_prefix(p.name, "ig") == true do continue;
-        print_proc(p, longest_link_name, longest_proc_name);
+    for k, v in groups {
+        fmt.println("@(default_calling_convention=\"c\")");
+        fmt.println("foreign cimgui {");
+        for p in v.procs {
+            if strings.has_prefix(p.name, "ig") == true do continue;
+            print_proc(p, v.longest_link_name, v.longest_proc_name);
+        }
+
+        
+
+        header_printed := false;
+        for p in v.procs {
+            if strings.has_prefix(p.name, "ig") == false do continue;
+
+            if header_printed == false {
+                fmt.println("");
+                fmt.println("////////////////////////////");
+                fmt.println("/// NEEDS OVERLOADING!!!");
+                fmt.println("");
+                header_printed = true;
+            }
+
+            print_proc(p, v.longest_link_name, v.longest_proc_name);
+        }
+        fmt.println("}\n");
     }
-
-    fmt.println("");
-    fmt.println("////////////////////////////");
-    fmt.println("/// NEEDS OVERLOADING!!!");
-    fmt.println("");
-
-    for p in procs {
-        if strings.has_prefix(p.name, "ig") == false do continue;
-        print_proc(p, longest_link_name, longest_proc_name);
-    }
-
-
-
-    fmt.println("}");
 }
 
 right_pad :: proc(text : string, max_length : int) {
