@@ -2,3 +2,5 @@ cimgui.*
 cimgui_debug.*
 external/*
 x64-binaries
+*.exe
+*.json
