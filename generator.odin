@@ -73,34 +73,46 @@ print_procedures :: proc(obj : json.Object) {
         return res;
     }
 
-    figure_out_default_val :: proc(b : ^strings.Builder, c_name : string, overload : json.Object) -> bool {
+    figure_out_default_val :: proc(b : ^strings.Builder, c_name : string, overload : json.Object) -> (found: bool, inferred : bool) {
+        inferred = false;
+        found = false;
+
         obj, has_defaults := overload["defaults"].value.(json.Object);
-        if has_defaults == false do return false;
+        if has_defaults == false do return;
 
         default_v, name_has_default := obj[c_name];
-        if name_has_default == false do return false; 
+        if name_has_default == false do return; 
+
+        found = true;
         
         c_val := default_v.value.(json.String);
         val := "ERROR";
-        strings.write_rune(b, ' ');
-
+        
         if pre, has_predefind := predefined_defaults_by_value[c_val]; has_predefind {
             val = pre;
+        } else if c_val == "FLT_MAX" {
+            val = "max(f32)";
+            inferred = true;
+        } else if c_val == "sizeof(float)" {
+            val = "i32(size_of(f32))";
+            inferred = true;
         } else if c_val == "((void*)0)" {
             val = "nil";
         } else {
             val = clean_imgui_namespacing(c_val);
         
             if utf8.rune_at_pos(val, 0) != '(' {
-                val, _ = strings.replace_all(val, "(", "{");
-                val, _ = strings.replace_all(val, ")", "}");
+                replaced_left, replaced_right : bool;
+                val, replaced_left = strings.replace_all(val, "(", "{");
+                val, replaced_right = strings.replace_all(val, ")", "}");
+                inferred = replaced_left || replaced_right;
             }
 
             if strings.has_suffix(val, "f") do val = strings.trim_right(val, "f");
         }
         
-        strings.write_string(b, fmt.tprintf("= %v", val));
-        return true;
+        strings.write_string(b, val);
+        return;
     }
 
     should_skip :: proc(overload : json.Object) -> bool {
@@ -216,11 +228,19 @@ print_procedures :: proc(obj : json.Object) {
                 arg_name := clean_array_brackets(c_name, has_size);
                 if arg_name == "in" do arg_name = "in_";
 
-                b := strings.make_builder();
-                convert_type(&b, arg_name, c_type, 0);
-                figure_out_default_val(&b, c_name, overload);
+                b_type := strings.make_builder();
+                b_default := strings.make_builder();
+                convert_type(&b_type, arg_name, c_type, 0);
+                inferred, default_found := figure_out_default_val(&b_default, c_name, overload);
 
-                append(&res.args, fmt.aprintf("%s : %s", arg_name, strings.to_string(b)));
+                if default_found == false {
+                    append(&res.args, fmt.aprintf("%s : %s", arg_name, strings.to_string(b_type)));
+                } else if inferred == true {
+                    append(&res.args, fmt.aprintf("%s := %s", arg_name, strings.to_string(b_default)));
+                } else {
+                    append(&res.args, fmt.aprintf("%s : %s = %s", 
+                                                  arg_name, strings.to_string(b_type), strings.to_string(b_default)));
+                }
             }
 
             set_proc_name(&res, 
