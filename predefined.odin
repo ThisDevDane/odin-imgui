@@ -49,7 +49,7 @@ proc_name_by_link_name := map[string]string {
     "ImGuiStoragePair_ImGuiStoragePairPtr" = "StoragePair_rawptr_ctor",
 };
 
-predefined_type_for_structs_by_name := map[string]string {
+predefined_type_by_name := map[string]string {
     // IO
     "GetClipboardTextFn" = "get_clipboard_text_function",
     "SetClipboardTextFn" = "set_clipboard_text_function",
@@ -62,7 +62,7 @@ predefined_type_for_structs_by_name := map[string]string {
     "free_func" = "proc \"c\"(ptr : rawptr, user_date : rawptr) -> rawptr",
 };
 
-predefined_type_for_structs_by_type := map[string]string {
+predefined_type_by_type := map[string]string {
 
     "char"           = "i8",
     "unsigned char"  = "u8",
@@ -74,27 +74,27 @@ predefined_type_for_structs_by_type := map[string]string {
     "double"         = "f64",
     "size_t"         = "uint",
 
-    "U32" = "u32",
+    "ImU32" = "u32",
 
-    "Vector_ImTextureID" = "ImVector(TextureID)",
-    "Vector_ImWchar" = "ImVector(Wchar)",
-    "Vector_ImVec2" = "ImVector(Vec2)",
-    "Vector_ImVec4" = "ImVector(Vec4)",
+    "ImVector_ImTextureID" = "ImVector(TextureID)",
+    "ImVector_ImWchar" = "ImVector(Wchar)",
+    "ImVector_ImVec2" = "ImVector(Vec2)",
+    "ImVector_ImVec4" = "ImVector(Vec4)",
     
-    "Vector_ImGuiTextRange" = "ImVector(TextRange)",
-    "Vector_ImGuiStoragePair" = "ImVector(StoragePair)",
+    "ImVector_ImGuiTextRange" = "ImVector(TextRange)",
+    "ImVector_ImGuiStoragePair" = "ImVector(StoragePair)",
     
-    "Vector_ImFontConfig" = "ImVector(FontConfig)",
-    "Vector_ImFontAtlasCustomRect" = "ImVector(FontAtlasCustomRect)",
-    "Vector_ImFontPtr" = "ImVector(^Font)",
-    "Vector_ImFontGlyph" = "ImVector(FontGlyph)",
+    "ImVector_ImFontConfig" = "ImVector(FontConfig)",
+    "ImVector_ImFontAtlasCustomRect" = "ImVector(FontAtlasCustomRect)",
+    "ImVector_ImFontPtr" = "ImVector(^Font)",
+    "ImVector_ImFontGlyph" = "ImVector(FontGlyph)",
     
-    "Vector_ImDrawChannel" = "ImVector(DrawChannel)",
-    "Vector_ImDrawCmd" = "ImVector(DrawCmd)",
-    "Vector_ImDrawIdx" = "ImVector(DrawIdx)",
-    "Vector_ImDrawVert" = "ImVector(DrawVert)",
+    "ImVector_ImDrawChannel" = "ImVector(DrawChannel)",
+    "ImVector_ImDrawCmd" = "ImVector(DrawCmd)",
+    "ImVector_ImDrawIdx" = "ImVector(DrawIdx)",
+    "ImVector_ImDrawVert" = "ImVector(DrawVert)",
 
-    "Vector_ImU32" = "ImVector(u32)",
-    "Vector_float" = "ImVector(f32)",
-    "Vector_char" = "ImVector(u8)",
+    "ImVector_ImU32" = "ImVector(u32)",
+    "ImVector_float" = "ImVector(f32)",
+    "ImVector_char" = "ImVector(u8)",
 };
