@@ -6,56 +6,113 @@ import "core:encoding/json";
 import "core:strings";
 import "core:os";
 import "core:unicode/utf8";
+import "core:log";
+
+Foreign_Group :: struct {
+    name : string,
+    procs : [dynamic]Foreign_Proc,
+    longest_link_name : int,
+    longest_proc_name : int,
+};
+
+Foreign_Proc :: struct {
+    link_name : string,
+    name      : string,
+    args      : [dynamic]string,
+    ret_type  : string,
+    var_args  : bool,
+};
 
 main :: proc() {
-   {
+    logger_opts := log.Options {
+        .Level,
+        .Short_File_Path,
+        .Line,
+        .Procedure,
+    };
+    context.logger = log.create_console_logger(opt = logger_opts, ident = "Generator");
+    {
         data, _ := os.read_entire_file("test.json");
         value, err := json.parse(data);
 
         if err == json.Error.None {
+            fHandle, fErr := os.open("../output/imgui_structs_enums.odin", os.O_WRONLY|os.O_CREATE|os.O_TRUNC);
+            fmt.fprintf(fHandle, "package imgui;\n\n");
+
+            if fErr != os.ERROR_NONE {
+                fmt.println("Couldn't create/open file for output!", fErr);
+                return;
+            }
+
             obj := value.value.(json.Object);
 
             enums := obj["enums"].value.(json.Object);
-            print_enums(enums);
+            output_enums(fHandle, enums);
 
             structs := obj["structs"].value.(json.Object);
-            print_structs(structs);
+            output_structs(fHandle, structs);
 
         } else {
             fmt.eprintln("Error in json!", err);
         }
-   }
-   {
+    }
+    {
         data, _ := os.read_entire_file("test2.json");
         value, err := json.parse(data);
 
         if err == json.Error.None {
+            fHandle, fErr := os.open("../output/imgui_procs.odin", os.O_WRONLY|os.O_CREATE|os.O_TRUNC);
+            fmt.fprintf(fHandle, "package imgui;\n\n");
+
+            fmt.fprint(fHandle, "when ODIN_DEBUG {\n");
+            fmt.fprint(fHandle, "    foreign import cimgui \"external/cimgui_debug.lib\";\n");
+            fmt.fprint(fHandle, "} else {\n");
+            fmt.fprint(fHandle, "    foreign import \"external/cimgui.lib\";\n");
+            fmt.fprint(fHandle, "}\n\n");
+
             obj := value.value.(json.Object);
 
-            print_procedures(obj);
+            groups := gather_procedures(obj);
+
+            for v in groups {
+                fmt.fprintln(fHandle, "@(default_calling_convention=\"c\")");
+                fmt.fprintln(fHandle, "foreign cimgui {");
+                for p in v.procs {
+                    if strings.has_prefix(p.name, "ig") == true do continue;
+                    print_proc(fHandle, p, v.longest_link_name, v.longest_proc_name);
+                }
+
+                
+
+                header_printed := false;
+                for p in v.procs {
+                    if strings.has_prefix(p.name, "ig") == false do continue;
+
+                    if header_printed == false {
+                        fmt.fprintln(fHandle, "");
+                        fmt.fprintln(fHandle, "////////////////////////////");
+                        fmt.fprintln(fHandle, "/// NEEDS OVERLOADING!!!");
+                        fmt.fprintln(fHandle, "////////////////////////////");
+                        fmt.fprintln(fHandle, "");
+                        header_printed = true;
+                    }
+
+                    print_proc(fHandle, p, v.longest_link_name, v.longest_proc_name);
+                }
+                fmt.fprintln(fHandle, "}\n");
+            }
 
         } else {
             fmt.eprintln("Error in json!", err);
         }
-   }
+    }
+    {
+        text_bytes, _ := os.read_entire_file("../imgui_predefined.odin");
+        os.write_entire_file("../output/imgui_predefined.odin", text_bytes);
+    }
 }
 
-print_procedures :: proc(obj : json.Object) {
-    Foreign_Group :: struct {
-        name : string,
-        procs : [dynamic]Foreign_Proc,
-        longest_link_name : int,
-        longest_proc_name : int,
-    };
-
-    Foreign_Proc :: struct {
-        link_name : string,
-        name      : string,
-        args      : [dynamic]string,
-        ret_type  : string,
-        var_args  : bool,
-    };
-
+gather_procedures :: proc(obj : json.Object) -> []Foreign_Group {
     groups : map[string]^Foreign_Group;
 
     count_overloads :: proc(overloads: json.Array) -> int {
@@ -90,7 +147,7 @@ print_procedures :: proc(obj : json.Object) {
             val = "max(f32)";
             inferred = true;
         } else if c_val == "sizeof(float)" {
-            val = "i32(size_of(f32))";
+            val = "size_of(f32)";
             inferred = true;
         } else if c_val == "((void*)0)" {
             val = "nil";
@@ -118,11 +175,10 @@ print_procedures :: proc(obj : json.Object) {
         if has_stname {
             stname := stname_v.value.(json.String);
             if stname == "ImVector" do return true;
-            if stname == "ImVec2" do return true;
-            if stname == "ImVec4" do return true;
-            if stname == "ImGuiStoragePair" do return true;
-            if stname == "ImGuiOnceUponAFrame" do return true;
         }
+
+        if _, is_ctor := overload["constructor"]; is_ctor do return true;
+        if _, is_ctor := overload["destructor"]; is_ctor do return true;
 
         return false;
     }
@@ -152,19 +208,19 @@ print_procedures :: proc(obj : json.Object) {
 
         proc_name, has_funcname := overload["funcname"].value.(json.String);
         if has_funcname == false || overload_count > 1 {
-            proc_name = res.link_name;
+            proc_name = to_snake_case(res.link_name);
         }
         
         if first_arg != nil {
             c_name := first_arg["name"].value.(json.String);
             if c_name == "label" {
-                res.name = res.link_name;
+                res.name = to_snake_case(res.link_name);
                 return;
             }
         }
 
         if res.var_args == true {
-            res.name = res.link_name;
+            res.name = to_snake_case(res.link_name);
             return;
         }
 
@@ -180,14 +236,11 @@ print_procedures :: proc(obj : json.Object) {
             }
         }
 
-        if _, is_ctor := overload["constructor"]; is_ctor {
-            proc_name = set_ctor_name(first_arg);
-        }
-
-        if _, is_ctor := overload["destructor"]; is_ctor do proc_name = "destroy";
+        // if _, is_ctor := overload["constructor"]; is_ctor do proc_name = set_ctor_name(first_arg);
+        // if _, is_dtor := overload["destructor"];  is_dtor do proc_name = "destroy";
         
         strings.write_string(&b, proc_name);
-        res.name = strings.to_string(b);
+        res.name = to_snake_case(strings.to_string(b));
     }
 
     get_link_name :: proc(overload : json.Object) -> string {
@@ -220,26 +273,32 @@ print_procedures :: proc(obj : json.Object) {
                 c_name := field["name"].value.(json.String);
                 if c_name == "..." {
                     res.var_args = true;
-                    append(&res.args, "#c_varargs args : ..any");
+                    append(&res.args, "#c_vararg args : ..any");
                     continue;
                 }
 
                 size, has_size := field["size"];
                 arg_name := clean_array_brackets(c_name, has_size);
-                if arg_name == "in" do arg_name = "in_";
+
+                switch arg_name {
+                    case "in":  arg_name = "in_";
+                    case "fmt": arg_name = "format";
+                }
 
                 b_type := strings.make_builder();
                 b_default := strings.make_builder();
-                convert_type(&b_type, arg_name, c_type, 0);
+                is_base := convert_type(&b_type, arg_name, c_type, 0);
                 inferred, default_found := figure_out_default_val(&b_default, c_name, overload);
 
                 if default_found == false {
-                    append(&res.args, fmt.aprintf("%s : %s", arg_name, strings.to_string(b_type)));
+                    if is_base do append(&res.args, fmt.aprintf("%s : %s", arg_name, strings.to_string(b_type)));
+                    else do append(&res.args, fmt.aprintf("%s : %s", arg_name, to_ada_case(strings.to_string(b_type))));
                 } else if inferred == true {
                     append(&res.args, fmt.aprintf("%s := %s", arg_name, strings.to_string(b_default)));
                 } else {
                     append(&res.args, fmt.aprintf("%s : %s = %s", 
-                                                  arg_name, strings.to_string(b_type), strings.to_string(b_default)));
+                                                  arg_name, strings.to_string(b_type), 
+                                                  strings.to_string(b_default)));
                 }
             }
 
@@ -251,107 +310,96 @@ print_procedures :: proc(obj : json.Object) {
             ret, has_ret := overload["ret"].value.(json.String);
             if has_ret == true && ret != "void" {
                 b := strings.make_builder();
-                convert_type(&b, "", ret, 0);
-                res.ret_type = strings.to_string(b);
+                is_base := convert_type(&b, "", ret, 0);
+                if is_base do res.ret_type = strings.to_string(b);
+                else do res.ret_type = to_ada_case(strings.to_string(b));
             }
 
             group_name := clean_imgui_namespacing(overload["stname"].value.(json.String));
             if group, ok := groups[group_name]; ok {
-                append(&group.procs, res);                
                 group.longest_link_name = max(group.longest_link_name, len(res.link_name));
                 group.longest_proc_name = max(group.longest_proc_name, len(res.name));
+
+                append(&group.procs, res);                
             } else {
                 group := new(Foreign_Group);
                 group.name = group_name;
-                group.longest_link_name = min(int);
-                group.longest_proc_name = min(int);
+                group.longest_link_name = len(res.link_name);
+                group.longest_proc_name = len(res.name);
 
                 append(&group.procs, res);
-                
                 groups[group_name] = group;
             }
         }
     }
 
-    print_proc :: proc(p : Foreign_Proc, longest_link_name : int, longest_proc_name : int) {
-        fmt.printf("\t@(link_name = \"%s\") ", p.link_name);
-        right_pad(p.link_name, longest_link_name);
-        fmt.printf("%s ", p.name);
-        right_pad(p.name, longest_proc_name);
+    result := make([]Foreign_Group, len(groups));
 
-        fmt.printf(":: proc(");
-        for a, i in p.args{
-            fmt.printf("%s", a);
-            if i < len(p.args)-1 {
-                fmt.printf(", ");
-            }
-        }
-
-        fmt.printf(") ");
-        if len(p.ret_type) > 0 {
-            fmt.printf("-> %s ", p.ret_type);
-        }
-        fmt.println("---;");
+    idx := 0;
+    for _, v in groups {
+        result[idx] = v^;
+        idx += 1;
     }
 
-    for k, v in groups {
-        fmt.println("@(default_calling_convention=\"c\")");
-        fmt.println("foreign cimgui {");
-        for p in v.procs {
-            if strings.has_prefix(p.name, "ig") == true do continue;
-            print_proc(p, v.longest_link_name, v.longest_proc_name);
-        }
-
-        
-
-        header_printed := false;
-        for p in v.procs {
-            if strings.has_prefix(p.name, "ig") == false do continue;
-
-            if header_printed == false {
-                fmt.println("");
-                fmt.println("////////////////////////////");
-                fmt.println("/// NEEDS OVERLOADING!!!");
-                fmt.println("");
-                header_printed = true;
-            }
-
-            print_proc(p, v.longest_link_name, v.longest_proc_name);
-        }
-        fmt.println("}\n");
-    }
+    return result;
 }
 
-right_pad :: proc(text : string, max_length : int) {
-    if len(text) <= max_length {
-        for _ in len(text)..max_length-1 {
-            fmt.printf(" ");
+print_proc :: proc(fHandle : os.Handle, p : Foreign_Proc, longest_link_name : int, longest_proc_name : int) {
+    fmt.fprintf(fHandle, "\t@(link_name = \"%s\") ", p.link_name);
+    if len(p.link_name) <= longest_link_name {
+        for _ in len(p.link_name)..longest_link_name-1 do fmt.fprintf(fHandle, " ");
+    }
+
+    fmt.fprintf(fHandle, "%s ", right_pad(p.name, longest_proc_name - len(p.name)));
+
+    fmt.fprintf(fHandle, ":: proc(");
+    for a, i in p.args{
+        fmt.fprintf(fHandle, "%s", a);
+        if i < len(p.args)-1 {
+            fmt.fprintf(fHandle, ", ");
         }
     }
+
+    fmt.fprintf(fHandle, ") ");
+    if len(p.ret_type) > 0 {
+        fmt.fprintf(fHandle, "-> %s ", p.ret_type);
+    }
+    fmt.fprintln(fHandle, "---;");
 }
 
-convert_type :: proc(b : ^strings.Builder, field_name : string, c_type : string, size : i64) {
+convert_type :: proc(b : ^strings.Builder, field_name : string, c_type : string, size : i64) -> bool {
     type := "ERROR!";
     skip_ptr := false;
+    base := false;
 
     switch c_type {
         case "void*", "const void*" : {
             type = "rawptr";
             skip_ptr = true;
+            base = true;
         }
         case "const char*" : {
             type = "cstring";
             skip_ptr = true;
+            base = true;
         }
         case: {
             if pre, ok := predefined_type_by_name[field_name]; ok {
                 type = pre;
+                base = true;
+                break;
+            }
+
+            if pre, ok := predefined_base_type_by_type[clean_const_ref_ptr(c_type)]; ok {
+                type = pre;
+                base = true;
                 break;
             }
             
 
-            if pre, ok := predefined_type_by_type[c_type]; ok {
+            if pre, ok := predefined_type_by_type[clean_const_ref_ptr(c_type)]; ok {
                 type = pre;
+                base = true;
                 break;
             }
 
@@ -373,9 +421,11 @@ convert_type :: proc(b : ^strings.Builder, field_name : string, c_type : string,
     }
 
     strings.write_string(b, type);
+
+    return base;
 }
 
-print_structs :: proc(structs : json.Object) {
+output_structs :: proc(fHandle : os.Handle, structs : json.Object) {
 
     Struct_Definiton :: struct {
         name : string,
@@ -384,8 +434,9 @@ print_structs :: proc(structs : json.Object) {
     };
 
     Struct_Field :: struct {
-        name : string,
-        type : string,
+        name    : string,
+        type    : string,
+        is_base : bool
     };
 
     definitions : [dynamic]Struct_Definiton;
@@ -399,9 +450,9 @@ print_structs :: proc(structs : json.Object) {
         return clean_array_brackets(arg["name"].value.(json.String), has_size);
     }
 
-    get_arg_type :: proc(b : ^strings.Builder, arg_name : string, arg : json.Object, size : i64) {
+    get_arg_type :: proc(b : ^strings.Builder, arg_name : string, arg : json.Object, size : i64) -> bool {
         c_type := arg["type"].value.(json.String);
-        convert_type(b, arg_name, c_type, size);
+        return convert_type(b, arg_name, c_type, size);
     }
 
     for k, v in structs {
@@ -417,9 +468,9 @@ print_structs :: proc(structs : json.Object) {
 
             size := get_arg_size(arg);
             arg_name := get_arg_name(arg, size > 0);
-            get_arg_type(&b, arg_name, arg, size);
+            is_base := get_arg_type(&b, arg_name, arg, size);
             
-            append(&def.fields, Struct_Field{ strings.clone(arg_name), strings.to_string(b) });
+            append(&def.fields, Struct_Field{ strings.clone(arg_name), strings.to_string(b), is_base});
         }
 
         def.longest_field_len = min(int);
@@ -431,49 +482,19 @@ print_structs :: proc(structs : json.Object) {
     }
 
     for def in definitions {
-        fmt.printf("%s :: struct {\n", def.name);
+        fmt.fprintf(fHandle, "%s :: struct {\n", to_ada_case(def.name));
 
         for f in def.fields {
-            fmt.printf("\t%s", f.name);
-            right_pad(f.name, def.longest_field_len);
-            fmt.printf(" : %s,\n", f.type);
+            fmt.fprintf(fHandle, "\t%s ", right_pad(f.name, def.longest_field_len - len(f.name)));
+            if f.is_base do fmt.fprintf(fHandle, ": %s,\n", f.type);
+            else do fmt.fprintf(fHandle, ": %s,\n", to_ada_case(f.type));
         }
 
-        fmt.println("};\n");
+        fmt.fprintln(fHandle, "};\n");
     }
 }
 
-clean_array_brackets :: proc(s : string, has_size : bool) -> string {
-    if has_size == false do return s;
-
-    result := s;
-    i := strings.index(s, "[");
-    if i > 0 {
-        result = result[:i];
-    }
-
-    return result;
-}
-
-clean_const_ref_ptr :: proc(s : string) -> string {
-    result := s;
-    if strings.has_prefix(s, "const") {
-        result = result[6:];
-    }
-
-    i := strings.index(result, "*");
-    if i > 0 {
-        result = result[:i];
-    }
-
-    if strings.has_suffix(s, "&") {
-        result = result[:len(result)-1];
-    }
-
-    return result;
-}
-
-print_enums :: proc(enums : json.Object) {
+output_enums :: proc(fHandle : os.Handle, enums : json.Object) {
     Enum_Defintion :: struct {
         name : string,
         fields : [dynamic]Enum_Field,
@@ -487,11 +508,11 @@ print_enums :: proc(enums : json.Object) {
 
     definitions : [dynamic]Enum_Defintion;
 
-    for k, v in enums {
+    for key, v in enums {
         def := Enum_Defintion{};
         arr := v.value.(json.Array);
 
-        def.name = clean_imgui_namespacing(k[:len(k)-1]);
+        def.name = clean_imgui_namespacing(key[:len(key)-1]);
 
         clean_field_val :: proc(name : string) -> string {
             cleaned := strings.trim_space(name);
@@ -547,25 +568,12 @@ print_enums :: proc(enums : json.Object) {
     }
 
     for def in definitions {
-        fmt.printf("%s :: enum i32 {\n", def.name);
+        fmt.fprintf(fHandle, "%s :: enum i32 {\n", to_ada_case(def.name));
             for x in def.fields {
-            fmt.printf("\t%s", x.name);
-            right_pad(x.name, def.longest_field_len);
-            fmt.printf(" = %s,\n", x.value);
+            fmt.fprintf(fHandle, "\t%s ", right_pad(x.name, def.longest_field_len - len(x.name)));
+            fmt.fprintf(fHandle, "= %s,\n", x.value);
         }
 
-        fmt.println("}\n");
+        fmt.fprintln(fHandle, "}\n");
     }
-}
-
-clean_imgui_namespacing :: proc(s : string) -> string {
-    if strings.has_prefix(s, "Im") == true && strings.has_prefix(s, "Image") == false {
-        result := s[2:];
-        if strings.has_prefix(result, "Gui") == true {
-            result = result[3:];
-        }
-        return result;
-    }
-
-    return s;
 }
