@@ -1,0 +1,43 @@
+{
+	"folders":
+	[
+		{
+			"path": "."
+		}
+	],
+    "build_systems":
+    [
+        {
+            "name": "Project",
+            "working_dir": "${project_path:${folder}}",
+            "file_regex": "(.*)[(]([0-9]+)[:]([0-9]+)*[)](.*)",
+            "selector": "source.odin",
+            "quiet": true,
+
+            "shell_cmd": "make",
+
+            "variants": [
+                {
+                    "name": "Build",
+                    "shell_cmd": "make build",
+                },
+                {
+                    "name": "Run",
+                    "shell_cmd": "make generate",
+                },
+                {
+                    "name": "Dist",
+                    "shell_cmd": "make dist",
+                },
+                {
+                    "name": "Clean",
+                    "shell_cmd": "make clean",
+                },
+                {
+                    "name": "cimgui",
+                    "shell_cmd": "make clean",
+                },
+            ]
+        },
+    ]
+}
