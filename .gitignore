@@ -1,6 +1,6 @@
-cimgui.*
-cimgui_debug.*
 external/*
-x64-binaries
+dist/*
+output/*
+
 *.exe
 *.json

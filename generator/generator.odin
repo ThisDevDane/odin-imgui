@@ -23,6 +23,30 @@ Foreign_Proc :: struct {
     var_args  : bool,
 };
 
+Enum_Defintion :: struct {
+        name : string,
+        fields : [dynamic]Enum_Field,
+        longest_field_len : int,
+    };
+    
+Enum_Field :: struct {
+    name  : string,
+    value : string,
+};
+
+Struct_Definiton :: struct {
+    name : string,
+    fields : [dynamic]Struct_Field,
+    longest_field_len : int,
+};
+
+Struct_Field :: struct {
+    name    : string,
+    type    : string,
+    is_base : bool
+};
+
+
 main :: proc() {
     logger_opts := log.Options {
         .Level,
@@ -31,18 +55,21 @@ main :: proc() {
         .Procedure,
     };
     context.logger = log.create_console_logger(opt = logger_opts, ident = "Generator");
+    
     {
         data, _ := os.read_entire_file("test.json");
         value, err := json.parse(data);
 
+        fmt.println("Generating structs & enums...");
         if err == json.Error.None {
-            fHandle, fErr := os.open("../output/imgui_structs_enums.odin", os.O_WRONLY|os.O_CREATE|os.O_TRUNC);
-            fmt.fprintf(fHandle, "package imgui;\n\n");
-
+            fHandle, fErr := os.open("./output/imgui_structs_enums.odin", os.O_WRONLY|os.O_CREATE|os.O_TRUNC);
+            
             if fErr != os.ERROR_NONE {
-                fmt.println("Couldn't create/open file for output!", fErr);
-                return;
+                fmt.println("Couldn't create/open file for output!", fErr);                
+                os.exit(1);
             }
+
+            fmt.fprintf(fHandle, "package imgui;\n\n");
 
             obj := value.value.(json.Object);
 
@@ -54,14 +81,21 @@ main :: proc() {
 
         } else {
             fmt.eprintln("Error in json!", err);
+            os.exit(1);
         }
     }
     {
         data, _ := os.read_entire_file("test2.json");
         value, err := json.parse(data);
 
+        fmt.println("Generating procs...");
+
         if err == json.Error.None {
-            fHandle, fErr := os.open("../output/imgui_procs.odin", os.O_WRONLY|os.O_CREATE|os.O_TRUNC);
+            fHandle, fErr := os.open("./output/imgui_procs.odin", os.O_WRONLY|os.O_CREATE|os.O_TRUNC);
+            if fErr != os.ERROR_NONE {
+                fmt.println("Couldn't create/open file for output!", fErr);
+                os.exit(1);
+            }
             fmt.fprintf(fHandle, "package imgui;\n\n");
 
             fmt.fprint(fHandle, "when ODIN_DEBUG {\n");
@@ -104,11 +138,12 @@ main :: proc() {
 
         } else {
             fmt.eprintln("Error in json!", err);
+            os.exit(1);
         }
     }
     {
-        text_bytes, _ := os.read_entire_file("../imgui_predefined.odin");
-        os.write_entire_file("../output/imgui_predefined.odin", text_bytes);
+        text_bytes, _ := os.read_entire_file("imgui_predefined.odin");
+        os.write_entire_file("./output/imgui_predefined.odin", text_bytes);
     }
 }
 
@@ -426,19 +461,6 @@ convert_type :: proc(b : ^strings.Builder, field_name : string, c_type : string,
 }
 
 output_structs :: proc(fHandle : os.Handle, structs : json.Object) {
-
-    Struct_Definiton :: struct {
-        name : string,
-        fields : [dynamic]Struct_Field,
-        longest_field_len : int,
-    };
-
-    Struct_Field :: struct {
-        name    : string,
-        type    : string,
-        is_base : bool
-    };
-
     definitions : [dynamic]Struct_Definiton;
 
     get_arg_size :: proc(arg : json.Object) -> i64 {
@@ -495,17 +517,6 @@ output_structs :: proc(fHandle : os.Handle, structs : json.Object) {
 }
 
 output_enums :: proc(fHandle : os.Handle, enums : json.Object) {
-    Enum_Defintion :: struct {
-        name : string,
-        fields : [dynamic]Enum_Field,
-        longest_field_len : int,
-    };
-    
-    Enum_Field :: struct {
-        name  : string,
-        value : string,
-    };
-
     definitions : [dynamic]Enum_Defintion;
 
     for key, v in enums {
