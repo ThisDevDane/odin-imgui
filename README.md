@@ -1,6 +1,6 @@
 # odin-imgui
 ![scrshot](https://i.imgur.com/nOA6iSl.png)
-This is a (work in progress) wrapper for [dear imgui v1.64](https://github.com/ocornut/imgui) (based on the auto-generated [cimgui](https://github.com/sonoro1234/cimgui.git)).
+This is a (work in progress) wrapper for [dear imgui v1.74](https://github.com/ocornut/imgui) (based on the auto-generated [cimgui](https://github.com/cimgui/cimgui.git)).
 
 You can download the latest release with pre-built cimgui binaries [here.](https://github.com/ThisDrunkDane/odin-dear_imgui/releases/latest)
 

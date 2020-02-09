@@ -23,6 +23,11 @@ Foreign_Proc :: struct {
     var_args  : bool,
 };
 
+Foreign_Proc_Argument :: struct {
+    name      : string,
+    type      : string
+}
+
 Enum_Defintion :: struct {
         name : string,
         fields : [dynamic]Enum_Field,
@@ -57,15 +62,15 @@ main :: proc() {
     context.logger = log.create_console_logger(opt = logger_opts, ident = "Generator");
     
     {
-        data, _ := os.read_entire_file("test.json");
+        data, _ := os.read_entire_file("./cimgui/generator/output/structs_and_enums.json");
         value, err := json.parse(data);
 
-        fmt.println("Generating structs & enums...");
+        log.info("Generating structs & enums...");
         if err == json.Error.None {
             fHandle, fErr := os.open("./output/imgui_structs_enums.odin", os.O_WRONLY|os.O_CREATE|os.O_TRUNC);
             
             if fErr != os.ERROR_NONE {
-                fmt.println("Couldn't create/open file for output!", fErr);                
+                log.error("Couldn't create/open file for output! %v", fErr);                
                 os.exit(1);
             }
 
@@ -80,20 +85,20 @@ main :: proc() {
             output_structs(fHandle, structs);
 
         } else {
-            fmt.eprintln("Error in json!", err);
+            log.error("Error in json! %v", err);
             os.exit(1);
         }
     }
     {
-        data, _ := os.read_entire_file("test2.json");
+        data, _ := os.read_entire_file("./cimgui/generator/output/definitions.json");
         value, err := json.parse(data);
 
-        fmt.println("Generating procs...");
+        log.info("Generating procs...");
 
         if err == json.Error.None {
             fHandle, fErr := os.open("./output/imgui_procs.odin", os.O_WRONLY|os.O_CREATE|os.O_TRUNC);
             if fErr != os.ERROR_NONE {
-                fmt.println("Couldn't create/open file for output!", fErr);
+                log.error("Couldn't create/open file for output! %v", fErr);
                 os.exit(1);
             }
             fmt.fprintf(fHandle, "package imgui;\n\n");
@@ -131,13 +136,18 @@ main :: proc() {
                         header_printed = true;
                     }
 
-                    print_proc(fHandle, p, v.longest_link_name, v.longest_proc_name);
+                    if try_generate_wrapper(fHandle, p, v.longest_link_name, v.longest_proc_name) == false {
+                        log.warn("WRAPPER MISSING: %s", p.name);
+                        print_proc(fHandle, p, v.longest_link_name, v.longest_proc_name);
+                    }
+
+
                 }
                 fmt.fprintln(fHandle, "}\n");
             }
 
         } else {
-            fmt.eprintln("Error in json!", err);
+            log.error("Error in json! %v", err);
             os.exit(1);
         }
     }
@@ -377,6 +387,10 @@ gather_procedures :: proc(obj : json.Object) -> []Foreign_Group {
     }
 
     return result;
+}
+
+try_generate_wrapper :: proc(fHandle : os.Handle, p : Foreign_Proc, longest_link_name : int, longest_proc_name : int) -> bool {
+    return false;
 }
 
 print_proc :: proc(fHandle : os.Handle, p : Foreign_Proc, longest_link_name : int, longest_proc_name : int) {
