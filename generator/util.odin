@@ -14,7 +14,7 @@ right_pad :: proc(text : string, pad_size : int) -> string {
     return strings.to_string(b);
 }
 
-clean_array_brackets :: proc(s : string, has_size : bool) -> string {
+clean_array_brackets :: proc(s : string, has_size := true) -> string {
     if has_size == false do return s;
 
     result := s;

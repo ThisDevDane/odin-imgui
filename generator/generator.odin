@@ -19,13 +19,17 @@ Foreign_Proc :: struct {
     link_name : string,
     name      : string,
     args      : [dynamic]string,
+    arguments : [dynamic]Foreign_Proc_Argument,
     ret_type  : string,
     var_args  : bool,
 };
 
 Foreign_Proc_Argument :: struct {
-    name      : string,
-    type      : string
+    name             : string,
+    type             : string,
+    var_arg          : bool,
+    default_value    : string,
+    default_inferred : bool,
 }
 
 Enum_Defintion :: struct {
@@ -111,37 +115,34 @@ main :: proc() {
 
             obj := value.value.(json.Object);
 
-            groups := gather_procedures(obj);
+            groups := gather_procedures_v2(obj);
 
             for v in groups {
                 fmt.fprintln(fHandle, "@(default_calling_convention=\"c\")");
                 fmt.fprintln(fHandle, "foreign cimgui {");
+
                 for p in v.procs {
-                    if strings.has_prefix(p.name, "ig") == true do continue;
+                    if strings.has_prefix(p.name, "ig") {
+
+                        sb := strings.make_builder();
+                        if try_generate_wrapper(&sb, p, v.longest_link_name, v.longest_proc_name) == false {
+                            log.warn("WRAPPER MISSING: ", p.name);
+                        } else {
+                            fmt.fprint(fHandle, strings.to_string(sb));
+                        }
+                        strings.reset_builder(&sb);
+                        continue;
+                    }
+                    
                     print_proc(fHandle, p, v.longest_link_name, v.longest_proc_name);
                 }
 
-                
+                fmt.fprintln(fHandle, "");
+                fmt.fprintln(fHandle, "");
 
-                header_printed := false;
                 for p in v.procs {
                     if strings.has_prefix(p.name, "ig") == false do continue;
-
-                    if header_printed == false {
-                        fmt.fprintln(fHandle, "");
-                        fmt.fprintln(fHandle, "////////////////////////////");
-                        fmt.fprintln(fHandle, "/// NEEDS OVERLOADING!!!");
-                        fmt.fprintln(fHandle, "////////////////////////////");
-                        fmt.fprintln(fHandle, "");
-                        header_printed = true;
-                    }
-
-                    if try_generate_wrapper(fHandle, p, v.longest_link_name, v.longest_proc_name) == false {
-                        log.warn("WRAPPER MISSING: %s", p.name);
-                        print_proc(fHandle, p, v.longest_link_name, v.longest_proc_name);
-                    }
-
-
+                    print_proc(fHandle, p, v.longest_link_name, v.longest_proc_name);
                 }
                 fmt.fprintln(fHandle, "}\n");
             }
@@ -155,6 +156,247 @@ main :: proc() {
         text_bytes, _ := os.read_entire_file("imgui_predefined.odin");
         os.write_entire_file("./output/imgui_predefined.odin", text_bytes);
     }
+}
+
+gather_procedures_v2 :: proc(obj : json.Object) -> []Foreign_Group {
+    groups : map[string]^Foreign_Group;
+
+    count_overloads :: proc(overloads: json.Array) -> int {
+        res := 0;
+        for x in overloads {
+            overload := x.value.(json.Object);
+            if _, has_nonUDT := overload["nonUDT"]; has_nonUDT == false {
+                res += 1;
+            }
+        }
+        return res;
+    }
+
+    add_to_group :: proc(groups : ^map[string]^Foreign_Group, group_name : string, fproc : Foreign_Proc) {
+        if group, ok := groups[group_name]; ok {
+            group.longest_link_name = max(group.longest_link_name, len(fproc.link_name));
+            group.longest_proc_name = max(group.longest_proc_name, len(fproc.name));
+
+            append(&group.procs, fproc);                
+        } else {
+            group := new(Foreign_Group);
+            group.name = group_name;
+            group.longest_link_name = len(fproc.link_name);
+            group.longest_proc_name = len(fproc.name);
+
+            append(&group.procs, fproc);
+            groups[group_name] = group;
+        }
+    }
+
+    for def_key, def_val in obj {
+        overloads := def_val.value.(json.Array);
+        overload_count := count_overloads(overloads); // TODO(Hoej): Setup overload groups for this
+
+        overloads_label: for x in overloads {
+            res := Foreign_Proc{};
+            overload := x.value.(json.Object);
+
+            if should_overload_be_skipped(overload) do continue;
+
+            res.link_name = get_overload_link_name(overload);
+
+            arguments := overload["argsT"].value.(json.Array);
+            for a in arguments {
+                argument := a.value.(json.Object);
+                defaults, has_defaults := overload["defaults"].value.(json.Object);
+                if arg, skip := get_overload_argument(argument, has_defaults ? &defaults : nil); skip == false {
+                    append(&res.arguments, arg);
+                }
+            }
+
+            res.name = get_overload_name(overload, 
+                                         res.link_name, 
+                                         len(res.arguments) > 0 ? &res.arguments[0] : nil);
+
+            res.ret_type = get_overload_return_type(overload);
+
+            group_name := clean_imgui_namespacing(overload["stname"].value.(json.String));
+            add_to_group(&groups, group_name, res);
+        }
+    }
+
+    result := make([]Foreign_Group, len(groups));
+    idx := 0;
+    for _, v in groups {
+        result[idx] = v^;
+        idx += 1;
+    }
+
+    return result;
+}
+
+get_overload_return_type :: proc(overload : json.Object) -> string {
+    ret, has_ret := overload["ret"].value.(json.String);
+    if has_ret == true && ret != "void" {
+        b := strings.make_builder();
+        is_base := convert_type(&b, "", ret, 0);
+        if is_base do return strings.to_string(b);
+        else do return to_ada_case(strings.to_string(b));
+    }
+
+    return "";
+}
+
+get_overload_name :: proc(overload : json.Object, link_name : string, first_arg : ^Foreign_Proc_Argument) -> string {
+    if pre, has_predefind := proc_name_by_link_name[link_name]; has_predefind {
+        return pre;
+    }
+
+    proc_name, has_funcname := overload["funcname"].value.(json.String);
+    if has_funcname == false {
+        return to_snake_case(link_name);
+    }
+
+    if first_arg != nil && (first_arg.name == "label" || 
+                            first_arg.name == "str_id" || 
+                            first_arg.name == "prefix" || 
+                            first_arg.name == "name") {
+        return to_snake_case(link_name);
+    }
+
+    sb := strings.make_builder();
+    proc_name = clean_imgui_namespacing(proc_name);
+
+    if stname_v, has_stname := overload["stname"]; has_stname {
+        stname := stname_v.value.(json.String);
+        if(len(stname) > 0) {
+            type_name := clean_imgui_namespacing(stname);
+            strings.write_string(&sb, type_name);
+            strings.write_rune(&sb, '_');
+        }
+    }
+    
+    strings.write_string(&sb, proc_name);
+    return to_snake_case(strings.to_string(sb));
+}
+
+get_overload_argument :: proc(argument : json.Object, defaults : ^json.Object) -> (Foreign_Proc_Argument, bool) {
+    original_type := argument["type"].value.(json.String);
+    if original_type == "va_list" do return Foreign_Proc_Argument{}, true;
+
+    arg := Foreign_Proc_Argument{};
+
+    arg.name = get_out_overload_argument_name(argument);
+    if arg.name == "..." {
+        arg.name = "args";
+        arg.var_arg = true;
+        arg.type = "any";
+        return arg, false;
+    }
+
+    sb := strings.make_builder();
+    get_arg_size :: proc(arg : json.Object) -> i64 {
+        v, ok := arg["size"];
+        return ok ? v.value.(json.Integer) : 0;
+    }
+    is_base_type := convert_type(&sb, arg.name, original_type, get_arg_size(argument));
+    if is_base_type {
+        arg.type = strings.clone(strings.to_string(sb));
+    } else {
+        arg.type = to_ada_case(strings.clone(strings.to_string(sb)));
+    }
+
+    strings.reset_builder(&sb);
+    _, inferred := get_overload_arugment_default(&sb, argument["name"].value.(json.String), defaults);
+    arg.default_value = strings.clone(strings.to_string(sb));
+    arg.default_inferred = inferred;
+
+    return arg, false;
+}
+
+get_overload_arugment_default :: proc(b : ^strings.Builder, c_name : string, defaults : ^json.Object) -> (found: bool, inferred : bool) {
+    if defaults == nil do return;
+
+    inferred = false;
+    found = false;
+
+    default_v, name_has_default := defaults[c_name];
+    if name_has_default == false do return; 
+
+    found = true;
+    
+    c_val := default_v.value.(json.String);
+    val := "ERROR";
+    
+    if pre, has_predefind := predefined_defaults_by_value[c_val]; has_predefind {
+        val = pre;
+    } else if c_val == "FLT_MAX" {
+        val = "max(f32)";
+        inferred = true;
+    } else if c_val == "sizeof(float)" {
+        val = "size_of(f32)";
+        inferred = true;
+    } else if c_val == "((void*)0)" {
+        val = "nil";
+    } else {
+        val = clean_imgui_namespacing(c_val);
+    
+        if utf8.rune_at_pos(val, 0) != '(' {
+            replaced_left, replaced_right : bool;
+            val, replaced_left = strings.replace_all(val, "(", "{");
+            val, replaced_right = strings.replace_all(val, ")", "}");
+            inferred = replaced_left || replaced_right;
+        }
+
+        if strings.has_suffix(val, "f") do val = strings.trim_right(val, "f");
+    }
+    
+    strings.write_string(b, val);
+    return;
+}
+
+get_out_overload_argument_name :: proc(argument : json.Object) -> string {
+    name := argument["name"].value.(json.String);
+
+    if name == "..." do return name;
+
+    size, has_size := argument["size"];
+    if has_size {
+        name = clean_array_brackets(name);
+
+        switch name {
+            case "in":  name = "in_";
+            case "fmt": name = "format";
+        }
+    }
+
+    return name;
+}
+
+get_overload_link_name :: proc(overload : json.Object) -> string {
+    link_name := overload["cimguiname"].value.(json.String);
+    if v, ok := overload["ov_cimguiname"]; ok {
+        link_name = v.value.(json.String);
+    }
+    return link_name;
+}
+
+should_overload_be_skipped :: proc(overload : json.Object) -> bool {
+    if _, has_nonUDT := overload["nonUDT"]; has_nonUDT do return true;
+
+    stname_v, has_stname := overload["stname"]; 
+    if has_stname {
+        stname := stname_v.value.(json.String);
+        if stname == "ImVector" do return true;
+    }
+
+    if _, is_ctor := overload["constructor"]; is_ctor do return true;
+    if _, is_ctor := overload["destructor"]; is_ctor do return true;
+
+    arguments := overload["argsT"].value.(json.Array);
+    for a in arguments {
+        argument := a.value.(json.Object);
+        type := argument["type"].value.(json.String);
+        if type == "va_list" do return true;
+    }
+
+    return false;
 }
 
 gather_procedures :: proc(obj : json.Object) -> []Foreign_Group {
@@ -211,21 +453,6 @@ gather_procedures :: proc(obj : json.Object) -> []Foreign_Group {
         
         strings.write_string(b, val);
         return;
-    }
-
-    should_skip :: proc(overload : json.Object) -> bool {
-        if _, has_nonUDT := overload["nonUDT"]; has_nonUDT do return true;
-
-        stname_v, has_stname := overload["stname"]; 
-        if has_stname {
-            stname := stname_v.value.(json.String);
-            if stname == "ImVector" do return true;
-        }
-
-        if _, is_ctor := overload["constructor"]; is_ctor do return true;
-        if _, is_ctor := overload["destructor"]; is_ctor do return true;
-
-        return false;
     }
 
     set_ctor_name :: proc(first_arg : ^json.Object) -> string {
@@ -304,7 +531,7 @@ gather_procedures :: proc(obj : json.Object) -> []Foreign_Group {
             res := Foreign_Proc{};
             overload := x.value.(json.Object);
 
-            if should_skip(overload) do continue;
+            if should_overload_be_skipped(overload) do continue;
 
             res.link_name = strings.clone(get_link_name(overload));
 
@@ -389,8 +616,57 @@ gather_procedures :: proc(obj : json.Object) -> []Foreign_Group {
     return result;
 }
 
-try_generate_wrapper :: proc(fHandle : os.Handle, p : Foreign_Proc, longest_link_name : int, longest_proc_name : int) -> bool {
-    return false;
+try_generate_wrapper :: proc(sb : ^strings.Builder, p : Foreign_Proc, longest_link_name : int, longest_proc_name : int) -> bool {
+    if len(p.arguments) <= 0 do return false;
+
+    first_arg := p.arguments[0];
+
+    if first_arg.type != "cstring" do return false;
+    if(first_arg.name != "label" &&
+       first_arg.name != "str_id" && 
+       first_arg.name != "prefix" && 
+       first_arg.name != "name") {
+        return false;    
+    } 
+
+    fmt.sbprint(sb, "\t");
+
+    longest_link_name := longest_link_name + len(p.link_name) + len("@(link_name = \"\")");
+
+    if len(p.link_name) <= longest_link_name {
+        for _ in len(p.link_name)..longest_link_name-1 do fmt.sbprint(sb, " ");
+    }
+
+
+    fmt.sbprintf(sb, "\t%s :: proc(", right_pad(p.name[3:], longest_proc_name - len(p.name[3:])));
+
+    fmt.sbprintf(sb, "%s : string", first_arg.name);
+    if len(p.arguments) > 1 do fmt.sbprint(sb, ", ");
+
+    print_procedure_arguments(sb, p.arguments[1:]);
+    fmt.sbprint(sb, ")");
+    if len(p.ret_type) > 0 do fmt.sbprintf(sb, " -> %s", p.ret_type);
+    fmt.sbprint(sb, " do ");
+
+    fmt.sbprintf(sb, "return %s(", p.name);
+    fmt.sbprintf(sb, "_make_label_string(%s)", first_arg.name);
+    print_call_arguments(sb, p.arguments[1:]);
+
+    fmt.sbprint(sb, ");\n");
+
+    print_call_arguments :: proc(sb : ^strings.Builder, arguments : []Foreign_Proc_Argument) {
+        if len(arguments) > 0 {
+            fmt.sbprint(sb, ", ");
+            for arg, idx in arguments {
+                fmt.sbprint(sb, arg.name);
+                if idx < len(arguments)-1 {
+                    fmt.sbprintf(sb, ", ");
+                }
+            }
+        }
+    }
+
+    return true;
 }
 
 print_proc :: proc(fHandle : os.Handle, p : Foreign_Proc, longest_link_name : int, longest_proc_name : int) {
@@ -402,18 +678,37 @@ print_proc :: proc(fHandle : os.Handle, p : Foreign_Proc, longest_link_name : in
     fmt.fprintf(fHandle, "%s ", right_pad(p.name, longest_proc_name - len(p.name)));
 
     fmt.fprintf(fHandle, ":: proc(");
-    for a, i in p.args{
-        fmt.fprintf(fHandle, "%s", a);
-        if i < len(p.args)-1 {
-            fmt.fprintf(fHandle, ", ");
-        }
-    }
-
+    sb := strings.make_builder();
+    print_procedure_arguments(&sb, p.arguments[:]);
+    fmt.fprint(fHandle, strings.to_string(sb));
     fmt.fprintf(fHandle, ") ");
     if len(p.ret_type) > 0 {
         fmt.fprintf(fHandle, "-> %s ", p.ret_type);
     }
     fmt.fprintln(fHandle, "---;");
+}
+
+print_procedure_arguments :: proc(sb : ^strings.Builder, arguments : []Foreign_Proc_Argument) {
+    for a, i in arguments {
+        if a.var_arg == false {
+            fmt.sbprintf(sb, "%s", a.name);
+            if a.default_inferred == false do fmt.sbprintf(sb, " : %s", a.type);
+
+            if len(a.default_value) > 0 {
+                if a.default_inferred {
+                    fmt.sbprintf(sb, " := %s", a.default_value);
+                } else {
+                    fmt.sbprintf(sb, " = %s", a.default_value);
+                }
+            }
+
+            if i < len(arguments)-1 {
+                fmt.sbprintf(sb, ", ");
+            }
+        } else {
+            fmt.sbprintf(sb, "#c_vararg %s : ..%s", a.name, a.type);
+        }
+    }
 }
 
 convert_type :: proc(b : ^strings.Builder, field_name : string, c_type : string, size : i64) -> bool {
@@ -456,7 +751,7 @@ convert_type :: proc(b : ^strings.Builder, field_name : string, c_type : string,
         }
     }
 
-    if size > 0 do strings.write_string(b, fmt.tprintf("[%d]", size));
+    if size > 0 do fmt.sbprintf(b, "[%d]", size);
     if skip_ptr == false {
         if strings.has_suffix(c_type, "*") {
             for _ in 0..strings.count(c_type, "*")-1 {

@@ -18,12 +18,15 @@ CIMGUI_OBJS=cimgui.obj imgui.obj imgui_draw.obj imgui_demo.obj imgui_widgets.obj
 CIMGUI_FLAGS = /c /nologo /DCIMGUI_NO_EXPORT
 CIMGUI_LIB_ARCHIVE = $(DIST_DIR)/cimgui-binaries.zip
 
-build:
-	$(OC) build $(GENERATOR_SRC) $(FLAGS)
+build_debug:
+	$(OC) build $(GENERATOR_SRC) $(FLAGS) -debug
 
-all: cimgui build
+build_prod:
+	$(OC) build $(GENERATOR_SRC) $(FLAGS) -opt=3
 
-generate: build
+all: cimgui build_prod
+
+generate: build_debug
 	@mkdir -p $(ODIN_OUTPUT_DIR)
 	$(GENERATOR_NAME)
 
@@ -35,6 +38,7 @@ clean:
 	rm -rf $(ODIN_OUTPUT_DIR)
 	rm -rf $(GENERATOR_NAME)
 	rm -rf $(EXTERNAL_LIB_DIR)
+	rm -rf $(DIST_DIR)
 
 cimgui:
 	@mkdir -p $(EXTERNAL_LIB_DIR)
