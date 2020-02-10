@@ -1,7 +1,9 @@
 external/*
 dist/*
 output/*
+.vs/*
 
 *.exe
 *.json
 *.sublime-workspace
+*.pdb
