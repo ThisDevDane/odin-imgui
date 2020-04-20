@@ -1,7 +1,7 @@
 package imgui;
 
-Draw_Corner_Flags :: enum i32 {
-	None     = 0,
+Draw_Corner_Flags :: enum i32 %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	None     = 0,
 	TopLeft  = 1 << 0,
 	TopRight = 1 << 1,
 	BotLeft  = 1 << 2,
@@ -13,29 +13,29 @@ Draw_Corner_Flags :: enum i32 {
 	All      = 0xF,
 }
 
-Draw_List_Flags :: enum i32 {
-	None             = 0,
+Draw_List_Flags :: enum i32 %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	None             = 0,
 	AntiAliasedLines = 1 << 0,
 	AntiAliasedFill  = 1 << 1,
 	AllowVtxOffset   = 1 << 2,
 }
 
-Font_Atlas_Flags :: enum i32 {
-	None               = 0,
+Font_Atlas_Flags :: enum i32 %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	None               = 0,
 	NoPowerOfTwoHeight = 1 << 0,
 	NoMouseCursors     = 1 << 1,
 }
 
-Backend_Flags :: enum i32 {
-	None                 = 0,
+Backend_Flags :: enum i32 %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	None                 = 0,
 	HasGamepad           = 1 << 0,
 	HasMouseCursors      = 1 << 1,
 	HasSetMousePos       = 1 << 2,
 	RendererHasVtxOffset = 1 << 3,
 }
 
-Col :: enum i32 {
-	Text                  = 0,
+Col :: enum i32 %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	Text                  = 0,
 	TextDisabled          = 1,
 	WindowBg              = 2,
 	ChildBg               = 3,
@@ -86,8 +86,8 @@ Col :: enum i32 {
 	COUNT                 = 48,
 }
 
-Color_Edit_Flags :: enum i32 {
-	None             = 0,
+Color_Edit_Flags :: enum i32 %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	None             = 0,
 	NoAlpha          = 1 << 1,
 	NoPicker         = 1 << 2,
 	NoOptions        = 1 << 3,
@@ -117,8 +117,8 @@ Color_Edit_Flags :: enum i32 {
 	InputMask        = InputRGB | InputHSV,
 }
 
-Combo_Flags :: enum i32 {
-	None           = 0,
+Combo_Flags :: enum i32 %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	None           = 0,
 	PopupAlignLeft = 1 << 0,
 	HeightSmall    = 1 << 1,
 	HeightRegular  = 1 << 2,
@@ -129,15 +129,15 @@ Combo_Flags :: enum i32 {
 	HeightMask     = HeightSmall | HeightRegular | HeightLarge | HeightLargest,
 }
 
-Cond :: enum i32 {
-	Always       = 1 << 0,
+Cond :: enum i32 %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	Always       = 1 << 0,
 	Once         = 1 << 1,
 	FirstUseEver = 1 << 2,
 	Appearing    = 1 << 3,
 }
 
-Config_Flags :: enum i32 {
-	None                 = 0,
+Config_Flags :: enum i32 %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	None                 = 0,
 	NavEnableKeyboard    = 1 << 0,
 	NavEnableGamepad     = 1 << 1,
 	NavEnableSetMousePos = 1 << 2,
@@ -148,8 +148,8 @@ Config_Flags :: enum i32 {
 	IsTouchScreen        = 1 << 21,
 }
 
-Data_Type :: enum i32 {
-	S8     = 0,
+Data_Type :: enum i32 %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	S8     = 0,
 	U8     = 1,
 	S16    = 2,
 	U16    = 3,
@@ -162,8 +162,8 @@ Data_Type :: enum i32 {
 	COUNT  = 10,
 }
 
-Dir :: enum i32 {
-	None  = -1,
+Dir :: enum i32 %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	None  = -1,
 	Left  = 0,
 	Right = 1,
 	Up    = 2,
@@ -171,8 +171,8 @@ Dir :: enum i32 {
 	COUNT = 4,
 }
 
-Drag_Drop_Flags :: enum i32 {
-	None                     = 0,
+Drag_Drop_Flags :: enum i32 %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	None                     = 0,
 	SourceNoPreviewTooltip   = 1 << 0,
 	SourceNoDisableHover     = 1 << 1,
 	SourceNoHoldToOpenOthers = 1 << 2,
@@ -185,16 +185,16 @@ Drag_Drop_Flags :: enum i32 {
 	AcceptPeekOnly           = AcceptBeforeDelivery | AcceptNoDrawDefaultRect,
 }
 
-Focused_Flags :: enum i32 {
-	None                = 0,
+Focused_Flags :: enum i32 %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	None                = 0,
 	ChildWindows        = 1 << 0,
 	RootWindow          = 1 << 1,
 	AnyWindow           = 1 << 2,
 	RootAndChildWindows = RootWindow | ChildWindows,
 }
 
-Hovered_Flags :: enum i32 {
-	None                         = 0,
+Hovered_Flags :: enum i32 %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	None                         = 0,
 	ChildWindows                 = 1 << 0,
 	RootWindow                   = 1 << 1,
 	AnyWindow                    = 1 << 2,
@@ -206,8 +206,8 @@ Hovered_Flags :: enum i32 {
 	RootAndChildWindows          = RootWindow | ChildWindows,
 }
 
-Input_Text_Flags :: enum i32 {
-	None                = 0,
+Input_Text_Flags :: enum i32 %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	None                = 0,
 	CharsDecimal        = 1 << 0,
 	CharsHexadecimal    = 1 << 1,
 	CharsUppercase      = 1 << 2,
@@ -231,8 +231,8 @@ Input_Text_Flags :: enum i32 {
 	NoMarkEdited        = 1 << 21,
 }
 
-Key :: enum i32 {
-	Tab         = 0,
+Key :: enum i32 %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	Tab         = 0,
 	LeftArrow   = 1,
 	RightArrow  = 2,
 	UpArrow     = 3,
@@ -257,8 +257,8 @@ Key :: enum i32 {
 	COUNT       = 22,
 }
 
-Mouse_Cursor :: enum i32 {
-	None       = -1,
+Mouse_Cursor :: enum i32 %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	None       = -1,
 	Arrow      = 0,
 	TextInput  = 1,
 	ResizeAll  = 2,
@@ -270,8 +270,8 @@ Mouse_Cursor :: enum i32 {
 	COUNT      = 8,
 }
 
-Nav_Input :: enum i32 {
-	Activate      = 0,
+Nav_Input :: enum i32 %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	Activate      = 0,
 	Cancel        = 1,
 	Input         = 2,
 	Menu          = 3,
@@ -296,8 +296,8 @@ Nav_Input :: enum i32 {
 	InternalStart = KeyMenu,
 }
 
-Selectable_Flags :: enum i32 {
-	None             = 0,
+Selectable_Flags :: enum i32 %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	None             = 0,
 	DontClosePopups  = 1 << 0,
 	SpanAllColumns   = 1 << 1,
 	AllowDoubleClick = 1 << 2,
@@ -305,8 +305,8 @@ Selectable_Flags :: enum i32 {
 	AllowItemOverlap = 1 << 4,
 }
 
-Style_Var :: enum i32 {
-	Alpha               = 0,
+Style_Var :: enum i32 %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	Alpha               = 0,
 	WindowPadding       = 1,
 	WindowRounding      = 2,
 	WindowBorderSize    = 3,
@@ -332,8 +332,8 @@ Style_Var :: enum i32 {
 	COUNT               = 23,
 }
 
-Tab_Bar_Flags :: enum i32 {
-	None                         = 0,
+Tab_Bar_Flags :: enum i32 %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	None                         = 0,
 	Reorderable                  = 1 << 0,
 	AutoSelectNewTabs            = 1 << 1,
 	TabListPopupButton           = 1 << 2,
@@ -346,16 +346,16 @@ Tab_Bar_Flags :: enum i32 {
 	FittingPolicyDefault         = FittingPolicyResizeDown,
 }
 
-Tab_Item_Flags :: enum i32 {
-	None                         = 0,
+Tab_Item_Flags :: enum i32 %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	None                         = 0,
 	UnsavedDocument              = 1 << 0,
 	SetSelected                  = 1 << 1,
 	NoCloseWithMiddleMouseButton = 1 << 2,
 	NoPushId                     = 1 << 3,
 }
 
-Tree_Node_Flags :: enum i32 {
-	None                 = 0,
+Tree_Node_Flags :: enum i32 %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	None                 = 0,
 	Selected             = 1 << 0,
 	Framed               = 1 << 1,
 	AllowItemOverlap     = 1 << 2,
@@ -373,8 +373,8 @@ Tree_Node_Flags :: enum i32 {
 	CollapsingHeader     = Framed | NoTreePushOnOpen | NoAutoOpenOnLog,
 }
 
-Window_Flags :: enum i32 {
-	None                      = 0,
+Window_Flags :: enum i32 %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	None                      = 0,
 	NoTitleBar                = 1 << 0,
 	NoResize                  = 1 << 1,
 	NoMove                    = 1 << 2,
@@ -406,17 +406,17 @@ Window_Flags :: enum i32 {
 	ChildMenu                 = 1 << 28,
 }
 
-Color :: struct {
-	Value : Vec4,
+Color :: struct %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	Value : Vec4,
 };
 
-Draw_Channel :: struct {
-	_CmdBuffer : Im_Vector(Draw_Cmd),
+Draw_Channel :: struct %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	_CmdBuffer : Im_Vector(Draw_Cmd),
 	_IdxBuffer : Im_Vector(Draw_Idx),
 };
 
-Draw_Cmd :: struct {
-	ElemCount        : u32,
+Draw_Cmd :: struct %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	ElemCount        : u32,
 	ClipRect         : Vec4,
 	TextureId        : Texture_ID,
 	VtxOffset        : u32,
@@ -425,8 +425,8 @@ Draw_Cmd :: struct {
 	UserCallbackData : rawptr,
 };
 
-Draw_Data :: struct {
-	Valid            : bool,
+Draw_Data :: struct %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	Valid            : bool,
 	CmdLists         : ^^Draw_List,
 	CmdListsCount    : i32,
 	TotalIdxCount    : i32,
@@ -436,8 +436,8 @@ Draw_Data :: struct {
 	FramebufferScale : Vec2,
 };
 
-Draw_List :: struct {
-	CmdBuffer         : Im_Vector(Draw_Cmd),
+Draw_List :: struct %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	CmdBuffer         : Im_Vector(Draw_Cmd),
 	IdxBuffer         : Im_Vector(Draw_Idx),
 	VtxBuffer         : Im_Vector(Draw_Vert),
 	Flags             : Draw_List_Flags,
@@ -453,20 +453,20 @@ Draw_List :: struct {
 	_Splitter         : Draw_List_Splitter,
 };
 
-Draw_List_Splitter :: struct {
-	_Current  : i32,
+Draw_List_Splitter :: struct %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	_Current  : i32,
 	_Count    : i32,
 	_Channels : Im_Vector(Draw_Channel),
 };
 
-Draw_Vert :: struct {
-	pos : Vec2,
+Draw_Vert :: struct %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	pos : Vec2,
 	uv  : Vec2,
 	col : u32,
 };
 
-Font :: struct {
-	IndexAdvanceX       : Im_Vector(f32),
+Font :: struct %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	IndexAdvanceX       : Im_Vector(f32),
 	FallbackAdvanceX    : f32,
 	FontSize            : f32,
 	IndexLookup         : Im_Vector(Wchar),
@@ -485,8 +485,8 @@ Font :: struct {
 	DirtyLookupTables   : bool,
 };
 
-Font_Atlas :: struct {
-	Locked          : bool,
+Font_Atlas :: struct %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	Locked          : bool,
 	Flags           : Font_Atlas_Flags,
 	TexID           : Texture_ID,
 	TexDesiredWidth : i32,
@@ -503,8 +503,8 @@ Font_Atlas :: struct {
 	CustomRectIds   : [1]i32,
 };
 
-Font_Atlas_Custom_Rect :: struct {
-	ID            : u32,
+Font_Atlas_Custom_Rect :: struct %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	ID            : u32,
 	Width         : u16,
 	Height        : u16,
 	X             : u16,
@@ -514,8 +514,8 @@ Font_Atlas_Custom_Rect :: struct {
 	Font          : ^Font,
 };
 
-Font_Config :: struct {
-	FontData             : rawptr,
+Font_Config :: struct %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	FontData             : rawptr,
 	FontDataSize         : i32,
 	FontDataOwnedByAtlas : bool,
 	FontNo               : i32,
@@ -536,8 +536,8 @@ Font_Config :: struct {
 	DstFont              : ^Font,
 };
 
-Font_Glyph :: struct {
-	Codepoint : Wchar,
+Font_Glyph :: struct %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	Codepoint : Wchar,
 	AdvanceX  : f32,
 	X0        : f32,
 	Y0        : f32,
@@ -549,12 +549,12 @@ Font_Glyph :: struct {
 	V1        : f32,
 };
 
-Font_Glyph_Ranges_Builder :: struct {
-	UsedChars : Im_Vector(u32),
+Font_Glyph_Ranges_Builder :: struct %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	UsedChars : Im_Vector(u32),
 };
 
-Io :: struct {
-	ConfigFlags                       : Config_Flags,
+Io :: struct %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	ConfigFlags                       : Config_Flags,
 	BackendFlags                      : Backend_Flags,
 	DisplaySize                       : Vec2,
 	DeltaTime                         : f32,
@@ -633,8 +633,8 @@ Io :: struct {
 	InputQueueCharacters              : Im_Vector(Wchar),
 };
 
-Input_Text_Callback_Data :: struct {
-	EventFlag      : Input_Text_Flags,
+Input_Text_Callback_Data :: struct %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	EventFlag      : Input_Text_Flags,
 	Flags          : Input_Text_Flags,
 	UserData       : rawptr,
 	EventChar      : Wchar,
@@ -648,8 +648,8 @@ Input_Text_Callback_Data :: struct {
 	SelectionEnd   : i32,
 };
 
-List_Clipper :: struct {
-	StartPosY    : f32,
+List_Clipper :: struct %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	StartPosY    : f32,
 	ItemsHeight  : f32,
 	ItemsCount   : i32,
 	StepNo       : i32,
@@ -657,12 +657,12 @@ List_Clipper :: struct {
 	DisplayEnd   : i32,
 };
 
-Once_Upon_a_Frame :: struct {
-	RefFrame : i32,
+Once_Upon_a_Frame :: struct %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	RefFrame : i32,
 };
 
-Payload :: struct {
-	Data           : rawptr,
+Payload :: struct %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	Data           : rawptr,
 	DataSize       : i32,
 	SourceId       : ID,
 	SourceParentId : ID,
@@ -672,19 +672,19 @@ Payload :: struct {
 	Delivery       : bool,
 };
 
-Size_Callback_Data :: struct {
-	UserData    : rawptr,
+Size_Callback_Data :: struct %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	UserData    : rawptr,
 	Pos         : Vec2,
 	CurrentSize : Vec2,
 	DesiredSize : Vec2,
 };
 
-Storage :: struct {
-	Data : Im_Vector(Storage_Pair),
+Storage :: struct %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	Data : Im_Vector(Storage_Pair),
 };
 
-Style :: struct {
-	Alpha                    : f32,
+Style :: struct %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	Alpha                    : f32,
 	WindowPadding            : Vec2,
 	WindowRounding           : f32,
 	WindowBorderSize         : f32,
@@ -721,18 +721,18 @@ Style :: struct {
 	Colors                   : [48]Vec4,
 };
 
-Text_Buffer :: struct {
-	Buf : Im_Vector(u8),
+Text_Buffer :: struct %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	Buf : Im_Vector(u8),
 };
 
-Text_Filter :: struct {
-	InputBuf  : [256]i8,
+Text_Filter :: struct %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	InputBuf  : [256]i8,
 	Filters   : Im_Vector(Text_Range),
 	CountGrep : i32,
 };
 
-Text_Range :: struct {
-	b : cstring,
+Text_Range :: struct %!(BAD ARGUMENT NUMBER 
+)%!(MISSING CLOSE BRACE)	b : cstring,
 	e : cstring,
 };
 

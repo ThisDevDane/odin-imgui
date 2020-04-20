@@ -7,6 +7,14 @@ import "core:strings";
 import "core:os";
 import "core:unicode/utf8";
 import "core:log";
+import "core:strconv";
+import "core:odin/ast"
+import "core:odin/tokenizer"
+import "core:odin/parser"
+
+PRINT_STRUCTS_AND_ENUMS :: true;
+PRINT_PROCEDURES :: true;
+PRINT_FOREIGN_PROCEDURES :: true;
 
 Foreign_Group :: struct {
     name : string,
@@ -32,6 +40,14 @@ Foreign_Proc_Argument :: struct {
     default_inferred : bool,
 }
 
+Proc_Wrapper :: struct {
+    link_name    : string,
+    name         : string, 
+    //wrapper_body : string,
+    fields       : []Foreign_Proc_Argument,
+    ret_type     : string,
+}
+
 Enum_Defintion :: struct {
         name : string,
         fields : [dynamic]Enum_Field,
@@ -55,7 +71,6 @@ Struct_Field :: struct {
     is_base : bool
 };
 
-
 main :: proc() {
     logger_opts := log.Options {
         .Level,
@@ -63,9 +78,43 @@ main :: proc() {
         .Line,
         .Procedure,
     };
-    context.logger = log.create_console_logger(opt = logger_opts, ident = "Generator");
-    
+    context.logger = log.create_console_logger(opt = logger_opts);
+
     {
+        log.info("Parsing predefined_imgui.odin...");
+        context.logger = log.create_console_logger(opt = logger_opts, ident = "Odin parser");
+        err_log : parser.Error_Handler : proc(pos: tokenizer.Pos, msg: string, args: ..any) {
+            log.errorf("%s(%d:%d): ", pos.file, pos.line, pos.column);
+            log.errorf(msg, ..args);
+        }
+
+        warn_log : parser.Warning_Handler : proc(pos: tokenizer.Pos, msg: string, args: ..any) {
+            log.warnf("%s(%d:%d): ", pos.file, pos.line, pos.column);
+            log.warnf(msg, ..args);
+        }
+
+
+        predefined_file := ast.File {
+            fullpath = "imgui_predefined.odin"
+        };
+        src, _ := os.read_entire_file(predefined_file.fullpath);
+        predefined_file.src = src;
+
+        p := parser.Parser {
+            err  = err_log,
+            warn = warn_log,
+        };
+
+        ok := parser.parse_file(&p, &predefined_file);
+        if ok == false || p.error_count > 0 {
+            log.error("FAILED TO PARSE 'predefined_imgui.odin'");
+            os.exit(1);
+        }
+
+        check_and_gather_predefined(predefined_file);
+    }
+    
+    when PRINT_STRUCTS_AND_ENUMS == true {{
         data, _ := os.read_entire_file("./cimgui/generator/output/structs_and_enums.json");
         value, err := json.parse(data);
 
@@ -92,8 +141,9 @@ main :: proc() {
             log.error("Error in json! %v", err);
             os.exit(1);
         }
-    }
-    {
+    }}
+
+    when PRINT_PROCEDURES == true {{
         data, _ := os.read_entire_file("./cimgui/generator/output/definitions.json");
         value, err := json.parse(data);
 
@@ -118,44 +168,160 @@ main :: proc() {
             groups := gather_procedures_v2(obj);
 
             for v in groups {
-                fmt.fprintln(fHandle, "@(default_calling_convention=\"c\")");
-                fmt.fprintln(fHandle, "foreign cimgui {");
-
                 for p in v.procs {
                     if strings.has_prefix(p.name, "ig") {
 
-                        sb := strings.make_builder();
-                        if try_generate_wrapper(&sb, p, v.longest_link_name, v.longest_proc_name) == false {
-                            log.warn("WRAPPER MISSING: ", p.name);
+                        wrapper, ok := wrappers[p.link_name];
+                        if ok == false {
+                            sb := strings.make_builder();
+                            if try_generate_simple_wrapper(&sb, p, v.longest_proc_name) == false {
+                                log.warn("WRAPPER MISSING: ", p.link_name);
+                                fmt.fprintf(fHandle, "// MISSING WRAPPER FOR: %s\n", p.link_name);
+                            } else {
+                                fmt.fprint(fHandle, strings.to_string(sb));
+                            }
+                            strings.reset_builder(&sb);
                         } else {
-                            fmt.fprint(fHandle, strings.to_string(sb));
+                            fmt.fprintf(fHandle, "// WRAPPER UNDER HERE \n");
+                            print_wrapper_call(fHandle, wrapper, v.longest_proc_name);
+                            fmt.fprint(fHandle, "\n");
                         }
-                        strings.reset_builder(&sb);
                         continue;
                     }
                     
-                    print_proc(fHandle, p, v.longest_link_name, v.longest_proc_name);
+                    print_proc(fHandle, p, v.longest_proc_name);
+                    print_proxy_call(fHandle, p);
+                    fmt.fprintln(fHandle);
                 }
 
-                fmt.fprintln(fHandle, "");
-                fmt.fprintln(fHandle, "");
+                fmt.fprintf(fHandle, "\n\n");
+            }
 
-                for p in v.procs {
-                    if strings.has_prefix(p.name, "ig") == false do continue;
-                    print_proc(fHandle, p, v.longest_link_name, v.longest_proc_name);
+            when PRINT_FOREIGN_PROCEDURES {
+                for v in groups {
+                    fmt.fprintln(fHandle, "@(default_calling_convention=\"c\")");
+                    fmt.fprintln(fHandle, "foreign cimgui {");
+
+                    for p in v.procs {
+                        print_foreign_proc(fHandle, p, v.longest_link_name, v.longest_proc_name);
+                    }
+                    fmt.fprintln(fHandle, "}\n");
                 }
-                fmt.fprintln(fHandle, "}\n");
             }
 
         } else {
             log.error("Error in json! %v", err);
             os.exit(1);
         }
-    }
+    }}
     {
         text_bytes, _ := os.read_entire_file("imgui_predefined.odin");
         os.write_entire_file("./output/imgui_predefined.odin", text_bytes);
     }
+}
+
+check_and_gather_predefined :: proc(predefined_file : ast.File) {
+    for x in predefined_file.decls {
+        if v, ok := x.derived.(ast.Value_Decl); ok {
+            if len(v.attributes) < 1 do continue;
+
+            name := v.names[0].derived.(ast.Ident).name;
+
+            for attr in v.attributes {
+                for x in attr.elems {
+                    f := x.derived.(ast.Field_Value);
+                    ident := f.field.derived.(ast.Ident);
+                    value := f.value.derived.(ast.Basic_Lit);
+
+                    switch ident.name {
+                        case "wrapper": {
+                            wrapper, ok := do_wrapper(v, value, name);
+                            if ok == false do continue;
+
+                            wrappers[wrapper.link_name] = wrapper;
+                        }
+
+                        case "predefined": {
+                            if v.values[0].derived.id != ast.Proc_Type {
+                                log.errorf("%s cannot be a wrapper since it's not a procedure type", name);
+                                continue;
+                            }
+                        }
+
+                        case "type": {
+                            if v.values[0].derived.id != ast.Struct_Type {
+                                log.errorf("%s cannot be a wrapper since it's not a procedure", name);
+                                continue;
+                            }
+                        }
+                    }
+                }                
+            }
+        }
+    }
+
+    do_wrapper :: proc(v : ast.Value_Decl, value : ast.Basic_Lit, name : string) -> (Proc_Wrapper, bool) {
+        if v.values[0].derived.id != ast.Proc_Lit {
+            log.errorf("%s cannot be a wrapper since it's not a procedure", name);
+            return Proc_Wrapper{}, false;
+        }
+
+        proc_type := (v.values[0].derived.(ast.Proc_Lit)).type;
+
+        if proc_type.results != nil && len(proc_type.results.list) > 1 {
+            log.errorf("Wrapper '%s' has more than one return value, not allowed", name);
+            return Proc_Wrapper{}, false;
+        }
+
+        return_type := "";
+        if proc_type.results != nil {
+            return_type = proc_type.results.list[0].type.derived.(ast.Ident).name;
+        }
+
+        arguments : [dynamic]Foreign_Proc_Argument;
+
+        if proc_type.params != nil {
+            for p in proc_type.params.list {
+                r := Foreign_Proc_Argument{};
+                r.name = p.names[0].derived.(ast.Ident).name;
+                switch d in p.type.derived {
+                    case ast.Ident:
+                        r.type = d.name;    
+                    case ast.Array_Type:
+                        r.type = fmt.aprintf("[%s]%s", d.len.derived.(ast.Basic_Lit).tok.text, d.elem.derived.(ast.Ident).name);
+                    case ast.Pointer_Type:
+                        r.type = fmt.aprintf("^%s", d.elem.derived.(ast.Ident).name);
+                    case :
+                        log.errorf("Unexpected paramter type in wrapper %v", p.type.derived);
+                }
+                
+                if p.default_value != nil {
+                    switch d in p.default_value.derived {
+                        case ast.Basic_Lit:
+                            r.default_value = d.tok.text;
+                        case ast.Ident:
+                            r.default_value = d.name;
+                        case :
+                            log.errorf("Unexpected default value type in wrapper", p.default_value.derived);
+                    }
+                    
+                }
+
+                append(&arguments, r);
+            }
+        }
+
+        wrapper := Proc_Wrapper {
+            link_name = strings.trim(value.tok.text, "\""),
+            name = name,
+            ret_type = return_type,
+            fields = arguments[:],
+            //wrapper_body = string(src[v.pos.offset:v.end.offset])
+        };
+
+        return wrapper, true;
+    }
+
 }
 
 gather_procedures_v2 :: proc(obj : json.Object) -> []Foreign_Group {
@@ -200,6 +366,7 @@ gather_procedures_v2 :: proc(obj : json.Object) -> []Foreign_Group {
             if should_overload_be_skipped(overload) do continue;
 
             res.link_name = get_overload_link_name(overload);
+            //log.debugf("Gathering %s", res.link_name);
 
             arguments := overload["argsT"].value.(json.Array);
             for a in arguments {
@@ -291,11 +458,7 @@ get_overload_argument :: proc(argument : json.Object, defaults : ^json.Object) -
     }
 
     sb := strings.make_builder();
-    get_arg_size :: proc(arg : json.Object) -> i64 {
-        v, ok := arg["size"];
-        return ok ? v.value.(json.Integer) : 0;
-    }
-    is_base_type := convert_type(&sb, arg.name, original_type, get_arg_size(argument));
+    is_base_type := convert_type(&sb, arg.name, original_type, -1);
     if is_base_type {
         arg.type = strings.clone(strings.to_string(sb));
     } else {
@@ -359,11 +522,11 @@ get_out_overload_argument_name :: proc(argument : json.Object) -> string {
     size, has_size := argument["size"];
     if has_size {
         name = clean_array_brackets(name);
+    }
 
-        switch name {
-            case "in":  name = "in_";
-            case "fmt": name = "format";
-        }
+    switch name {
+        case "in":  name = "in_";
+        case "fmt": name = "format";
     }
 
     return name;
@@ -616,29 +779,29 @@ gather_procedures :: proc(obj : json.Object) -> []Foreign_Group {
     return result;
 }
 
-try_generate_wrapper :: proc(sb : ^strings.Builder, p : Foreign_Proc, longest_link_name : int, longest_proc_name : int) -> bool {
+try_generate_simple_wrapper :: proc(sb : ^strings.Builder, p : Foreign_Proc, longest_proc_name : int) -> bool {
     if len(p.arguments) <= 0 do return false;
+
+    count_cstring :: proc(arguments : []Foreign_Proc_Argument) -> int {
+        i := 0;
+        for arg in arguments {
+            if arg.type == "cstring" {
+                i += 1;
+            }
+        }
+
+        return i;
+    }
+
+    if count_cstring(p.arguments[:]) > 1 {
+        return false;
+    }
 
     first_arg := p.arguments[0];
 
     if first_arg.type != "cstring" do return false;
-    if(first_arg.name != "label" &&
-       first_arg.name != "str_id" && 
-       first_arg.name != "prefix" && 
-       first_arg.name != "name") {
-        return false;    
-    } 
 
-    fmt.sbprint(sb, "\t");
-
-    longest_link_name := longest_link_name + len(p.link_name) + len("@(link_name = \"\")");
-
-    if len(p.link_name) <= longest_link_name {
-        for _ in len(p.link_name)..longest_link_name-1 do fmt.sbprint(sb, " ");
-    }
-
-
-    fmt.sbprintf(sb, "\t%s :: proc(", right_pad(p.name[3:], longest_proc_name - len(p.name[3:])));
+    fmt.sbprintf(sb, "%s :: inline proc(", right_pad(p.name[3:], longest_proc_name - len(p.name[3:])));
 
     fmt.sbprintf(sb, "%s : string", first_arg.name);
     if len(p.arguments) > 1 do fmt.sbprint(sb, ", ");
@@ -650,32 +813,33 @@ try_generate_wrapper :: proc(sb : ^strings.Builder, p : Foreign_Proc, longest_li
 
     fmt.sbprintf(sb, "return %s(", p.name);
     fmt.sbprintf(sb, "_make_label_string(%s)", first_arg.name);
+    if len(p.arguments) > 1 {
+        fmt.sbprint(sb, ", ");
+    }
     print_call_arguments(sb, p.arguments[1:]);
 
     fmt.sbprint(sb, ");\n");
-
-    print_call_arguments :: proc(sb : ^strings.Builder, arguments : []Foreign_Proc_Argument) {
-        if len(arguments) > 0 {
-            fmt.sbprint(sb, ", ");
-            for arg, idx in arguments {
-                fmt.sbprint(sb, arg.name);
-                if idx < len(arguments)-1 {
-                    fmt.sbprintf(sb, ", ");
-                }
-            }
-        }
-    }
-
     return true;
 }
 
-print_proc :: proc(fHandle : os.Handle, p : Foreign_Proc, longest_link_name : int, longest_proc_name : int) {
-    fmt.fprintf(fHandle, "\t@(link_name = \"%s\") ", p.link_name);
-    if len(p.link_name) <= longest_link_name {
-        for _ in len(p.link_name)..longest_link_name-1 do fmt.fprintf(fHandle, " ");
+print_call_arguments :: proc(sb : ^strings.Builder, arguments : []Foreign_Proc_Argument) {
+    if len(arguments) > 0 {
+        for arg, idx in arguments {
+            fmt.sbprint(sb, arg.name);
+            if idx < len(arguments)-1 {
+                fmt.sbprintf(sb, ", ");
+            }
+        }
     }
+}
 
-    fmt.fprintf(fHandle, "%s ", right_pad(p.name, longest_proc_name - len(p.name)));
+print_foreign_proc :: proc(fHandle : os.Handle, p : Foreign_Proc, longest_link_name : int, longest_proc_name : int) {
+    //fmt.fprintf(fHandle, "\t@(link_name = \"%s\") ", p.link_name);
+    // if len(p.link_name) <= longest_link_name {
+    //     for _ in len(p.link_name)..longest_link_name-1 do fmt.fprintf(fHandle, " ");
+    // }
+
+    fmt.fprintf(fHandle, "\t%s ", right_pad(p.link_name, longest_proc_name - len(p.link_name)));
 
     fmt.fprintf(fHandle, ":: proc(");
     sb := strings.make_builder();
@@ -686,6 +850,57 @@ print_proc :: proc(fHandle : os.Handle, p : Foreign_Proc, longest_link_name : in
         fmt.fprintf(fHandle, "-> %s ", p.ret_type);
     }
     fmt.fprintln(fHandle, "---;");
+}
+
+print_wrapper_call :: proc(fHandle : os.Handle, p : Proc_Wrapper, longest_proc_name : int) {
+    pname := strings.trim_left(p.name, "wrapper_");
+    fmt.fprintf(fHandle, "%s ", right_pad(pname, longest_proc_name - len(pname)));
+
+    fmt.fprintf(fHandle, ":: inline proc(");
+    sb := strings.make_builder();
+    print_procedure_arguments(&sb, p.fields[:]);
+    fmt.fprint(fHandle, strings.to_string(sb));
+    fmt.fprintf(fHandle, ") ");
+    if len(p.ret_type) > 0 {
+        fmt.fprintf(fHandle, "-> %s ", p.ret_type);
+    }
+
+    fmt.fprintf(fHandle, "do ");
+
+    if len(p.ret_type) > 0 {
+        fmt.fprintf(fHandle, "return ");
+    }
+
+    fmt.fprint(fHandle, p.name);
+    strings.reset_builder(&sb);
+    print_call_arguments(&sb, p.fields[:]);
+    fmt.fprintf(fHandle, "(%s);", strings.to_string(sb));
+}
+
+print_proc :: proc(fHandle : os.Handle, p : Foreign_Proc, longest_proc_name : int) {
+    fmt.fprintf(fHandle, "%s ", right_pad(p.name, longest_proc_name - len(p.name)));
+
+    fmt.fprintf(fHandle, ":: inline proc(");
+    sb := strings.make_builder();
+    print_procedure_arguments(&sb, p.arguments[:]);
+    fmt.fprint(fHandle, strings.to_string(sb));
+    fmt.fprintf(fHandle, ") ");
+    if len(p.ret_type) > 0 {
+        fmt.fprintf(fHandle, "-> %s ", p.ret_type);
+    }
+}
+
+print_proxy_call :: proc(fHandle : os.Handle, p : Foreign_Proc) {
+    fmt.fprintf(fHandle, "do ");
+
+    if len(p.ret_type) > 0 {
+        fmt.fprintf(fHandle, "return ");
+    }
+
+    fmt.fprintf(fHandle, p.link_name);
+    sb := strings.make_builder();
+    print_call_arguments(&sb, p.arguments[:]);
+    fmt.fprintf(fHandle, "(%s);", strings.to_string(sb));
 }
 
 print_procedure_arguments :: proc(sb : ^strings.Builder, arguments : []Foreign_Proc_Argument) {
@@ -714,7 +929,24 @@ print_procedure_arguments :: proc(sb : ^strings.Builder, arguments : []Foreign_P
 convert_type :: proc(b : ^strings.Builder, field_name : string, c_type : string, size : i64) -> bool {
     type := "ERROR!";
     skip_ptr := false;
+    add_ptr := false;
     base := false;
+    size := size;
+    c_type := c_type;
+
+    if size == -1 {
+        start := strings.index(c_type, "[");
+        if start != -1 {
+            end := strings.index(c_type, "]");
+            txt := c_type[start+1:end];
+            if(len(txt) > 0) {
+                size = i64(strconv.atoi(txt));
+                c_type = c_type[:start];
+            }
+        } else {
+            size = 0;
+        }
+    }
 
     switch c_type {
         case "void*", "const void*" : {
@@ -725,6 +957,11 @@ convert_type :: proc(b : ^strings.Builder, field_name : string, c_type : string,
         case "const char*" : {
             type = "cstring";
             skip_ptr = true;
+            base = true;
+        }
+        case "const char* const[]" : {
+            type = "cstring";
+            add_ptr = true;
             base = true;
         }
         case: {
@@ -747,6 +984,11 @@ convert_type :: proc(b : ^strings.Builder, field_name : string, c_type : string,
                 break;
             }
 
+            if(field_name == "v") {
+                log.debug(c_type);    
+                log.debug(size);    
+            }
+
             type = clean_imgui_namespacing(clean_const_ref_ptr(c_type));
         }
     }
@@ -762,6 +1004,10 @@ convert_type :: proc(b : ^strings.Builder, field_name : string, c_type : string,
         if strings.has_suffix(c_type, "&") {
             strings.write_rune(b, '^');
         }
+    }
+
+    if add_ptr == true {
+        strings.write_rune(b, '^');
     }
 
     strings.write_string(b, type);

@@ -18,6 +18,8 @@ proc_name_by_link_name := map[string]string {
     "ImGuiStoragePair_ImGuiStoragePairPtr" = "StoragePair_rawptr_ctor",
 };
 
+wrappers : map[string]Proc_Wrapper;
+
 predefined_type_by_name := map[string]string {
     // IO
     "GetClipboardTextFn" = "get_clipboard_text_function",

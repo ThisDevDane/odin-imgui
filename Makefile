@@ -19,28 +19,38 @@ CIMGUI_FLAGS = /c /nologo /DCIMGUI_NO_EXPORT
 CIMGUI_LIB_ARCHIVE = $(DIST_DIR)/cimgui-binaries.zip
 
 build_debug:
+	@echo "[Build Debug]"
 	$(OC) build $(GENERATOR_SRC) $(FLAGS) -debug
 
 build_prod:
+	@echo "[Build Production]"
 	$(OC) build $(GENERATOR_SRC) $(FLAGS) -opt=3
 
 all: cimgui build_prod
 
 generate: build_debug
+	@echo "[Generate]"
 	@mkdir -p $(ODIN_OUTPUT_DIR)
 	$(GENERATOR_NAME)
 
+vet:
+	@echo "[Odin Vet]"
+	$(OC) check $(GENERATOR_SRC) $(FLAGS) -vet
+
 dist: clean all generate
+	@echo "[Build Distribute]"
 	7z a $(CIMGUI_LIB_ARCHIVE) $(EXTERNAL_LIB_DIR)/*
 	cp output/* dist
 
 clean:
+	@echo "[Clean]"
 	rm -rf $(ODIN_OUTPUT_DIR)
 	rm -rf $(GENERATOR_NAME)
 	rm -rf $(EXTERNAL_LIB_DIR)
 	rm -rf $(DIST_DIR)
 
 cimgui:
+	@echo "[Build CIMGUI]"
 	@mkdir -p $(EXTERNAL_LIB_DIR)
 
 	$(CC) $(CIMGUI_FLAGS) /MTd /Zi /Fd:$(EXTERNAL_LIB_DIR)/cimgui_debug.pdb $(CIMGUI_SRC)

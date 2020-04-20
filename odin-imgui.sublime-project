@@ -19,7 +19,7 @@
             "variants": [
                 {
                     "name": "Build",
-                    "shell_cmd": "make build",
+                    "shell_cmd": "make build_debug",
                 },
                 {
                     "name": "Run",
