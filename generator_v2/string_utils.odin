@@ -3,18 +3,7 @@ package main;
 import "core:strings";
 import "core:log";
 
-right_pad :: proc(text : string, pad_size : int) -> string {
-    if pad_size < 1 do return text;
-
-    b := strings.make_builder();
-    strings.write_string(&b, text);
-    for _ in 0..pad_size-1 {
-        strings.write_rune(&b, ' ');
-    }
-    return strings.to_string(b);
-}
-
-clean_array_brackets :: proc(s : string, has_size := true) -> string {
+remove_array_decleration :: proc(s : string, has_size := true) -> string {
     if has_size == false do return s;
 
     result := s;
@@ -26,25 +15,26 @@ clean_array_brackets :: proc(s : string, has_size := true) -> string {
     return result;
 }
 
-clean_const_ref_ptr :: proc(s : string) -> string {
+clean_ptr :: proc(s : string) -> (result: string, ptr_count: int){
+    result = s;
+    i := strings.index(result, "*");
+    if i > 0 {
+        ptr_count = strings.count(result, "*");
+        result = result[:i];
+    }
+
+    return;
+}
+
+clean_const :: proc(s : string) -> string {
     result := s;
     if strings.has_prefix(s, "const") {
         result = result[6:];
     }
-
-    i := strings.index(result, "*");
-    if i > 0 {
-        result = result[:i];
-    }
-
-    if strings.has_suffix(s, "&") {
-        result = result[:len(result)-1];
-    }
-
     return result;
 }
 
-clean_imgui_namespacing :: proc(s : string) -> string {
+clean_imgui :: proc(s : string) -> string {
     if strings.has_prefix(s, "Im") == true && strings.has_prefix(s, "Image") == false {
         result := s[2:];
         if strings.has_prefix(result, "Gui") == true {
