@@ -6,7 +6,7 @@ LINK = lib
 
 FLAGS = -out=$(GENERATOR_NAME)
 
-GENERATOR_SRC = ./generator
+GENERATOR_SRC = ./generator_v2
 GENERATOR_NAME = odin-imgui-gen.exe
 
 DIST_DIR = ./dist
