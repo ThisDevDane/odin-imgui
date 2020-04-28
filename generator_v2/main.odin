@@ -105,45 +105,45 @@ output_enums :: proc(json_path: string, output_path: string) {
         }
 
         for def in definitions {
-            strings.write_string(&sb, clean_enum_key(def.name));
-            strings.write_string(&sb, " :: enum i32 {");
-            strings.write_rune(&sb, '\n');
+            fmt.sbprint(&sb, clean_enum_key(def.name));
+            fmt.sbprint(&sb, " :: enum i32 {");
+            fmt.sbprint(&sb, '\n');
 
             for f in def.fields {
-                strings.write_rune(&sb, '\t');
-                strings.write_string(&sb, clean_field_key(f.name, def.name));
+                fmt.sbprint(&sb, '\t');
+                fmt.sbprint(&sb, clean_field_key(f.name, def.name));
 
                 if(f.value != nil) {
-                    strings.write_string(&sb, " = ");
+                    fmt.sbprint(&sb, " = ");
                     
                     switch v in f.value {
                         case int: {
-                            strings.write_string(&sb, fmt.tprintf("%d", v));
+                            fmt.sbprintf(&sb, "%d", v);
                         }
 
                         case string: {
-                            strings.write_string(&sb, v);
+                            fmt.sbprint(&sb, v);
                         }
 
                         case []string: {
                             for x, i in v {
-                                strings.write_string(&sb, clean_field_key(x, def.name));
+                                fmt.sbprint(&sb, clean_field_key(x, def.name));
                                 if i == len(v)-1 do break;
-                                strings.write_string(&sb, " | ");
+                                fmt.sbprint(&sb, " | ");
                             }
                         }
                         
                     }
                 }
-                strings.write_rune(&sb, ',');
-                strings.write_rune(&sb, '\n');
+                fmt.sbprint(&sb, ',');
+                fmt.sbprint(&sb, '\n');
             }
 
 
-            strings.write_rune(&sb, '}');
+            fmt.sbprint(&sb, '}');
 
-            strings.write_rune(&sb, '\n');
-            strings.write_rune(&sb, '\n');
+            fmt.sbprint(&sb, '\n');
+            fmt.sbprint(&sb, '\n');
         }
     }
 
@@ -163,4 +163,4 @@ output_structs :: proc() {}
 output_header :: proc() {}
 output_foreign :: proc() {}
 
-insert_package_header :: proc(sb: ^strings.Builder) do strings.write_string(sb, "package imgui;\n\n");
+insert_package_header :: proc(sb: ^strings.Builder) do fmt.sbprint(sb, "package imgui;\n\n");
