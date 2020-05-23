@@ -174,55 +174,6 @@ struct_name_map := map[string]string {
     "ImVec4" = "Vec4",
 };
 
-type_map := map[string]string {
-
-    "char"           = "i8",
-    "unsigned char"  = "u8",
-    "unsigned char*" = "^u8",
-    "unsigned short" = "u16",
-    "short"          = "i16",
-    "unsigned int"   = "u32",
-    "unsigned int*"  = "^u32",
-    "int"            = "i32",
-    "float"          = "f32",
-    "double"         = "f64",
-    "size_t"         = "uint",
-    "bool"           = "bool",
-    "void*"          = "rawptr",
-
-    "ImU32" = "u32",
-
-    "char*" = "cstring",
-
-    // "ImTextureID" = "Texture_ID",
-    // "ImGuiID" = "ID",
-
-    "ImVec2" = "Vec2",
-    "ImVec4" = "Vec4",
-
-    "ImVector_ImTextureID" = "Im_Vector(Texture_ID)",
-    "ImVector_ImWchar" = "Im_Vector(Wchar)",
-    "ImVector_ImVec2" = "Im_Vector(Vec2)",
-    "ImVector_ImVec4" = "Im_Vector(Vec4)",
-    
-    "ImVector_ImGuiTextRange" = "Im_Vector(Text_Range)",
-    "ImVector_ImGuiStoragePair" = "Im_Vector(Storage_Pair)",
-    
-    "ImVector_ImFontConfig" = "Im_Vector(Font_Config)",
-    "ImVector_ImFontAtlasCustomRect" = "Im_Vector(Font_Atlas_Custom_Rect)",
-    "ImVector_ImFontPtr" = "Im_Vector(^Font)",
-    "ImVector_ImFontGlyph" = "Im_Vector(Font_Glyph)",
-    
-    "ImVector_ImDrawChannel" = "Im_Vector(Draw_Channel)",
-    "ImVector_ImDrawCmd" = "Im_Vector(Draw_Cmd)",
-    "ImVector_ImDrawIdx" = "Im_Vector(Draw_Idx)",
-    "ImVector_ImDrawVert" = "Im_Vector(Draw_Vert)",
-
-    "ImVector_ImU32" = "Im_Vector(u32)",
-    "ImVector_float" = "Im_Vector(f32)",
-    "ImVector_char" = "Im_Vector(u8)",
-};
-
 output_structs :: proc(json_path: string, output_path: string) {
     log.info("Outputting structs...");
 
@@ -290,31 +241,6 @@ output_structs :: proc(json_path: string, output_path: string) {
             key = remove_array_decleration(key, size > 0);
             //key = to_ada_case(key);
             return key;
-        }
-
-        clean_type :: proc(type: string) -> string {
-            type := type;
-            type = clean_const(type);
-
-            if n, ok := type_map[type]; ok {
-                return n;
-            }
-
-            type = clean_imgui(type);
-            type = to_ada_case(type);
-
-            t, count := clean_ptr(type);
-            if count > 0 {
-                sb := strings.make_builder();
-                for _ in 0..count-1 {
-                    fmt.sbprint(&sb, '^');
-                }
-                fmt.sbprint(&sb, t);
-
-                return strings.to_string(sb);
-            } else {
-                return type;            
-            }
         }
 
         for def in definitions {
@@ -420,26 +346,14 @@ output_foreign :: proc(json_path: string, output_path: string) {
         fmt.sbprint(&sb, "@(default_calling_convention=\"c\")\n");
         fmt.sbprint(&sb, "foreign cimgui {\n");
 
-        prev_group := "";
-        first_line := true;
-        last_was_ig := false;
         for f in functions {
-            group := strings.split(f.link_name, "_")[0];
-            if prev_group != group {
-                if first_line == false && last_was_ig == false{
-                    fmt.sbprint(&sb, "\n");
-                }    
-
-                last_was_ig = strings.has_prefix(f.link_name, "ig");
-                prev_group = group;
-            } 
-            first_line = false;
+            figure_out_group_and_break(&sb, f.link_name);
 
             fmt.sbprint(&sb, "\t");
             fmt.sbprintf(&sb, "{} :: proc(", f.link_name);
 
             for p, idx in f.params {
-                fmt.sbprintf(&sb, "{}: {}", p.name, p.type);
+                fmt.sbprintf(&sb, "{}: {}", p.name, clean_type(p.type));
                 if idx < len(f.params)-1 {
                     fmt.sbprint(&sb, ", ");
                 }
@@ -447,8 +361,7 @@ output_foreign :: proc(json_path: string, output_path: string) {
             fmt.sbprint(&sb, ") ");
 
             if f.return_type != "" && f.return_type != "void" {
-                fmt.sbprintf(&sb, "-> {} ", f.return_type);
-
+                fmt.sbprintf(&sb, "-> {} ", clean_type(f.return_type));
             }
 
             fmt.sbprint(&sb, "---;\n");
@@ -466,6 +379,23 @@ output_foreign :: proc(json_path: string, output_path: string) {
         }
 
         os.write_string(handle, strings.to_string(sb));
+    }
+
+    figure_out_group_and_break :: proc(sb: ^strings.Builder, link_name: string) {
+        @static prev_group := "";
+        @static first_line := true;
+        @static last_was_ig := false;
+
+        group := strings.split(link_name, "_")[0];
+        if prev_group != group {
+            if first_line == false && last_was_ig == false{
+                fmt.sbprint(sb, "\n");
+            }    
+
+            last_was_ig = strings.has_prefix(link_name, "ig");
+            prev_group = group;
+        } 
+        first_line = false;
     }
 
     output_foreign_import :: proc(sb: ^strings.Builder) {

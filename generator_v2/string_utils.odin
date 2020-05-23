@@ -6,6 +6,91 @@ import "core:fmt";
 
 insert_package_header :: proc(sb: ^strings.Builder) do fmt.sbprint(sb, "package imgui;\n\n");
 
+type_map := map[string]string {
+    "char"           = "i8",
+    "unsigned char"  = "u8",
+    "unsigned short" = "u16",
+    "short"          = "i16",
+    "unsigned int"   = "u32",
+    "int"            = "i32",
+    "float"          = "f32",
+    "double"         = "f64",
+    "size_t"         = "uint",
+    "bool"           = "bool",
+
+    "ImU32" = "u32",
+
+    "char*" = "cstring",
+
+    // "ImTextureID" = "Texture_ID",
+    // "ImGuiID" = "ID",
+
+    "ImVec2" = "Vec2",
+    "ImVec4" = "Vec4",
+
+    "ImVector_ImTextureID" = "Im_Vector(Texture_ID)",
+    "ImVector_ImWchar" = "Im_Vector(Wchar)",
+    "ImVector_ImVec2" = "Im_Vector(Vec2)",
+    "ImVector_ImVec4" = "Im_Vector(Vec4)",
+    
+    "ImVector_ImGuiTextRange" = "Im_Vector(Text_Range)",
+    "ImVector_ImGuiStoragePair" = "Im_Vector(Storage_Pair)",
+    
+    "ImVector_ImFontConfig" = "Im_Vector(Font_Config)",
+    "ImVector_ImFontAtlasCustomRect" = "Im_Vector(Font_Atlas_Custom_Rect)",
+    "ImVector_ImFontPtr" = "Im_Vector(^Font)",
+    "ImVector_ImFontGlyph" = "Im_Vector(Font_Glyph)",
+    
+    "ImVector_ImDrawChannel" = "Im_Vector(Draw_Channel)",
+    "ImVector_ImDrawCmd" = "Im_Vector(Draw_Cmd)",
+    "ImVector_ImDrawIdx" = "Im_Vector(Draw_Idx)",
+    "ImVector_ImDrawVert" = "Im_Vector(Draw_Vert)",
+
+    "ImVector_ImU32" = "Im_Vector(u32)",
+    "ImVector_float" = "Im_Vector(f32)",
+    "ImVector_char" = "Im_Vector(u8)",
+};
+
+clean_type :: proc(type: string) -> string {
+    type := type;
+    type = clean_const(type);
+    t, count := clean_ptr(type);
+    is_mapped := false;
+
+    if n, ok := type_map[t]; ok {
+        if count == 0 {
+            return n;
+        } else {
+            t = n;
+            is_mapped = true;
+        }
+    }
+
+    if t == "void" && count >= 1 {
+        t = "rawptr";
+        count -= 1;
+        is_mapped = true;
+    }
+
+    if is_mapped == false {
+        t = clean_imgui(t);
+        t = to_ada_case(t);
+    }
+
+    //t, count := clean_ptr(type);
+    if count > 0 {
+        sb := strings.make_builder();
+        for _ in 0..count-1 {
+            fmt.sbprint(&sb, '^');
+        }
+        fmt.sbprint(&sb, t);
+
+        return strings.to_string(sb);
+    } else {
+        return t;            
+    }
+}
+
 remove_array_decleration :: proc(s : string, has_size := true) -> string {
     if has_size == false do return s;
 

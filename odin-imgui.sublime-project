@@ -3,7 +3,10 @@
 	[
 		{
 			"path": "."
-		}
+		},
+        {
+            "path": "E:/Odin/core"
+        }
 	],
     "build_systems":
     [
