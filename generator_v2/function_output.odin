@@ -80,6 +80,12 @@ output_foreign :: proc(json_path: string, output_path: string) {
         }
 
         append(&groups, current_group);
+
+        for g in &groups {
+            for f in g.functions {
+                g.longest_func_name = max(g.longest_func_name, len(f.link_name));
+            }
+        }
     }
 
     { // SB Output
@@ -91,8 +97,9 @@ output_foreign :: proc(json_path: string, output_path: string) {
         for g in groups {
             for f in g.functions {
                 fmt.sbprint(&sb, "\t");
-                fmt.sbprintf(&sb, "{} :: proc(", f.link_name);
-
+                fmt.sbprintf(&sb, "{}", f.link_name);
+                right_pad(&sb, len(f.link_name), g.longest_func_name);
+                fmt.sbprint(&sb, " :: proc(");
                 output_param_list(&sb, f);
                 fmt.sbprint(&sb, ") ");
 
