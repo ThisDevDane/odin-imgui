@@ -6,21 +6,18 @@ import "core:os"
 import "core:strings"
 import "core:encoding/json";
 
-@(private="file")
 Foreign_Func_Group :: struct {
     functions: [dynamic]Foreign_Func,
     longest_func_name: int,
     longest_param_return_list: int,
 };
 
-@(private="file")
 Foreign_Func :: struct {
     link_name: string,
     params: [dynamic]Foreign_Func_Param,
     return_type: string,
 };
 
-@(private="file")
 Foreign_Func_Param :: struct {
     name: string,
     type: string,
@@ -44,42 +41,10 @@ output_foreign :: proc(json_path: string, output_path: string) {
     defer strings.destroy_builder(&sb);
     insert_package_header(&sb);
 
-    reset_group_info();
-
     groups : [dynamic]Foreign_Func_Group;
 
     { // Gather
-        current_group := Foreign_Func_Group{};
-        for k, v in obj {
-            overloads := v.value.(json.Array);
-            for ov in overloads {
-                f := Foreign_Func{};
-                ov_obj := ov.value.(json.Object);
-
-                f.link_name = get_value_string(ov_obj["ov_cimguiname"]);
-                if figure_out_if_new_group(f.link_name) {
-                    append(&groups, current_group);
-                    current_group = Foreign_Func_Group{};
-                }
-                
-                f.return_type = get_optional_string(ov_obj, "ret");
-
-                for arg in ov_obj["argsT"].value.(json.Array) {
-                    param := Foreign_Func_Param{};
-                    arg_obj := arg.value.(json.Object);
-
-                    param.name = get_value_string(arg_obj["name"]);
-                    param.type = get_value_string(arg_obj["type"]);
-
-                    append(&f.params, param);
-                    
-                }
-
-                append(&current_group.functions, f);
-            }
-        }
-
-        append(&groups, current_group);
+        gather_foreign_proc_groups(&groups, obj);
 
         for g in &groups {
             for f in g.functions {
@@ -136,7 +101,7 @@ output_foreign :: proc(json_path: string, output_path: string) {
     }
 }
 
-output_header :: proc(json_path: string, output_path: string) {
+output_header :: proc(json_path: string, output_path: string, wrapper_map: ^map[string]string) {
     log.info("Outputting headers...");
 
     json_bytes, _ := os.read_entire_file(json_path);
@@ -154,42 +119,10 @@ output_header :: proc(json_path: string, output_path: string) {
     defer strings.destroy_builder(&sb);
     insert_package_header(&sb);
 
-    reset_group_info();
-
     groups : [dynamic]Foreign_Func_Group;
 
     { // Gather
-        current_group := Foreign_Func_Group{};
-        for k, v in obj {
-            overloads := v.value.(json.Array);
-            
-            for ov in overloads {
-                f := Foreign_Func{};
-                ov_obj := ov.value.(json.Object);
-
-                f.link_name = get_value_string(ov_obj["ov_cimguiname"]);
-                if figure_out_if_new_group(f.link_name) {
-                    append(&groups, current_group);
-                    current_group = Foreign_Func_Group{};
-                }
-
-                f.return_type = get_optional_string(ov_obj, "ret");
-
-                for arg in ov_obj["argsT"].value.(json.Array) {
-                    param := Foreign_Func_Param{};
-                    arg_obj := arg.value.(json.Object);
-
-                    param.name = get_value_string(arg_obj["name"]);
-                    param.type = get_value_string(arg_obj["type"]);
-
-                    append(&f.params, param);
-                }
-
-                append(&current_group.functions, f);
-            }
-        }
-
-        append(&groups, current_group);
+        gather_foreign_proc_groups(&groups, obj);
 
         for g in &groups {
             for f in g.functions {
@@ -215,7 +148,7 @@ output_header :: proc(json_path: string, output_path: string) {
 
     { // SB Output
         for g in groups {
-            for f, idx in g.functions {
+            for f, _ in g.functions {
                 name := clean_func_name(f.link_name);
 
                 fmt.sbprintf(&sb, "{} ", name);
@@ -246,9 +179,15 @@ output_header :: proc(json_path: string, output_path: string) {
 
                 if function_has_return(f) == true do fmt.sbprint(&sb, "return ");
 
-                fmt.sbprintf(&sb, "{}(", f.link_name);
-                output_call_list(&sb, f);
-                fmt.sbprint(&sb, ");");
+                if v, ok := wrapper_map[f.link_name]; ok {
+                    fmt.sbprintf(&sb, "{}(", v);
+                    output_call_list(&sb, f);
+                    fmt.sbprint(&sb, ");");
+                } else {
+                    fmt.sbprintf(&sb, "{}(", f.link_name);
+                    output_call_list(&sb, f);
+                    fmt.sbprint(&sb, ");");
+                }
                 fmt.sbprint(&sb, "\n");
             }
 
@@ -268,11 +207,54 @@ output_header :: proc(json_path: string, output_path: string) {
     }
 }
 
+gather_foreign_proc_groups :: proc(groups : ^[dynamic]Foreign_Func_Group, obj: json.Object) {
+    reset_group_info();
+    current_group := Foreign_Func_Group{};
+    for _, v in obj {
+        overloads := v.value.(json.Array);
+        ov_loop: for ov in overloads {
+            f := Foreign_Func{};
+            ov_obj := ov.value.(json.Object);
+
+            f.link_name = get_value_string(ov_obj["ov_cimguiname"]);
+            if figure_out_if_new_group(f.link_name) {
+                append(groups, current_group);
+                current_group = Foreign_Func_Group{};
+            }
+            
+            f.return_type = get_optional_string(ov_obj, "ret");
+
+            for arg in ov_obj["argsT"].value.(json.Array) {
+                param := Foreign_Func_Param{};
+                arg_obj := arg.value.(json.Object);
+
+                param.name = get_value_string(arg_obj["name"]);
+                param.type = get_value_string(arg_obj["type"]);
+
+                if param.type == "..." do continue ov_loop;
+                if param.type == "va_list" do continue ov_loop;
+
+                append(&f.params, param);
+                
+            }
+
+            append(&current_group.functions, f);
+        }
+    }
+
+    append(groups, current_group);
+}
+
 @(private="file") prev_group := "";
 @(private="file") first_line := true;
 @(private="file") last_was_ig := false;
 
-@(private="file")
+output_foreign_call :: proc(sb: ^strings.Builder, f: Foreign_Func) {
+    fmt.sbprintf(sb, "{}(", f.link_name);
+    output_call_list(sb, f);
+    fmt.sbprint(sb, ")");
+}
+
 output_call_list :: proc(sb: ^strings.Builder, f: Foreign_Func) {
     for p, idx in f.params {
         fmt.sbprint(sb, p.name);
@@ -296,18 +278,14 @@ reset_group_info :: proc() {
     last_was_ig = false;
 }
 
-@(private="file")
 function_has_return :: proc(f: Foreign_Func) -> bool {
     return f.return_type != "" && f.return_type != "void";
 }
 
-@(private="file")
 output_param_list :: proc(sb: ^strings.Builder, f: Foreign_Func) {
     for p, idx in f.params {
         fmt.sbprintf(sb, "{}: {}", p.name, clean_type(p.type));
-        if idx < len(f.params)-1 {
-            fmt.sbprint(sb, ", ");
-        }
+        if idx < len(f.params)-1 do fmt.sbprint(sb, ", ");
     }
 }
 

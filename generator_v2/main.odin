@@ -19,13 +19,120 @@ main :: proc() {
 
     log.info("Generating odin source...");
 
-    output_enums(STRUCTS_AND_ENUM_JSON_PATH, "./output/enums.odin");
-    output_structs(STRUCTS_AND_ENUM_JSON_PATH, "./output/structs.odin");
-    output_foreign(DEFINITION_JSON_PATH, "./output/foreign.odin");
-    output_header(DEFINITION_JSON_PATH, "./output/header.odin");
-    //output_wrapper(DEFINITION_JSON_PATH);
+    // output_enums(STRUCTS_AND_ENUM_JSON_PATH, "./output/enums.odin");
+    // output_structs(STRUCTS_AND_ENUM_JSON_PATH, "./output/structs.odin");
+    // output_foreign(DEFINITION_JSON_PATH, "./output/foreign.odin");
+    wrapper_map := output_wrappers(DEFINITION_JSON_PATH, "./output/wrapper.odin");
+    output_header(DEFINITION_JSON_PATH, "./output/header.odin", wrapper_map);
 
     log.info("Done generating!!!");
+}
+
+output_wrappers :: proc(json_path: string, output_path: string) -> ^map[string]string {
+    log.info("Outputting wrappers...");
+    res := new(map[string]string);
+
+    json_bytes, _ := os.read_entire_file(json_path);
+    js, err := json.parse(json_bytes);
+    defer json.destroy_value(js);
+
+    obj := js.value.(json.Object);
+
+    if err != json.Error.None {
+        log.error("Could not parse json file for foreign functions", err);
+        return nil;
+    }
+
+    sb := strings.make_builder();
+    defer strings.destroy_builder(&sb);
+    insert_package_header(&sb);
+
+    groups : [dynamic]Foreign_Func_Group;
+
+    { // Gather
+        gather_foreign_proc_groups(&groups, obj);
+    }
+
+    { // SB Output
+        for g in groups {
+            for f in g.functions {
+                if should_make_simple_wrapper(f) == false do continue;
+
+                wrapper_name := fmt.aprintf("swr_{}", f.link_name);
+                res[strings.clone(f.link_name)] = wrapper_name;
+                //log.debugf("var_map[\"{}\"] = \"{}\"", f.link_name, wrapper_name);
+
+                fmt.sbprintf(&sb, "{} :: proc(", wrapper_name);
+                for p, idx in f.params {
+                    fmt.sbprintf(&sb, "{}: ", p.name);
+                    type := clean_type(p.type);
+                    if type == "cstring" do type = "string";
+                    fmt.sbprint(&sb, type);
+
+                    if idx < len(f.params)-1 do fmt.sbprint(&sb, ", ");
+                }
+                fmt.sbprint(&sb, ") ");
+                if function_has_return(f) == true do fmt.sbprintf(&sb, "-> {} ", clean_type(f.return_type));
+                fmt.sbprint(&sb, "{\n");
+
+                var_map : map[string]string;
+
+                for p, idx in f.params {
+                    if clean_type(p.type) != "cstring" do continue;
+
+                    var_name := fmt.tprintf("str{}", idx);
+                    var_map[p.name] = var_name;
+                    fmt.sbprintf(&sb, "\t{} := fmt.tprintf(\"{{}}\\x00\", {});\n", var_name, p.name);
+                }           
+
+                fmt.sbprint(&sb, "\t");
+                if function_has_return(f) == true do fmt.sbprint(&sb, "return ");
+                
+
+                fmt.sbprintf(&sb, "{}(", f.link_name);
+                for p, idx in f.params {
+                    if v, ok := var_map[p.name]; ok {
+                        fmt.sbprintf(&sb, "cstring(&{}[0])", v);
+                    } else {
+                        fmt.sbprint(&sb, p.name);
+                    }
+                    if idx < len(f.params)-1 do fmt.sbprint(&sb, ", ");
+                }
+                fmt.sbprint(&sb, ");");
+                fmt.sbprint(&sb, "\n");
+                fmt.sbprint(&sb, "}\n\n");
+            }
+
+            fmt.sbprint(&sb, "\n");
+        }
+    }
+
+    { // File output 
+        handle, err := os.open(output_path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC);
+            
+        if err != os.ERROR_NONE {
+            log.errorf("Couldn't create/open file for outputting foreign functions! %v", err);                
+            return nil;
+        }
+
+        os.write_string(handle, strings.to_string(sb));
+    }
+
+    return res;
+
+    should_make_simple_wrapper :: proc(f: Foreign_Func) -> bool {
+        if len(f.params) == 0 do return false;
+
+        has_cstring := false;
+        for p in f.params {
+            if clean_type(p.type) == "cstring" {
+                has_cstring = true;
+                break;
+            }
+        }
+
+        return has_cstring == true;
+    }
 }
 
 output_enums :: proc(json_path: string, output_path: string) {
@@ -298,7 +405,7 @@ output_structs :: proc(json_path: string, output_path: string) {
 
     clean_field_key :: proc(key: string, size: int) -> string { 
         key := key;
-        key = remove_array_decleration(key, size > 0);
+        key, _ = remove_array_decleration(key, size > 0);
         //key = to_ada_case(key);
         return key;
     }

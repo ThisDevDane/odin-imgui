@@ -25,7 +25,7 @@ build_debug:
 
 build_prod:
 	@echo "[Build Production]"
-	$(OC) build $(GENERATOR_SRC) $(FLAGS) --opt=3
+	$(OC) build $(GENERATOR_SRC) $(FLAGS) --opt=3 --vet
 
 all: cimgui build_prod
 

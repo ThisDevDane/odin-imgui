@@ -3,6 +3,7 @@ package main;
 import "core:strings";
 import "core:log";
 import "core:fmt";
+import "core:strconv";
 
 insert_package_header :: proc(sb: ^strings.Builder) do fmt.sbprint(sb, "package imgui;\n\n");
 
@@ -24,8 +25,6 @@ type_map := map[string]string {
     "bool"           = "bool",
 
     "ImU32" = "u32",
-
-    "char*" = "cstring",
 
     // "ImTextureID" = "Texture_ID",
     // "ImGuiID" = "ID",
@@ -60,15 +59,25 @@ clean_type :: proc(type: string) -> string {
     type := type;
     type = clean_const(type);
     t, count := clean_ptr(type);
+    size := 0;
+    t, size = remove_array_decleration(t);
+
     is_mapped := false;
 
     if n, ok := type_map[t]; ok {
-        if count == 0 {
+        if count == 0 && size == 0 {
             return n;
         } else {
             t = n;
             is_mapped = true;
         }
+    }
+
+    //NOTE(Hoej, 2020-05-23): This might convert things to a cstring that actually is a ^i8
+    if t == "i8" && count >= 1 {
+        t = "cstring";
+        count -= 1;
+        is_mapped = true;
     }
 
     if t == "void" && count >= 1 {
@@ -82,9 +91,16 @@ clean_type :: proc(type: string) -> string {
         t = to_ada_case(t);
     }
 
-    //t, count := clean_ptr(type);
+    if size > 0 {
+        sb := strings.make_builder();
+        defer strings.destroy_builder(&sb);
+        fmt.sbprintf(&sb, "[{}]{}", size, t);
+        t = strings.to_string(sb);
+    }
+
     if count > 0 {
         sb := strings.make_builder();
+        defer strings.destroy_builder(&sb);
         for _ in 0..count-1 {
             fmt.sbprint(&sb, '^');
         }
@@ -96,16 +112,24 @@ clean_type :: proc(type: string) -> string {
     }
 }
 
-remove_array_decleration :: proc(s : string, has_size := true) -> string {
-    if has_size == false do return s;
+remove_array_decleration :: proc(s : string, has_size := true) -> (string, int) {
+    if has_size == false do return s, 0;
 
     result := s;
+    number := 0;
+
     i := strings.index(s, "[");
     if i > 0 {
         result = result[:i];
     }
 
-    return result;
+    i2 := strings.index(s, "]");
+    if i > -1 && i2 > -1 {
+        number_str := s[i+1:i2];
+        number = strconv.atoi(number_str);
+    }
+
+    return result, number;
 }
 
 clean_ptr :: proc(s : string) -> (result: string, ptr_count: int){
@@ -152,7 +176,7 @@ to_snake_case :: proc(str: string, allocator := context.allocator) -> string {
     buf := strings.make_builder(allocator);
 
     last_chars: [2]rune;
-    for char, offset in str {
+    for char, _ in str {
         switch char {
         case 'A'..'Z':
             switch last_chars[1] {
@@ -209,7 +233,7 @@ to_ada_case :: proc(str: string, allocator := context.allocator) -> string {
     buf := strings.make_builder(allocator);
  
     last_chars: [2]rune;
-    for char, offset in str {
+    for char, _ in str {
         switch char {
         case 'A'..'Z':
             switch last_chars[1] {
@@ -277,7 +301,7 @@ to_screaming_snake_case :: proc(str: string, allocator := context.allocator) -> 
     buf := strings.make_builder(allocator);
  
     last_chars: [2]rune;
-    for char, offset in str {
+    for char, _ in str {
         switch char {
         case 'A'..'Z':
             switch last_chars[1] {
