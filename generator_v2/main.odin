@@ -205,6 +205,7 @@ output_structs :: proc(json_path: string, output_path: string) {
     Struct_Definition :: struct {
         name:   string,
         fields: [dynamic]Struct_Field,
+        longest_field_name: int,
     };
 
     Struct_Field :: struct {
@@ -235,33 +236,25 @@ output_structs :: proc(json_path: string, output_path: string) {
 
             append(&definitions, def);
         }
+
+        for def in &definitions {
+            for f in def.fields {
+                key := clean_field_key(f.name, f.size);
+                def.longest_field_name = max(def.longest_field_name, len(key));
+            }
+        }
     }
     
     { // SB Output
-        clean_struct_key :: proc(key: string) -> string {
-            key := key;
-            if n, ok := struct_name_map[key]; ok {
-                return n;
-            }
-            key = clean_imgui(key);
-            key = to_ada_case(key);
-            return key;
-        }
-
-        clean_field_key :: proc(key: string, size: int) -> string { 
-            key := key;
-            key = remove_array_decleration(key, size > 0);
-            //key = to_ada_case(key);
-            return key;
-        }
-
         for def in definitions {
             fmt.sbprintf(&sb, "%s :: struct ", clean_struct_key(def.name));
             fmt.sbprint(&sb, '{');
             fmt.sbprint(&sb, '\n');
 
             for f in def.fields {
-                fmt.sbprintf(&sb, "\t%s: ", clean_field_key(f.name, f.size));
+                key := clean_field_key(f.name, f.size);
+                fmt.sbprintf(&sb, "\t%s: ", key);
+                right_pad(&sb, len(key), def.longest_field_name);
 
                 if(f.size > 0) {
                     fmt.sbprintf(&sb, "[%d]", f.size);                    
@@ -291,6 +284,23 @@ output_structs :: proc(json_path: string, output_path: string) {
         }
 
         os.write_string(handle, strings.to_string(sb));
+    }
+
+    clean_struct_key :: proc(key: string) -> string {
+        key := key;
+        if n, ok := struct_name_map[key]; ok {
+            return n;
+        }
+        key = clean_imgui(key);
+        key = to_ada_case(key);
+        return key;
+    }
+
+    clean_field_key :: proc(key: string, size: int) -> string { 
+        key := key;
+        key = remove_array_decleration(key, size > 0);
+        //key = to_ada_case(key);
+        return key;
     }
 }
 
