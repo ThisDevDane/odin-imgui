@@ -2,6 +2,9 @@ package main;
 
 import "core:strings";
 import "core:log";
+import "core:fmt";
+
+insert_package_header :: proc(sb: ^strings.Builder) do fmt.sbprint(sb, "package imgui;\n\n");
 
 remove_array_decleration :: proc(s : string, has_size := true) -> string {
     if has_size == false do return s;

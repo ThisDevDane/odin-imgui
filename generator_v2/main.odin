@@ -17,10 +17,13 @@ main :: proc() {
     };
     context.logger = log.create_console_logger(opt = logger_opts);
 
+    log.info("Generating odin source...");
+
     output_enums(STRUCTS_AND_ENUM_JSON_PATH, "./output/enums.odin");
     output_structs(STRUCTS_AND_ENUM_JSON_PATH, "./output/structs.odin");
-    output_foreign(DEFINITION_JSON_PATH);
-    output_header(DEFINITION_JSON_PATH);
+    output_foreign(DEFINITION_JSON_PATH, "./output/foreign.odin");
+    //output_wrapper(DEFINITION_JSON_PATH);
+    //output_header(DEFINITION_JSON_PATH);
 }
 
 output_enums :: proc(json_path: string, output_path: string) {
@@ -49,8 +52,8 @@ output_enums :: proc(json_path: string, output_path: string) {
     };
 
     definitions : [dynamic]Enum_Defintion;
-    // Gather
-    {
+    
+    { // Gather
         obj := js.value.(json.Object);
         for k, v in obj["enums"].value.(json.Object) {
             def := Enum_Defintion{};
@@ -85,8 +88,8 @@ output_enums :: proc(json_path: string, output_path: string) {
             append(&definitions, def);
         }
     }
-    // Ouptut
-    {
+    
+    { // SB output
         clean_enum_key :: proc(key: string) -> string {
             key := key;
             key = strings.trim_space(key);
@@ -147,7 +150,7 @@ output_enums :: proc(json_path: string, output_path: string) {
         }
     }
 
-    {
+    { // File output
         handle, err := os.open(output_path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC);
             
         if err != os.ERROR_NONE {
@@ -249,8 +252,8 @@ output_structs :: proc(json_path: string, output_path: string) {
 
     definitions : [dynamic]Struct_Definition;
 
-    // Gather
-    {
+    
+    { // Gather
         obj := js.value.(json.Object);
         for k, v in obj["structs"].value.(json.Object) {
             def := Struct_Definition{};
@@ -270,8 +273,8 @@ output_structs :: proc(json_path: string, output_path: string) {
             append(&definitions, def);
         }
     }
-    // Output
-    {
+    
+    { // SB Output
         clean_struct_key :: proc(key: string) -> string {
             key := key;
             if n, ok := struct_name_map[key]; ok {
@@ -312,7 +315,6 @@ output_structs :: proc(json_path: string, output_path: string) {
             } else {
                 return type;            
             }
-
         }
 
         for def in definitions {
@@ -331,8 +333,6 @@ output_structs :: proc(json_path: string, output_path: string) {
                     fmt.sbprint(&sb, v);
                 } else {        
                     fmt.sbprint(&sb, clean_type(f.type));
-                    // fmt.sbprint(&sb, "----");
-                    // fmt.sbprint(&sb, f.type);
                 }
 
                 fmt.sbprint(&sb, ",\n");
@@ -344,8 +344,7 @@ output_structs :: proc(json_path: string, output_path: string) {
         }
     }
 
-    log.debug("OUTPUT:\n", strings.to_string(sb));
-    {
+    { // File output
         handle, err := os.open(output_path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC);
             
         if err != os.ERROR_NONE {
@@ -356,7 +355,126 @@ output_structs :: proc(json_path: string, output_path: string) {
         os.write_string(handle, strings.to_string(sb));
     }
 }
-output_header :: proc(json_path: string) {}
-output_foreign :: proc(json_path: string) {}
 
-insert_package_header :: proc(sb: ^strings.Builder) do fmt.sbprint(sb, "package imgui;\n\n");
+output_foreign :: proc(json_path: string, output_path: string) {
+    log.info("Outputting foreign...");
+
+    json_bytes, _ := os.read_entire_file(json_path);
+    js, err := json.parse(json_bytes);
+    defer json.destroy_value(js);
+
+    obj := js.value.(json.Object);
+
+    if err != json.Error.None {
+        log.error("Could not parse json file for foreign functions", err);
+        return;
+    }
+
+    sb := strings.make_builder();
+    defer strings.destroy_builder(&sb);
+    insert_package_header(&sb);
+
+    Foreign_Func :: struct {
+        link_name: string,
+        params: [dynamic]Foreign_Func_Param,
+        return_type: string,
+    };
+
+    Foreign_Func_Param :: struct {
+        name: string,
+        type: string,
+    };
+
+    functions : [dynamic]Foreign_Func;
+
+    { // Gather
+        for k, v in obj {
+            overloads := v.value.(json.Array);
+            for ov in overloads {
+                f := Foreign_Func{};
+                ov_obj := ov.value.(json.Object);
+
+
+                f.link_name = get_value_string(ov_obj["ov_cimguiname"]);
+                f.return_type = get_optional_string(ov_obj, "ret");
+
+                for arg in ov_obj["argsT"].value.(json.Array) {
+                    param := Foreign_Func_Param{};
+                    arg_obj := arg.value.(json.Object);
+
+                    param.name = get_value_string(arg_obj["name"]);
+                    param.type = get_value_string(arg_obj["type"]);
+
+                    append(&f.params, param);
+                    
+                }
+
+                append(&functions, f);
+            }
+        }
+    }
+
+    { // SB Output
+        output_foreign_import(&sb);
+
+        fmt.sbprint(&sb, "@(default_calling_convention=\"c\")\n");
+        fmt.sbprint(&sb, "foreign cimgui {\n");
+
+        prev_group := "";
+        first_line := true;
+        last_was_ig := false;
+        for f in functions {
+            group := strings.split(f.link_name, "_")[0];
+            if prev_group != group {
+                if first_line == false && last_was_ig == false{
+                    fmt.sbprint(&sb, "\n");
+                }    
+
+                last_was_ig = strings.has_prefix(f.link_name, "ig");
+                prev_group = group;
+            } 
+            first_line = false;
+
+            fmt.sbprint(&sb, "\t");
+            fmt.sbprintf(&sb, "{} :: proc(", f.link_name);
+
+            for p, idx in f.params {
+                fmt.sbprintf(&sb, "{}: {}", p.name, p.type);
+                if idx < len(f.params)-1 {
+                    fmt.sbprint(&sb, ", ");
+                }
+            }
+            fmt.sbprint(&sb, ") ");
+
+            if f.return_type != "" && f.return_type != "void" {
+                fmt.sbprintf(&sb, "-> {} ", f.return_type);
+
+            }
+
+            fmt.sbprint(&sb, "---;\n");
+        }
+        
+        fmt.sbprint(&sb, "}\n");
+    }
+
+    { // File output 
+        handle, err := os.open(output_path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC);
+            
+        if err != os.ERROR_NONE {
+            log.errorf("Couldn't create/open file for outputting foreign functions! %v", err);                
+            return;
+        }
+
+        os.write_string(handle, strings.to_string(sb));
+    }
+
+    output_foreign_import :: proc(sb: ^strings.Builder) {
+        fmt.sbprint(sb, "when ODIN_DEBUG {\n");
+        fmt.sbprint(sb, "    foreign import cimgui \"external/cimgui_debug.lib\";\n");
+        fmt.sbprint(sb, "} else {\n");
+        fmt.sbprint(sb, "    foreign import cimgui \"external/cimgui.lib\";\n");
+        fmt.sbprint(sb, "}\n\n");
+    }
+}
+
+output_header :: proc(json_path: string) {}

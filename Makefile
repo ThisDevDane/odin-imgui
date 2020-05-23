@@ -4,7 +4,7 @@ OC  = odin
 CC = cl
 LINK = lib
 
-FLAGS = -out=$(GENERATOR_NAME)
+FLAGS = --out=$(GENERATOR_NAME) --llvm-api
 
 GENERATOR_SRC = ./generator_v2
 GENERATOR_NAME = odin-imgui-gen.exe
@@ -20,11 +20,11 @@ CIMGUI_LIB_ARCHIVE = $(DIST_DIR)/cimgui-binaries.zip
 
 build_debug:
 	@echo "[Build Debug]"
-	$(OC) build $(GENERATOR_SRC) $(FLAGS) -debug
+	$(OC) build $(GENERATOR_SRC) $(FLAGS) --debug
 
 build_prod:
 	@echo "[Build Production]"
-	$(OC) build $(GENERATOR_SRC) $(FLAGS) -opt=3
+	$(OC) build $(GENERATOR_SRC) $(FLAGS) --opt=3
 
 all: cimgui build_prod
 
@@ -35,7 +35,7 @@ generate: build_debug
 
 vet:
 	@echo "[Odin Vet]"
-	$(OC) check $(GENERATOR_SRC) $(FLAGS) -vet
+	$(OC) check $(GENERATOR_SRC) $(FLAGS) --vet
 
 dist: clean all generate
 	@echo "[Build Distribute]"

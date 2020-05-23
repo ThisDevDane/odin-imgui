@@ -1,4 +1,4 @@
-package main;
+jspackage main;
 
 import "core:fmt";
 import "core:reflect";
