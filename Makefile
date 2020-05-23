@@ -8,6 +8,7 @@ FLAGS = --out=$(GENERATOR_NAME) --llvm-api
 
 GENERATOR_SRC = ./generator_v2
 GENERATOR_NAME = odin-imgui-gen.exe
+PDB_NAME = odin-imgui-gen.pdb
 
 DIST_DIR = ./dist
 ODIN_OUTPUT_DIR = ./output
@@ -46,6 +47,7 @@ clean:
 	@echo "[Clean]"
 	rm -rf $(ODIN_OUTPUT_DIR)
 	rm -rf $(GENERATOR_NAME)
+	rm -rf $(PDB_NAME)
 	rm -rf $(EXTERNAL_LIB_DIR)
 	rm -rf $(DIST_DIR)
 
