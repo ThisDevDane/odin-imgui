@@ -46,6 +46,7 @@ output_enums :: proc(json_path: string, output_path: string) {
     Enum_Defintion :: struct {
         name:   string,
         fields: [dynamic]Enum_Field,
+        longest_field_name: int,
     };
 
     Enum_Field :: struct {
@@ -89,27 +90,16 @@ output_enums :: proc(json_path: string, output_path: string) {
 
             append(&definitions, def);
         }
+
+        for def in &definitions {
+            for f in def.fields {
+                key := clean_field_key(f.name, def.name);
+                def.longest_field_name = max(def.longest_field_name, len(key));
+            }
+        }
     }
     
     { // SB output
-        clean_enum_key :: proc(key: string) -> string {
-            key := key;
-            key = strings.trim_space(key);
-            key = clean_imgui(key);
-            key = strings.trim(key, "_");
-            key = to_ada_case(key);
-            return key;
-        }
-
-        clean_field_key :: proc(key: string, enum_name: string) -> string {
-            key := key;
-            key = strings.trim_space(key);
-            key = key[len(enum_name):];
-            key = strings.trim(key, "_");
-            key = to_ada_case(key);
-            return key;
-        }
-
         for def in definitions {
             fmt.sbprint(&sb, clean_enum_key(def.name));
             fmt.sbprint(&sb, " :: enum i32 {");
@@ -117,7 +107,9 @@ output_enums :: proc(json_path: string, output_path: string) {
 
             for f in def.fields {
                 fmt.sbprint(&sb, '\t');
-                fmt.sbprint(&sb, clean_field_key(f.name, def.name));
+                key := clean_field_key(f.name, def.name);
+                fmt.sbprint(&sb, key);
+                right_pad(&sb, len(key), def.longest_field_name);
 
                 if(f.value != nil) {
                     fmt.sbprint(&sb, " = ");
@@ -161,6 +153,24 @@ output_enums :: proc(json_path: string, output_path: string) {
         }
 
         os.write_string(handle, strings.to_string(sb));
+    }
+
+    clean_enum_key :: proc(key: string) -> string {
+        key := key;
+        key = strings.trim_space(key);
+        key = clean_imgui(key);
+        key = strings.trim(key, "_");
+        key = to_ada_case(key);
+        return key;
+    }
+
+    clean_field_key :: proc(key: string, enum_name: string) -> string {
+        key := key;
+        key = strings.trim_space(key);
+        key = key[len(enum_name):];
+        key = strings.trim(key, "_");
+        key = to_ada_case(key);
+        return key;
     }
 }
 
