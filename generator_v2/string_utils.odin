@@ -6,6 +6,11 @@ import "core:fmt";
 
 insert_package_header :: proc(sb: ^strings.Builder) do fmt.sbprint(sb, "package imgui;\n\n");
 
+right_pad :: proc(sb: ^strings.Builder, current: int, desired: int) {
+    if desired-current <= 0 do return;
+    for _ in 0..(desired-current)-1 do fmt.sbprint(sb, " ");
+}
+
 type_map := map[string]string {
     "char"           = "i8",
     "unsigned char"  = "u8",
@@ -128,6 +133,15 @@ clean_imgui :: proc(s : string) -> string {
         if strings.has_prefix(result, "Gui") == true {
             result = result[3:];
         }
+        return result;
+    }
+
+    return s;
+}
+
+clean_ig :: proc(s : string) -> string {
+    if strings.has_prefix(s, "ig") == true {
+        result := s[2:];
         return result;
     }
 
