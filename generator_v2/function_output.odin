@@ -284,7 +284,6 @@ gather_foreign_proc_groups :: proc(groups : ^[dynamic]Foreign_Func_Group, obj: j
             f, ok := convert_json_to_foreign_func(ov_obj);
             if ok == false do continue;
 
-
             if figure_out_if_new_group(f.link_name) {
                 append(groups, current_group);
                 current_group = Foreign_Func_Group{};
@@ -371,7 +370,7 @@ clean_func_name :: proc(key: string) -> string {
     key := key;
     key = clean_imgui(key);
     key = clean_ig(key);
-    key = to_snake_case(key);
+    key = strings.to_snake_case(key);
     return key;
 }
 

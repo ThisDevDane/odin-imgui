@@ -54,13 +54,7 @@ output_wrappers :: proc(json_path: string, output_path: string) -> ^map[string]s
     }
 
     { // SB Output
-        write_wrapper :: proc(sb: ^strings.Builder, f: Foreign_Func, res: ^map[string]string) {
-            if should_make_simple_wrapper(f) == false do return;
-
-            wrapper_name := fmt.aprintf("swr_{}", f.link_name);
-            res[strings.clone(f.link_name)] = wrapper_name;
-            //log.debugf("var_map[\"{}\"] = \"{}\"", f.link_name, wrapper_name);
-
+        write_wrapper :: proc(sb: ^strings.Builder, f: Foreign_Func, wrapper_name: string) {
             fmt.sbprintf(sb, "{} :: proc(", wrapper_name);
             for p, idx in f.params {
                 fmt.sbprintf(sb, "{}: ", p.name);
@@ -106,11 +100,18 @@ output_wrappers :: proc(json_path: string, output_path: string) -> ^map[string]s
             for x in g.functions {
                 switch f in x {
                     case Foreign_Overload_Group:
-                        for y in f.functions do write_wrapper(&sb, y, res);
+                        for y in f.functions {
+                            if should_make_simple_wrapper(y) == false do continue;
+                            wrapper_name := fmt.aprintf("swr_{}", y.link_name);
+                            res[strings.clone(y.link_name)] = wrapper_name;
+                            write_wrapper(&sb, y, wrapper_name);
+                        }
                     case Foreign_Func:
-                        write_wrapper(&sb, f, res);
+                        if should_make_simple_wrapper(f) == false do break;
+                        wrapper_name := fmt.aprintf("swr_{}", f.link_name);
+                        res[strings.clone(f.link_name)] = wrapper_name;
+                        write_wrapper(&sb, f, wrapper_name);
                 }
-                
             }
 
             fmt.sbprint(&sb, "\n");
@@ -277,7 +278,7 @@ output_enums :: proc(json_path: string, output_path: string) {
         key = strings.trim_space(key);
         key = clean_imgui(key);
         key = strings.trim(key, "_");
-        key = to_ada_case(key);
+        key = strings.to_ada_case(key);
         return key;
     }
 
@@ -286,7 +287,7 @@ output_enums :: proc(json_path: string, output_path: string) {
         key = strings.trim_space(key);
         key = key[len(enum_name):];
         key = strings.trim(key, "_");
-        key = to_ada_case(key);
+        key = strings.to_ada_case(key);
         return key;
     }
 }
@@ -409,7 +410,7 @@ output_structs :: proc(json_path: string, output_path: string) {
             return n;
         }
         key = clean_imgui(key);
-        key = to_ada_case(key);
+        key = strings.to_ada_case(key);
         return key;
     }
 
