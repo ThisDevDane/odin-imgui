@@ -7,10 +7,15 @@ import "core:strings"
 import "core:encoding/json";
 
 Foreign_Func_Group :: struct {
-    functions: [dynamic]Foreign_Func,
+    functions: [dynamic]union{Foreign_Overload_Group, Foreign_Func},
     longest_func_name: int,
     longest_param_return_list: int,
 };
+
+Foreign_Overload_Group :: struct {
+    name: string,
+    functions: [dynamic]Foreign_Func,
+}
 
 Foreign_Func :: struct {
     link_name: string,
@@ -47,8 +52,15 @@ output_foreign :: proc(json_path: string, output_path: string) {
         gather_foreign_proc_groups(&groups, obj);
 
         for g in &groups {
-            for f in g.functions {
-                g.longest_func_name = max(g.longest_func_name, len(f.link_name));
+            for x in g.functions {
+                switch f in x {
+                    case Foreign_Overload_Group:
+                        for y in f.functions {
+                            g.longest_func_name = max(g.longest_func_name, len(y.link_name));    
+                        }
+                    case Foreign_Func:
+                        g.longest_func_name = max(g.longest_func_name, len(f.link_name));
+                }
             }
         }
     }
@@ -59,20 +71,29 @@ output_foreign :: proc(json_path: string, output_path: string) {
         fmt.sbprint(&sb, "@(default_calling_convention=\"c\")\n");
         fmt.sbprint(&sb, "foreign cimgui {\n");
 
+        output_functions :: proc(sb: ^strings.Builder, f: Foreign_Func, g: Foreign_Func_Group) {
+            fmt.sbprint(sb, "\t");
+            fmt.sbprintf(sb, "{}", f.link_name);
+            right_pad(sb, len(f.link_name), g.longest_func_name);
+            fmt.sbprint(sb, " :: proc(");
+            output_param_list(sb, f);
+            fmt.sbprint(sb, ") ");
+
+            if function_has_return(f) == true {
+                fmt.sbprintf(sb, "-> {} ", clean_type(f.return_type));
+            }
+
+            fmt.sbprint(sb, "---;\n");
+        }
+
         for g in groups {
-            for f in g.functions {
-                fmt.sbprint(&sb, "\t");
-                fmt.sbprintf(&sb, "{}", f.link_name);
-                right_pad(&sb, len(f.link_name), g.longest_func_name);
-                fmt.sbprint(&sb, " :: proc(");
-                output_param_list(&sb, f);
-                fmt.sbprint(&sb, ") ");
-
-                if function_has_return(f) == true {
-                    fmt.sbprintf(&sb, "-> {} ", clean_type(f.return_type));
+            for x in g.functions {
+                switch f in x {
+                    case Foreign_Overload_Group:
+                        for y in f.functions do output_functions(&sb, y, g);
+                    case Foreign_Func:
+                        output_functions(&sb, f, g);
                 }
-
-                fmt.sbprint(&sb, "---;\n");
             }
 
             fmt.sbprint(&sb, "\n");
@@ -124,71 +145,99 @@ output_header :: proc(json_path: string, output_path: string, wrapper_map: ^map[
     { // Gather
         gather_foreign_proc_groups(&groups, obj);
 
+        calculate_longest :: proc(g: ^Foreign_Func_Group, f: Foreign_Func) {
+            g.longest_func_name = max(g.longest_func_name, len(clean_func_name(f.link_name)));
+
+            sbu := strings.make_builder();
+            defer strings.destroy_builder(&sbu);
+            output_param_list(&sbu, f);
+
+            prl_len := len(strings.to_string(sbu));
+
+            if function_has_return(f) == true {
+                sbr := strings.make_builder();
+                defer strings.destroy_builder(&sbr);
+                fmt.sbprintf(&sbr, "-> {} ", clean_type(f.return_type));
+                prl_len += len(strings.to_string(sbr));
+            }
+
+            g.longest_param_return_list = max(g.longest_param_return_list, prl_len);
+        }
+
         for g in &groups {
-            for f in g.functions {
-                g.longest_func_name = max(g.longest_func_name, len(clean_func_name(f.link_name)));
-
-                sbu := strings.make_builder();
-                defer strings.destroy_builder(&sbu);
-                output_param_list(&sbu, f);
-
-                prl_len := len(strings.to_string(sbu));
-
-                if function_has_return(f) == true {
-                    sbr := strings.make_builder();
-                    defer strings.destroy_builder(&sbr);
-                    fmt.sbprintf(&sbr, "-> {} ", clean_type(f.return_type));
-                    prl_len += len(strings.to_string(sbr));
+            for x in g.functions {
+                switch f in x {
+                    case Foreign_Overload_Group:
+                        for y in f.functions do calculate_longest(&g, y);
+                    case Foreign_Func:
+                        calculate_longest(&g, f);
                 }
-
-                g.longest_param_return_list = max(g.longest_param_return_list, prl_len);
             }
         }
     }
 
     { // SB Output
+        write_header :: proc(sb: ^strings.Builder, wrapper_map: ^map[string]string, g: Foreign_Func_Group, f: Foreign_Func) {
+            name := clean_func_name(f.link_name);
+
+            fmt.sbprintf(sb, "{} ", name);
+            right_pad(sb, len(name), g.longest_func_name);
+
+            fmt.sbprintf(sb, ":: proc(");
+
+            sbu := strings.make_builder();
+            defer strings.destroy_builder(&sbu);
+            output_param_list(&sbu, f);
+            param_list := strings.to_string(sbu);
+            fmt.sbprint(sb, param_list);
+            fmt.sbprint(sb, ") ");
+
+            return_length := 0;
+
+            if function_has_return(f) == true {
+                sbr := strings.make_builder();
+                defer strings.destroy_builder(&sbr);
+                fmt.sbprintf(&sbr, "-> {} ", clean_type(f.return_type));
+                return_str := strings.to_string(sbr);
+                return_length = len(return_str);
+                fmt.sbprint(sb, return_str);
+            }
+
+            right_pad(sb, len(param_list)+return_length, g.longest_param_return_list);
+            fmt.sbprint(sb, "do ");
+
+            if function_has_return(f) == true do fmt.sbprint(sb, "return ");
+
+            if v, ok := wrapper_map[f.link_name]; ok {
+                fmt.sbprintf(sb, "{}(", v);
+                output_call_list(sb, f);
+                fmt.sbprint(sb, ");");
+            } else {
+                fmt.sbprintf(sb, "{}(", f.link_name);
+                output_call_list(sb, f);
+                fmt.sbprint(sb, ");");
+            }
+            fmt.sbprint(sb, "\n");
+        }
+
         for g in groups {
-            for f, _ in g.functions {
-                name := clean_func_name(f.link_name);
+            for x in g.functions {
+                switch f in x {
+                    case Foreign_Overload_Group:{
+                        fmt.sbprint(&sb, "\n");
+                        fmt.sbprintf(&sb, "{} :: proc{{\n", clean_func_name(f.name));
+                        for y in f.functions {
+                            name := clean_func_name(y.link_name);
+                            fmt.sbprintf(&sb, "\t{}\n", name);
+                        }
+                        fmt.sbprint(&sb, "}\n");
 
-                fmt.sbprintf(&sb, "{} ", name);
-                right_pad(&sb, len(name), g.longest_func_name);
-
-                fmt.sbprintf(&sb, ":: proc(");
-
-                sbu := strings.make_builder();
-                defer strings.destroy_builder(&sbu);
-                output_param_list(&sbu, f);
-                param_list := strings.to_string(sbu);
-                fmt.sbprint(&sb, param_list);
-                fmt.sbprint(&sb, ") ");
-
-                return_length := 0;
-
-                if function_has_return(f) == true {
-                    sbr := strings.make_builder();
-                    defer strings.destroy_builder(&sbr);
-                    fmt.sbprintf(&sbr, "-> {} ", clean_type(f.return_type));
-                    return_str := strings.to_string(sbr);
-                    return_length = len(return_str);
-                    fmt.sbprint(&sb, return_str);
+                        for y in f.functions do write_header(&sb, wrapper_map, g, y);
+                        fmt.sbprint(&sb, "\n");
+                    }
+                    case Foreign_Func:
+                        write_header(&sb, wrapper_map, g, f);
                 }
-
-                right_pad(&sb, len(param_list)+return_length, g.longest_param_return_list);
-                fmt.sbprint(&sb, "do ");
-
-                if function_has_return(f) == true do fmt.sbprint(&sb, "return ");
-
-                if v, ok := wrapper_map[f.link_name]; ok {
-                    fmt.sbprintf(&sb, "{}(", v);
-                    output_call_list(&sb, f);
-                    fmt.sbprint(&sb, ");");
-                } else {
-                    fmt.sbprintf(&sb, "{}(", f.link_name);
-                    output_call_list(&sb, f);
-                    fmt.sbprint(&sb, ");");
-                }
-                fmt.sbprint(&sb, "\n");
             }
 
             fmt.sbprint(&sb, "\n");
@@ -207,42 +256,97 @@ output_header :: proc(json_path: string, output_path: string, wrapper_map: ^map[
     }
 }
 
+count_cimgui_overloads :: proc(arr: json.Array) -> int {
+    count := 0;
+    for x in arr {
+        if is_nonUDT(x.value.(json.Object)) do continue;
+        count += 1;
+    }
+
+    return count;
+}
+
 gather_foreign_proc_groups :: proc(groups : ^[dynamic]Foreign_Func_Group, obj: json.Object) {
     reset_group_info();
     current_group := Foreign_Func_Group{};
     for _, v in obj {
         overloads := v.value.(json.Array);
-        ov_loop: for ov in overloads {
-            f := Foreign_Func{};
-            ov_obj := ov.value.(json.Object);
+        ov_count := count_cimgui_overloads(overloads);
 
-            f.link_name = get_value_string(ov_obj["ov_cimguiname"]);
+        ov_group := Foreign_Overload_Group{};
+
+        for ov, idx in overloads {
+            ov_obj := ov.value.(json.Object);
+            if is_nonUDT(ov_obj)    do continue;
+            if is_vector(ov_obj)    do continue;
+            if is_ctor_dtor(ov_obj) do continue;
+
+            f, ok := convert_json_to_foreign_func(ov_obj);
+            if ok == false do continue;
+
+
             if figure_out_if_new_group(f.link_name) {
                 append(groups, current_group);
                 current_group = Foreign_Func_Group{};
             }
-            
-            f.return_type = get_optional_string(ov_obj, "ret");
 
-            for arg in ov_obj["argsT"].value.(json.Array) {
-                param := Foreign_Func_Param{};
-                arg_obj := arg.value.(json.Object);
-
-                param.name = get_value_string(arg_obj["name"]);
-                param.type = get_value_string(arg_obj["type"]);
-
-                if param.type == "..." do continue ov_loop;
-                if param.type == "va_list" do continue ov_loop;
-
-                append(&f.params, param);
-                
+            if ov_count > 1 {
+                ov_group.name = get_value_string(ov_obj["funcname"]);
+                append(&ov_group.functions, f);
+            } else {
+                append(&current_group.functions, f);
             }
+        }
 
-            append(&current_group.functions, f);
+        if ov_count > 1 && len(ov_group.functions) > 0 {
+            append(&current_group.functions, ov_group);
         }
     }
 
     append(groups, current_group);
+}
+
+@(private="file")
+is_ctor_dtor :: proc(obj: json.Object) -> bool {
+    ctor := get_optional_bool(obj, "constructor");
+    dtor := get_optional_bool(obj, "destructor");
+    return ctor == true || dtor == true;
+}
+
+@(private="file")
+is_vector :: proc(obj: json.Object) -> bool {
+    str := get_value_string(obj["stname"]);
+    return str == "ImVector";
+}
+
+@(private="file")
+is_nonUDT :: proc(obj: json.Object) -> bool {
+    _, ok := obj["nonUDT"];
+    return ok == true;
+}
+
+@(private="file")
+convert_json_to_foreign_func :: proc(ov_obj: json.Object) -> (Foreign_Func, bool) {
+    f := Foreign_Func{};
+
+    f.link_name = get_value_string(ov_obj["ov_cimguiname"]);
+    f.return_type = get_optional_string(ov_obj, "ret");
+
+    for arg in ov_obj["argsT"].value.(json.Array) {
+        param := Foreign_Func_Param{};
+        arg_obj := arg.value.(json.Object);
+
+        param.name = get_value_string(arg_obj["name"]);
+        param.type = get_value_string(arg_obj["type"]);
+
+        if param.type == "..." do return Foreign_Func{}, false;
+        if param.type == "va_list" do return Foreign_Func{}, false;
+
+        append(&f.params, param);
+        
+    }
+
+    return f, true;
 }
 
 @(private="file") prev_group := "";

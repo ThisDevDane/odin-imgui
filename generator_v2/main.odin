@@ -19,9 +19,9 @@ main :: proc() {
 
     log.info("Generating odin source...");
 
-    // output_enums(STRUCTS_AND_ENUM_JSON_PATH, "./output/enums.odin");
-    // output_structs(STRUCTS_AND_ENUM_JSON_PATH, "./output/structs.odin");
-    // output_foreign(DEFINITION_JSON_PATH, "./output/foreign.odin");
+    output_enums(STRUCTS_AND_ENUM_JSON_PATH, "./output/enums.odin");
+    output_structs(STRUCTS_AND_ENUM_JSON_PATH, "./output/structs.odin");
+    output_foreign(DEFINITION_JSON_PATH, "./output/foreign.odin");
     wrapper_map := output_wrappers(DEFINITION_JSON_PATH, "./output/wrapper.odin");
     output_header(DEFINITION_JSON_PATH, "./output/header.odin", wrapper_map);
 
@@ -54,53 +54,63 @@ output_wrappers :: proc(json_path: string, output_path: string) -> ^map[string]s
     }
 
     { // SB Output
+        write_wrapper :: proc(sb: ^strings.Builder, f: Foreign_Func, res: ^map[string]string) {
+            if should_make_simple_wrapper(f) == false do return;
+
+            wrapper_name := fmt.aprintf("swr_{}", f.link_name);
+            res[strings.clone(f.link_name)] = wrapper_name;
+            //log.debugf("var_map[\"{}\"] = \"{}\"", f.link_name, wrapper_name);
+
+            fmt.sbprintf(sb, "{} :: proc(", wrapper_name);
+            for p, idx in f.params {
+                fmt.sbprintf(sb, "{}: ", p.name);
+                type := clean_type(p.type);
+                if type == "cstring" do type = "string";
+                fmt.sbprint(sb, type);
+
+                if idx < len(f.params)-1 do fmt.sbprint(sb, ", ");
+            }
+            fmt.sbprint(sb, ") ");
+            if function_has_return(f) == true do fmt.sbprintf(sb, "-> {} ", clean_type(f.return_type));
+            fmt.sbprint(sb, "{\n");
+
+            var_map : map[string]string;
+
+            for p, idx in f.params {
+                if clean_type(p.type) != "cstring" do continue;
+
+                var_name := fmt.tprintf("str{}", idx);
+                var_map[p.name] = var_name;
+                fmt.sbprintf(sb, "\t{} := fmt.tprintf(\"{{}}\\x00\", {});\n", var_name, p.name);
+            }           
+
+            fmt.sbprint(sb, "\t");
+            if function_has_return(f) == true do fmt.sbprint(sb, "return ");
+            
+
+            fmt.sbprintf(sb, "{}(", f.link_name);
+            for p, idx in f.params {
+                if v, ok := var_map[p.name]; ok {
+                    fmt.sbprintf(sb, "cstring(&{}[0])", v);
+                } else {
+                    fmt.sbprint(sb, p.name);
+                }
+                if idx < len(f.params)-1 do fmt.sbprint(sb, ", ");
+            }
+            fmt.sbprint(sb, ");");
+            fmt.sbprint(sb, "\n");
+            fmt.sbprint(sb, "}\n\n");
+        }
+
         for g in groups {
-            for f in g.functions {
-                if should_make_simple_wrapper(f) == false do continue;
-
-                wrapper_name := fmt.aprintf("swr_{}", f.link_name);
-                res[strings.clone(f.link_name)] = wrapper_name;
-                //log.debugf("var_map[\"{}\"] = \"{}\"", f.link_name, wrapper_name);
-
-                fmt.sbprintf(&sb, "{} :: proc(", wrapper_name);
-                for p, idx in f.params {
-                    fmt.sbprintf(&sb, "{}: ", p.name);
-                    type := clean_type(p.type);
-                    if type == "cstring" do type = "string";
-                    fmt.sbprint(&sb, type);
-
-                    if idx < len(f.params)-1 do fmt.sbprint(&sb, ", ");
+            for x in g.functions {
+                switch f in x {
+                    case Foreign_Overload_Group:
+                        for y in f.functions do write_wrapper(&sb, y, res);
+                    case Foreign_Func:
+                        write_wrapper(&sb, f, res);
                 }
-                fmt.sbprint(&sb, ") ");
-                if function_has_return(f) == true do fmt.sbprintf(&sb, "-> {} ", clean_type(f.return_type));
-                fmt.sbprint(&sb, "{\n");
-
-                var_map : map[string]string;
-
-                for p, idx in f.params {
-                    if clean_type(p.type) != "cstring" do continue;
-
-                    var_name := fmt.tprintf("str{}", idx);
-                    var_map[p.name] = var_name;
-                    fmt.sbprintf(&sb, "\t{} := fmt.tprintf(\"{{}}\\x00\", {});\n", var_name, p.name);
-                }           
-
-                fmt.sbprint(&sb, "\t");
-                if function_has_return(f) == true do fmt.sbprint(&sb, "return ");
                 
-
-                fmt.sbprintf(&sb, "{}(", f.link_name);
-                for p, idx in f.params {
-                    if v, ok := var_map[p.name]; ok {
-                        fmt.sbprintf(&sb, "cstring(&{}[0])", v);
-                    } else {
-                        fmt.sbprint(&sb, p.name);
-                    }
-                    if idx < len(f.params)-1 do fmt.sbprint(&sb, ", ");
-                }
-                fmt.sbprint(&sb, ");");
-                fmt.sbprint(&sb, "\n");
-                fmt.sbprint(&sb, "}\n\n");
             }
 
             fmt.sbprint(&sb, "\n");

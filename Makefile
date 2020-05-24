@@ -4,11 +4,14 @@ OC  = odin
 CC = cl
 LINK = lib
 
-FLAGS = --out=$(GENERATOR_NAME) --llvm-api
+PROGRAM_NAME = odin-imgui-gen
+
+FLAGS = --out=$(EXE_NAME) --llvm-api
 
 GENERATOR_SRC = ./generator_v2
-GENERATOR_NAME = odin-imgui-gen.exe
-PDB_NAME = odin-imgui-gen.pdb
+EXE_NAME = $(PROGRAM_NAME).exe
+OBJ_NAME = $(PROGRAM_NAME).exe
+PDB_NAME = $(PROGRAM_NAME).pdb
 
 DIST_DIR = ./dist
 ODIN_OUTPUT_DIR = ./output
@@ -32,7 +35,7 @@ all: cimgui build_prod
 generate: build_debug
 	@echo "[Generate]"
 	@mkdir -p $(ODIN_OUTPUT_DIR)
-	$(GENERATOR_NAME)
+	$(EXE_NAME)
 
 vet:
 	@echo "[Odin Vet]"
@@ -46,8 +49,9 @@ dist: clean all generate
 clean:
 	@echo "[Clean]"
 	rm -rf $(ODIN_OUTPUT_DIR)
-	rm -rf $(GENERATOR_NAME)
+	rm -rf $(EXE_NAME)
 	rm -rf $(PDB_NAME)
+	rm -rf $(OBJ_NAME)
 	rm -rf $(EXTERNAL_LIB_DIR)
 	rm -rf $(DIST_DIR)
 

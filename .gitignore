@@ -7,3 +7,4 @@ output/*
 *.json
 *.sublime-workspace
 *.pdb
+*.obj

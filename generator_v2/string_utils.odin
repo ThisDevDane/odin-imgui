@@ -53,6 +53,8 @@ type_map := map[string]string {
     "ImVector_ImU32" = "Im_Vector(u32)",
     "ImVector_float" = "Im_Vector(f32)",
     "ImVector_char" = "Im_Vector(u8)",
+
+    "ImGuiIO" = "IO",
 };
 
 clean_type :: proc(type: string) -> string {
