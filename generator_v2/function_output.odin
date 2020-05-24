@@ -72,8 +72,7 @@ output_foreign :: proc(json_path: string, output_path: string) {
         fmt.sbprint(&sb, "foreign cimgui {\n");
 
         output_functions :: proc(sb: ^strings.Builder, f: Foreign_Func, g: Foreign_Func_Group) {
-            fmt.sbprint(sb, "\t");
-            fmt.sbprintf(sb, "{}", f.link_name);
+            fmt.sbprintf(sb, "\t{}", f.link_name);
             right_pad(sb, len(f.link_name), g.longest_func_name);
             fmt.sbprint(sb, " :: proc(");
             output_param_list(sb, f);
@@ -115,14 +114,14 @@ output_foreign :: proc(json_path: string, output_path: string) {
 
     output_foreign_import :: proc(sb: ^strings.Builder) {
         fmt.sbprint(sb, "when ODIN_DEBUG {\n");
-        fmt.sbprint(sb, "    foreign import cimgui \"external/cimgui_debug.lib\";\n");
+        fmt.sbprint(sb, "\tforeign import cimgui \"external/cimgui_debug.lib\";\n");
         fmt.sbprint(sb, "} else {\n");
-        fmt.sbprint(sb, "    foreign import cimgui \"external/cimgui.lib\";\n");
+        fmt.sbprint(sb, "\tforeign import cimgui \"external/cimgui.lib\";\n");
         fmt.sbprint(sb, "}\n\n");
     }
 }
 
-output_header :: proc(json_path: string, output_path: string, wrapper_map: ^map[string]string) {
+output_header :: proc(json_path: string, output_path: string, wrapper_map: ^Wrapper_Map) {
     log.info("Outputting headers...");
 
     json_bytes, _ := os.read_entire_file(json_path);
@@ -177,17 +176,29 @@ output_header :: proc(json_path: string, output_path: string, wrapper_map: ^map[
     }
 
     { // SB Output
-        write_header :: proc(sb: ^strings.Builder, wrapper_map: ^map[string]string, g: Foreign_Func_Group, f: Foreign_Func) {
+        write_header :: proc(sb: ^strings.Builder, wrapper_map: ^Wrapper_Map, g: Foreign_Func_Group, f: Foreign_Func) {
             name := clean_func_name(f.link_name);
 
             fmt.sbprintf(sb, "{} ", name);
             right_pad(sb, len(name), g.longest_func_name);
 
-            fmt.sbprintf(sb, ":: proc(");
+            fmt.sbprintf(sb, ":: inline proc(");
 
             sbu := strings.make_builder();
             defer strings.destroy_builder(&sbu);
-            output_param_list(&sbu, f);
+            if v, ok := wrapper_map[f.link_name]; ok {
+                switch w in v {
+                    case Wrapper_Func: {
+                        write_wrapper_param_list(&sbu, w);
+                    }
+                    case string: {
+                        output_param_list(&sbu, f, true);
+                    }
+                }
+            } else {
+                output_param_list(&sbu, f, true);
+            }
+            
             param_list := strings.to_string(sbu);
             fmt.sbprint(sb, param_list);
             fmt.sbprint(sb, ") ");
@@ -209,9 +220,16 @@ output_header :: proc(json_path: string, output_path: string, wrapper_map: ^map[
             if function_has_return(f) == true do fmt.sbprint(sb, "return ");
 
             if v, ok := wrapper_map[f.link_name]; ok {
-                fmt.sbprintf(sb, "{}(", v);
-                output_call_list(sb, f);
-                fmt.sbprint(sb, ");");
+                switch w in v {
+                    case Wrapper_Func: {
+                        output_wrapper_call(sb, w);
+                    }
+                    case string: {
+                        fmt.sbprintf(sb, "{}(", w);
+                        output_call_list(sb, f);
+                        fmt.sbprint(sb, ");");
+                    }
+                }
             } else {
                 fmt.sbprintf(sb, "{}(", f.link_name);
                 output_call_list(sb, f);
@@ -256,6 +274,7 @@ output_header :: proc(json_path: string, output_path: string, wrapper_map: ^map[
     }
 }
 
+@(private="file")
 count_cimgui_overloads :: proc(arr: json.Array) -> int {
     count := 0;
     for x in arr {
@@ -338,7 +357,8 @@ convert_json_to_foreign_func :: proc(ov_obj: json.Object) -> (Foreign_Func, bool
         param.name = get_value_string(arg_obj["name"]);
         param.type = get_value_string(arg_obj["type"]);
 
-        if param.type == "..." do return Foreign_Func{}, false;
+        if param.type == "..." do param.name = "args";
+        
         if param.type == "va_list" do return Foreign_Func{}, false;
 
         append(&f.params, param);
@@ -385,9 +405,17 @@ function_has_return :: proc(f: Foreign_Func) -> bool {
     return f.return_type != "" && f.return_type != "void";
 }
 
-output_param_list :: proc(sb: ^strings.Builder, f: Foreign_Func) {
+output_param_list :: proc(sb: ^strings.Builder, f: Foreign_Func, convert_cstring := false) {
     for p, idx in f.params {
-        fmt.sbprintf(sb, "{}: {}", p.name, clean_type(p.type));
+        type := clean_type(p.type);
+        if convert_cstring == true && type == "cstring" do type = "string";
+
+        if type == "..." {
+            type = "..any";
+            fmt.sbprint(sb, "#c_vararg ");
+        }
+
+        fmt.sbprintf(sb, "{}: {}", p.name, type);
         if idx < len(f.params)-1 do fmt.sbprint(sb, ", ");
     }
 }
