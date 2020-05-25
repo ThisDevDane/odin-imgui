@@ -211,17 +211,18 @@ output_header :: proc(json_path: string, output_path: string, wrapper_map: ^Wrap
 
             sbu := strings.make_builder();
             defer strings.destroy_builder(&sbu);
+
             if v, ok := wrapper_map[f.link_name]; ok {
                 switch w in v {
                     case Wrapper_Func: {
                         write_wrapper_param_list(&sbu, w);
                     }
                     case string: {
-                        output_param_list(&sbu, f, true);
+                        output_param_list(&sbu, f, true, false);
                     }
                 }
             } else {
-                output_param_list(&sbu, f, true);
+                output_param_list(&sbu, f, true, false);
             }
             
             param_list := strings.to_string(sbu);
@@ -248,6 +249,7 @@ output_header :: proc(json_path: string, output_path: string, wrapper_map: ^Wrap
                 switch w in v {
                     case Wrapper_Func: {
                         output_wrapper_call(sb, w);
+                        fmt.sbprint(sb, ";");
                     }
                     case string: {
                         fmt.sbprintf(sb, "{}(", w);
@@ -268,12 +270,12 @@ output_header :: proc(json_path: string, output_path: string, wrapper_map: ^Wrap
                 switch f in x {
                     case Foreign_Overload_Group:{
                         fmt.sbprint(&sb, "\n");
-                        fmt.sbprintf(&sb, "{} :: proc{{\n", clean_func_name(f.name));
+                        fmt.sbprintf(&sb, "{} :: proc {{\n", clean_func_name(f.name));
                         for y in f.functions {
                             name := clean_func_name(y.link_name);
-                            fmt.sbprintf(&sb, "\t{}\n", name);
+                            fmt.sbprintf(&sb, "\t{},\n", name);
                         }
-                        fmt.sbprint(&sb, "}\n");
+                        fmt.sbprint(&sb, "};\n");
 
                         for y in f.functions do write_header(&sb, wrapper_map, g, y);
                         fmt.sbprint(&sb, "\n");
@@ -321,9 +323,12 @@ gather_foreign_proc_groups :: proc(groups : ^[dynamic]Foreign_Func_Group, obj: j
 
         for ov, idx in overloads {
             ov_obj := ov.value.(json.Object);
-            if is_nonUDT(ov_obj)    do continue;
-            if is_vector(ov_obj)    do continue;
-            if is_ctor_dtor(ov_obj) do continue;
+            if is_nonUDT(ov_obj)       do continue;
+            if is_vector(ov_obj)       do continue;
+            if is_pool(ov_obj)         do continue;
+            if is_chunk_stream(ov_obj) do continue;
+            if is_bit_vector(ov_obj)   do continue;
+            if is_ctor_dtor(ov_obj)    do continue;
 
             f, ok := convert_json_to_foreign_func(ov_obj);
             if ok == false do continue;
@@ -335,6 +340,7 @@ gather_foreign_proc_groups :: proc(groups : ^[dynamic]Foreign_Func_Group, obj: j
 
             if ov_count > 1 {
                 ov_group.name = get_value_string(ov_obj["funcname"]);
+                if get_value_string(ov_obj["stname"]) == "ImGuiWindow" && ov_group.name == "GetID" do ov_group.name = "WindowGetID";
                 append(&ov_group.functions, f);
             } else {
                 append(&current_group.functions, f);
@@ -363,6 +369,24 @@ is_vector :: proc(obj: json.Object) -> bool {
 }
 
 @(private="file")
+is_pool :: proc(obj: json.Object) -> bool {
+    str := get_value_string(obj["stname"]);
+    return str == "ImPool";
+}
+
+@(private="file")
+is_chunk_stream :: proc(obj: json.Object) -> bool {
+    str := get_value_string(obj["stname"]);
+    return str == "ImChunkStream";
+}
+
+@(private="file")
+is_bit_vector :: proc(obj: json.Object) -> bool {
+    str := get_value_string(obj["stname"]);
+    return str == "ImBitVector";
+}
+
+@(private="file")
 is_nonUDT :: proc(obj: json.Object) -> bool {
     _, ok := obj["nonUDT"];
     return ok == true;
@@ -387,9 +411,9 @@ convert_json_to_foreign_func :: proc(ov_obj: json.Object) -> (Foreign_Func, bool
 
         if param.name == "fmt" do param.name = "fmt_";
         if param.name == "in" do param.name = "in_";
+        if param.name == "context" do param.name = "ctx";
 
         append(&f.params, param);
-        
     }
 
     return f, true;
@@ -432,14 +456,14 @@ function_has_return :: proc(f: Foreign_Func) -> bool {
     return f.return_type != "" && f.return_type != "void";
 }
 
-output_param_list :: proc(sb: ^strings.Builder, f: Foreign_Func, convert_cstring := false) {
+output_param_list :: proc(sb: ^strings.Builder, f: Foreign_Func, convert_cstring := false, add_c_varargs := true) {
     for p, idx in f.params {
         type := clean_type(p.type);
         if convert_cstring == true && type == "cstring" do type = "string";
 
         if type == "..." {
             type = "..any";
-            fmt.sbprint(sb, "#c_vararg ");
+            if add_c_varargs == true do fmt.sbprint(sb, "#c_vararg ");
         }
 
         fmt.sbprintf(sb, "{}: {}", p.name, type);

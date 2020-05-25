@@ -55,7 +55,7 @@ output_predefined_copies :: proc(output_path: string, predefined_entities: []Pre
             #partial switch oc in e {
                 case Output_Copy: {
                     fmt.sbprint(&sb, oc.text);
-                    fmt.sbprint(&sb, "\n");
+                    fmt.sbprint(&sb, "\n\n");
                 }
             }
         }

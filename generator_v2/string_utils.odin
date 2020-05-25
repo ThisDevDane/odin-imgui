@@ -12,8 +12,25 @@ right_pad :: proc(sb: ^strings.Builder, current: int, desired: int) {
     for _ in 0..(desired-current)-1 do fmt.sbprint(sb, " ");
 }
 
+name_type_map := map[string]string {
+    "GetClipboardTextFn"     = `proc "c"(user_data : rawptr) -> cstring`,
+    "SetClipboardTextFn"     = `proc "c"(user_data : rawptr, text : cstring)`,
+    "ImeSetInputScreenPosFn" = `proc "c"(x, y : i32)`,
+};
+
+struct_name_map := map[string]string {
+    "ImGuiIO"     = "IO",
+    "ImGuiWindow" = "ImWindow",
+    "ImFont"      = "ImFont",
+    "ImVec1"      = "Vec1",
+    "ImVec2"      = "Vec2",
+    "ImVec2ih"    = "Vec2_ih",
+    "ImVec4"      = "Vec4",
+};
+
 type_map := map[string]string {
     "char"           = "i8",
+    "signed char"    = "i8",
     "unsigned char"  = "u8",
     "unsigned short" = "u16",
     "short"          = "i16",
@@ -24,35 +41,58 @@ type_map := map[string]string {
     "size_t"         = "uint",
     "bool"           = "bool",
 
+    "float&" = "^f32",
     "ImU32" = "u32",
+    "ImS8"  = "i8",
+    "ImU8"  = "u8",
+    "ImU64"  = "u64",
 
-    // "ImTextureID" = "Texture_ID",
-    // "ImGuiID" = "ID",
+    "ImTextureID" = "Texture_ID",
+    "ImGuiID"     = "ImID",
+    "ImFont"      = "ImFont",
+    "ImGuiWindow" = "ImWindow",
 
-    "ImVec2" = "Vec2",
-    "ImVec4" = "Vec4",
+    "ImVec1"   = "Vec1",
+    "ImVec2"   = "Vec2",
+    "ImVec2ih" = "Vec2_ih",
+    "ImVec4"   = "Vec4",
 
-    "ImVector_ImTextureID" = "Im_Vector(Texture_ID)",
-    "ImVector_ImWchar" = "Im_Vector(Wchar)",
-    "ImVector_ImVec2" = "Im_Vector(Vec2)",
-    "ImVector_ImVec4" = "Im_Vector(Vec4)",
-    
-    "ImVector_ImGuiTextRange" = "Im_Vector(Text_Range)",
-    "ImVector_ImGuiStoragePair" = "Im_Vector(Storage_Pair)",
-    
-    "ImVector_ImFontConfig" = "Im_Vector(Font_Config)",
+    "ImChunkStream_ImGuiWindowSettings" = "Im_Chunk_Stream(Window_Settings)",
+
+    "ImPool_ImGuiTabBar" = "Im_Pool(Tab_Bar)",
+
+    "ImVector_ImGuiSettingsHandler"  = "Im_Vector(Settings_Handler)",
+    "ImVector_ImGuiWindowPtr"        = "Im_Vector(^ImWindow)",
+    "ImVector_ImGuiColorMod"         = "Im_Vector(Color_Mod)",
+    "ImVector_ImGuiStyleMod"         = "Im_Vector(Style_Mod)",
+    "ImVector_ImGuiPopupData"        = "Im_Vector(Popup_Data)",
+    "ImVector_ImGuiShrinkWidthItem"  = "Im_Vector(Shrink_Width_Item)",
+    "ImVector_ImGuiID"               = "Im_Vector(ImID)",
+    "ImVector_ImGuiPtrOrIndex"       = "Im_Vector(Ptr_Or_Index)",
+    "ImVector_ImGuiColumnData"       = "Im_Vector(Column_Data)",
+    "ImVector_ImGuiColumns"          = "Im_Vector(Columns)",
+    "ImVector_ImGuiTabItem"          = "Im_Vector(Tab_Item)",
+    "ImVector_ImGuiItemFlags"        = "Im_Vector(Item_Flags)",
+    "ImVector_ImGuiGroupData"        = "Im_Vector(Group_Data)",
+    "ImVector_ImDrawListPtr"         = "Im_Vector(^Draw_List)",
+    "ImVector_ImTextureID"           = "Im_Vector(Texture_ID)",
+    "ImVector_ImWchar"               = "Im_Vector(Wchar)",
+    "ImVector_ImVec2"                = "Im_Vector(Vec2)",
+    "ImVector_ImVec4"                = "Im_Vector(Vec4)",
+    "ImVector_ImGuiTextRange"        = "Im_Vector(Text_Range)",
+    "ImVector_ImGuiStoragePair"      = "Im_Vector(Storage_Pair)",
+    "ImVector_ImFontConfig"          = "Im_Vector(Font_Config)",
     "ImVector_ImFontAtlasCustomRect" = "Im_Vector(Font_Atlas_Custom_Rect)",
-    "ImVector_ImFontPtr" = "Im_Vector(^Font)",
-    "ImVector_ImFontGlyph" = "Im_Vector(Font_Glyph)",
-    
-    "ImVector_ImDrawChannel" = "Im_Vector(Draw_Channel)",
-    "ImVector_ImDrawCmd" = "Im_Vector(Draw_Cmd)",
-    "ImVector_ImDrawIdx" = "Im_Vector(Draw_Idx)",
-    "ImVector_ImDrawVert" = "Im_Vector(Draw_Vert)",
-
-    "ImVector_ImU32" = "Im_Vector(u32)",
-    "ImVector_float" = "Im_Vector(f32)",
-    "ImVector_char" = "Im_Vector(u8)",
+    "ImVector_ImFontPtr"             = "Im_Vector(^ImFont)",
+    "ImVector_ImFontGlyph"           = "Im_Vector(Font_Glyph)",
+    "ImVector_ImDrawChannel"         = "Im_Vector(Draw_Channel)",
+    "ImVector_ImDrawCmd"             = "Im_Vector(Draw_Cmd)",
+    "ImVector_ImDrawIdx"             = "Im_Vector(Draw_Idx)",
+    "ImVector_ImDrawVert"            = "Im_Vector(Draw_Vert)",
+    "ImVector_ImU32"                 = "Im_Vector(u32)",
+    "ImVector_float"                 = "Im_Vector(f32)",
+    "ImVector_char"                  = "Im_Vector(u8)",
+    "ImVector_unsigned_char"         = "Im_Vector(u8)",
 
     "ImGuiIO" = "IO",
 };
@@ -108,7 +148,7 @@ clean_type :: proc(type: string) -> string {
         }
         fmt.sbprint(&sb, t);
 
-        return strings.to_string(sb);
+        return strings.clone(strings.to_string(sb));
     } else {
         return t;            
     }

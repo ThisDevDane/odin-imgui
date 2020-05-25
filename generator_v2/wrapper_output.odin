@@ -62,7 +62,6 @@ output_wrappers :: proc(json_path: string, output_path: string, predefined_entit
         }
 
         output :: proc(sb: ^strings.Builder, f: Foreign_Func, predefined: map[string]Wrapper_Func, res: ^Wrapper_Map) {
-            if should_make_simple_wrapper(f) == false do return;
             wrapper_name := "";
             if pw, ok := predefined[f.link_name]; ok {
                 wrapper_name = pw.name;
@@ -71,6 +70,7 @@ output_wrappers :: proc(json_path: string, output_path: string, predefined_entit
                 fmt.sbprint(sb, "\n\n");
                 res[strings.clone(f.link_name)] = pw;
             } else {
+                if should_make_simple_wrapper(f) == false do return;
                 wrapper_name = fmt.aprintf("swr_{}", f.link_name);
                 write_wrapper(sb, f, wrapper_name);
                 res[strings.clone(f.link_name)] = wrapper_name;
@@ -105,7 +105,7 @@ output_wrapper_call :: proc(sb: ^strings.Builder, w: Wrapper_Func) {
         fmt.sbprint(sb, p.name);
         if idx < len(w.params)-1 do fmt.sbprint(sb, ", ");
     }
-    fmt.sbprintf(sb, ")",);
+    fmt.sbprintf(sb, ")");
 }
 
 @(private="file")
@@ -116,6 +116,7 @@ write_wrapper :: proc(sb: ^strings.Builder, f: Foreign_Func, wrapper_name: strin
         fmt.sbprintf(sb, "{}: ", p.name);
         type := clean_type(p.type);
         if type == "cstring" do type = "string";
+        if type == "..." do type = "..any";
         fmt.sbprint(sb, type);
 
         if idx < len(f.params)-1 do fmt.sbprint(sb, ", ");

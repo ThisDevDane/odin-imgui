@@ -127,7 +127,9 @@ output_enums :: proc(json_path: string, output_path: string) {
                         }
 
                         case string: {
-                            fmt.sbprint(&sb, v);
+                            t := v;
+                            if strings.index(t, "_") > 0 do t = clean_field_key(t, def.name);
+                            fmt.sbprint(&sb, t);
                         }
 
                         case []string: {
@@ -176,22 +178,10 @@ output_enums :: proc(json_path: string, output_path: string) {
         key = strings.trim_space(key);
         key = key[len(enum_name):];
         key = strings.trim(key, "_");
-        key = strings.to_ada_case(key);
+        key = strings.to_pascal_case(key);
         return key;
     }
 }
-
-name_type_map := map[string]string {
-    "GetClipboardTextFn" = `proc "c"(user_data : rawptr) -> cstring`,
-    "SetClipboardTextFn" = `proc "c"(user_data : rawptr, text : cstring)`,
-    "ImeSetInputScreenPosFn" = `proc "c"(x, y : i32)`,
-};
-
-struct_name_map := map[string]string {
-    "ImGuiIO" = "IO",
-    "ImVec2" = "Vec2",
-    "ImVec4" = "Vec4",
-};
 
 output_structs :: proc(json_path: string, output_path: string, predefined_entites: []Predefined_Entity) {
     log.info("Outputting structs...");
@@ -266,6 +256,7 @@ output_structs :: proc(json_path: string, output_path: string, predefined_entite
             if so, ok := overwrites[def.name]; ok {
                 fmt.sbprint(&sb, so.text);
             } else {
+                fmt.sbprintf(&sb, "//%s \n", def.name);
                 fmt.sbprintf(&sb, "%s :: struct ", clean_struct_key(def.name));
                 fmt.sbprint(&sb, '{');
                 fmt.sbprint(&sb, '\n');
@@ -319,7 +310,7 @@ output_structs :: proc(json_path: string, output_path: string, predefined_entite
     clean_field_key :: proc(key: string, size: int) -> string { 
         key := key;
         key, _ = remove_array_decleration(key, size > 0);
-        //key = to_ada_case(key);
+        key = strings.to_snake_case(key);
         return key;
     }
 }
