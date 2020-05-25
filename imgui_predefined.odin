@@ -2,9 +2,9 @@ package imgui;
 
 ////////////////////////////
 // Predefined Types
-@output_copy ID         :: distinct u32;
-@output_copy Draw_Idx   :: distinct u16; 
-@output_copy Wchar      :: distinct u16; 
+@output_copy ID :: distinct u32;
+@output_copy Draw_Idx :: distinct u16; 
+@output_copy Wchar :: distinct u16; 
 @output_copy Texture_ID :: distinct rawptr; 
 
 @output_copy Alloc_Func :: #type proc "c" (size: i64, user_data: rawptr) -> rawptr;
@@ -15,25 +15,25 @@ package imgui;
 
 ///////////////////////////
 // DUMMY STRUCTS
-@output_copy Context               :: opaque struct {};
+@output_copy Context :: opaque struct {};
 @output_copy Draw_List_Shared_Data :: opaque struct {};
 
 // ///////////////////////////
 // // Predefined structs
 @output_copy
 Im_Vector :: struct(T : typeid) {
-    size     : i32,
-    capacity : i32,
-    data     : ^T,
+    size:     i32,
+    capacity: i32,
+    data:     ^T,
 }
 
 @(struct_overwrite="ImGuiStoragePair") 
 Storage_Pair :: struct {
-    key : ID,
+    key: ID,
     using _: struct #raw_union { 
-        val_i : i32, 
-        val_f : f32, 
-        val_p : rawptr, 
+        val_i: i32, 
+        val_f: f32, 
+        val_p: rawptr, 
     }
 }
 
@@ -57,7 +57,6 @@ wrapper_set_allocator_functions :: inline proc(alloc_func: Alloc_Func, free_func
     igSetAllocatorFunctions(alloc_func, free_func);
 }
 
-
 @(wrapper="igPlotHistogramFnPtr")
 wrapper_plot_histogram_fn_ptr :: proc(label: string,
                                       values_getter: Value_Getter_Proc,
@@ -72,7 +71,6 @@ wrapper_plot_histogram_fn_ptr :: proc(label: string,
     overlay := fmt.tprintf("{}\x00", overlay_text);
     igPlotHistogramFnPtr(l, values_getter, data, values_count, values_offset, cstring(&overlay[0]), scale_min, scale_max, graph_size);
 }
-
 
 @(wrapper="igPlotLinesFnPtr")
 wrapper_plot_lines_fn_ptr :: proc(label: string, 
