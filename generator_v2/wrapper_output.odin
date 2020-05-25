@@ -29,6 +29,8 @@ output_wrappers :: proc(json_path: string, output_path: string, predefined_entit
     sb := strings.make_builder();
     defer strings.destroy_builder(&sb);
     insert_package_header(&sb);
+    fmt.sbprint(&sb, "import \"core:fmt\";\n");
+    fmt.sbprint(&sb, "import \"core:strings\";\n");
 
     groups : [dynamic]Foreign_Func_Group;
     predefined : map[string]Wrapper_Func;
@@ -132,7 +134,7 @@ write_wrapper :: proc(sb: ^strings.Builder, f: Foreign_Func, wrapper_name: strin
 
         var_name := fmt.tprintf("str{}", idx);
         var_map[p.name] = var_name;
-        fmt.sbprintf(sb, "\t{} := fmt.tprintf(\"{{}}\\x00\", {});\n", var_name, p.name);
+        fmt.sbprintf(sb, "\t{} := strings.clone_to_cstring({}, context.temp_allocator);\n", var_name, p.name);
     }           
 
     fmt.sbprint(sb, "\t");
@@ -142,7 +144,7 @@ write_wrapper :: proc(sb: ^strings.Builder, f: Foreign_Func, wrapper_name: strin
     fmt.sbprintf(sb, "{}(", f.link_name);
     for p, idx in f.params {
         if v, ok := var_map[p.name]; ok {
-            fmt.sbprintf(sb, "cstring(&{}[0])", v);
+            fmt.sbprint(sb, v);
         } else {
             fmt.sbprint(sb, p.name);
         }

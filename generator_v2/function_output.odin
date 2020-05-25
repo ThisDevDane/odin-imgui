@@ -3,6 +3,7 @@ package main;
 import "core:log"
 import "core:fmt"
 import "core:os"
+import "core:strconv"
 import "core:strings"
 import "core:encoding/json";
 
@@ -26,6 +27,8 @@ Foreign_Func :: struct {
 Foreign_Func_Param :: struct {
     name: string,
     type: string,
+    default: string,
+    parsed_default: string,
 };
 
 output_foreign :: proc(json_path: string, output_path: string, predefined_entites: []Predefined_Entity) {
@@ -218,11 +221,11 @@ output_header :: proc(json_path: string, output_path: string, wrapper_map: ^Wrap
                         write_wrapper_param_list(&sbu, w);
                     }
                     case string: {
-                        output_param_list(&sbu, f, true, false);
+                        output_param_list(&sbu, f, true, false, true);
                     }
                 }
             } else {
-                output_param_list(&sbu, f, true, false);
+                output_param_list(&sbu, f, true, false, true);
             }
             
             param_list := strings.to_string(sbu);
@@ -340,7 +343,11 @@ gather_foreign_proc_groups :: proc(groups : ^[dynamic]Foreign_Func_Group, obj: j
 
             if ov_count > 1 {
                 ov_group.name = get_value_string(ov_obj["funcname"]);
-                if get_value_string(ov_obj["stname"]) == "ImGuiWindow" && ov_group.name == "GetID" do ov_group.name = "WindowGetID";
+                
+                if get_value_string(ov_obj["stname"]) == "ImGuiWindow" && ov_group.name == "GetID" {
+                    ov_group.name = "WindowGetID";
+                }
+                
                 append(&ov_group.functions, f);
             } else {
                 append(&current_group.functions, f);
@@ -405,6 +412,8 @@ convert_json_to_foreign_func :: proc(ov_obj: json.Object) -> (Foreign_Func, bool
 
         param.name = get_value_string(arg_obj["name"]);
         param.type = get_value_string(arg_obj["type"]);
+        param.default = get_default(ov_obj, param.name);
+        param.parsed_default = parse_default(ov_obj, param.name);
 
         if param.type == "..." do param.name = "args";
         if param.type == "va_list" do return Foreign_Func{}, false;
@@ -419,9 +428,79 @@ convert_json_to_foreign_func :: proc(ov_obj: json.Object) -> (Foreign_Func, bool
     return f, true;
 }
 
-@(private="file") prev_group := "";
-@(private="file") first_line := true;
-@(private="file") last_was_ig := false;
+@(private="file")
+get_default :: proc(obj: json.Object, param_name: string) -> string {
+    if dmap, ok := obj["defaults"].value.(json.Object); ok {
+        if def, ok := dmap[param_name]; ok {
+            return get_value_string(def);
+        }
+    }
+
+    return "";
+}
+@(private="file")
+parse_default :: proc(obj: json.Object, param_name: string) -> string {
+    if dmap, ok := obj["defaults"].value.(json.Object); ok {
+        if def, ok := dmap[param_name]; ok {
+            str := get_value_string(def);
+            switch str {
+                case "((void*)0)": return "nil";
+                case "FLT_MAX": return "max(f32)";
+                case "(((ImU32)(255)<<24)|((ImU32)(0)<<16)|((ImU32)(0)<<8)|((ImU32)(255)<<0))": return "";
+                case "(((ImU32)(255)<<24)|((ImU32)(255)<<16)|((ImU32)(255)<<8)|((ImU32)(255)<<0))": return "";
+                case: {
+                    if rune(str[0]) == '\"' && rune(str[len(str)-1]) == '\"' {
+                        return str;
+                    }
+                    if strings.has_prefix(str, "sizeof") == true {
+                        return fmt.aprintf("size_of({})", clean_type(str[len("sizeof")+1:len(str)-1]));
+                    }
+
+                    if strings.has_prefix(str, "Im") == true && strings.index(str, "(") > -1 {
+                        idx := strings.index(str, "(");
+                        type := strings.clone(str[:idx]);
+                        init := str[idx:];
+                        init, _ = strings.replace_all(init, "(", "{");
+                        init, _ = strings.replace_all(init, ")", "}");
+                        return fmt.aprint(clean_type(type), init);
+                    }
+
+                    if strings.index(str, ".") > -1 && rune(str[len(str)-1]) == 'f' {
+                        return str[:len(str)-1];
+                    }
+
+                    if strings.index(str, "_") > -1 {
+                        parts := strings.split(str, "_");
+                        type := clean_type(parts[0]);
+                        value := parts[1];
+                        return fmt.aprintf("{}.{}", type, value);
+                    }
+
+                    if _, ok := strconv.parse_int(str); ok {
+                        return str;
+                    }
+
+                    if _, ok := strconv.parse_bool(str); ok {
+                        return str;
+                    }
+
+                }
+            }
+
+            log.warnf("Default for parameter '{}' could not be parsed!\n\tValue: {}", param_name, str);
+            return str;
+        } else {
+            return "";
+        }
+    } 
+
+    return "";
+}
+
+
+@(private="file") g_prev_group := "";
+@(private="file") g_first_line := true;
+@(private="file") g_last_was_ig := false;
 
 output_foreign_call :: proc(sb: ^strings.Builder, f: Foreign_Func) {
     fmt.sbprintf(sb, "{}(", f.link_name);
@@ -447,16 +526,17 @@ clean_func_name :: proc(key: string) -> string {
 
 @(private="file")
 reset_group_info :: proc() {
-    prev_group  = "";
-    first_line  = true;
-    last_was_ig = false;
+    g_prev_group  = "";
+    g_first_line  = true;
+    g_last_was_ig = false;
 }
 
 function_has_return :: proc(f: Foreign_Func) -> bool {
     return f.return_type != "" && f.return_type != "void";
 }
 
-output_param_list :: proc(sb: ^strings.Builder, f: Foreign_Func, convert_cstring := false, add_c_varargs := true) {
+output_param_list :: proc(sb: ^strings.Builder, f: Foreign_Func, 
+                          convert_cstring := false, add_c_varargs := true, add_default := false) {
     for p, idx in f.params {
         type := clean_type(p.type);
         if convert_cstring == true && type == "cstring" do type = "string";
@@ -466,7 +546,18 @@ output_param_list :: proc(sb: ^strings.Builder, f: Foreign_Func, convert_cstring
             if add_c_varargs == true do fmt.sbprint(sb, "#c_vararg ");
         }
 
-        fmt.sbprintf(sb, "{}: {}", p.name, type);
+        if add_default && p.parsed_default != "" {
+            if type == "string" {
+                fmt.sbprintf(sb, "{} := \"\"", p.name);
+            // } else if strings.index(type, "^") == -1 && type != "rawptr" {
+            } else if p.parsed_default != "nil" {
+                fmt.sbprintf(sb, "{} := {}({})", p.name, type, p.parsed_default);
+            } else {
+                fmt.sbprintf(sb, "{} : {} = {}", p.name, type, p.parsed_default);
+            }
+        } else {
+            fmt.sbprintf(sb, "{}: {}", p.name, type);
+        }
         if idx < len(f.params)-1 do fmt.sbprint(sb, ", ");
     }
 }
@@ -476,15 +567,15 @@ figure_out_if_new_group :: proc(link_name: string) -> bool {
     res := false;
 
     group := strings.split(link_name, "_")[0];
-    if prev_group != group {
-        if first_line == false && last_was_ig == false {
+    if g_prev_group != group {
+        if g_first_line == false && g_last_was_ig == false {
             res = true;
         }    
 
-        last_was_ig = strings.has_prefix(link_name, "ig");
-        prev_group = group;
+        g_last_was_ig = strings.has_prefix(link_name, "ig");
+        g_prev_group = group;
     } 
-    first_line = false;
+    g_first_line = false;
 
     return res;
 }

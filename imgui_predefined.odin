@@ -136,9 +136,9 @@ wrapper_plot_ex :: proc(plot_type: Plot_Type,
                         scale_min: f32, 
                         scale_max: f32, 
                         frame_size: Vec2) -> i32 {
-    l := fmt.tprintf("{}\x00", label);
-    overlay := fmt.tprintf("{}\x00", overlay_text);
-    return igPlotEx(plot_type, l, values_getter, data, values_count, values_offset, cstring(&overlay[0]), scale_min, scale_max, frame_size);
+    l := strings.clone_to_cstring(label, context.temp_allocator);
+    overlay := strings.clone_to_cstring(overlay_text, context.temp_allocator);
+    return igPlotEx(plot_type, l, values_getter, data, values_count, values_offset, overlay, scale_min, scale_max, frame_size);
 }
 
 @(wrapper="igPlotHistogramFnPtr")
@@ -151,9 +151,9 @@ wrapper_plot_histogram_fn_ptr :: proc(label: string,
                                       scale_min: f32,
                                       scale_max: f32,
                                       graph_size: Vec2) {
-    l := fmt.tprintf("{}\x00", label);
-    overlay := fmt.tprintf("{}\x00", overlay_text);
-    igPlotHistogramFnPtr(l, values_getter, data, values_count, values_offset, cstring(&overlay[0]), scale_min, scale_max, graph_size);
+    l := strings.clone_to_cstring(label, context.temp_allocator);
+    overlay := strings.clone_to_cstring(overlay_text, context.temp_allocator);
+    igPlotHistogramFnPtr(l, values_getter, data, values_count, values_offset, overlay, scale_min, scale_max, graph_size);
 }
 
 @(wrapper="igPlotLinesFnPtr")
@@ -166,37 +166,38 @@ wrapper_plot_lines_fn_ptr :: proc(label: string,
                                   scale_min: f32, 
                                   scale_max: f32, 
                                   graph_size: Vec2) {
-    l := fmt.tprintf("{}\x00", label);
-    overlay := fmt.tprintf("{}\x00", overlay_text);
-    igPlotLinesFnPtr(l, values_getter, data, values_count, values_offset, cstring(&overlay[0]), scale_min, scale_max, graph_size);
+    l := strings.clone_to_cstring(label, context.temp_allocator);
+    overlay := strings.clone_to_cstring(overlay_text, context.temp_allocator);
+    igPlotLinesFnPtr(l, values_getter, data, values_count, values_offset, overlay, scale_min, scale_max, graph_size);
 }
 
 @(wrapper="igListBoxFnPtr")
 wrapper_list_box_fn_ptr :: proc(label: string, current_item: ^i32, items_getter: Items_Getter_Proc, data: rawptr, items_count: i32, height_in_items: i32) -> bool {
-    l := fmt.tprintf("{}\x00", label);
-    return igListBoxFnPtr(cstring(&label[0]), current_item, items_getter, data, items_count, height_in_items);
+    l := strings.clone_to_cstring(label, context.temp_allocator);
+    return igListBoxFnPtr(l, current_item, items_getter, data, items_count, height_in_items);
 }
 
 @(wrapper="igComboFnPtr")
 wrapper_combo_fn_ptr :: proc(label: string, current_item: ^i32, items_getter: Items_Getter_Proc, data: rawptr, items_count: i32, popup_max_height_in_items: i32) -> bool {
-    l := fmt.tprintf("{}\x00", label);
-    return igComboFnPtr(cstring(&label[0]), current_item, items_getter, data, items_count, popup_max_height_in_items);
+    l := strings.clone_to_cstring(label, context.temp_allocator);
+    return igComboFnPtr(l, current_item, items_getter, data, items_count, popup_max_height_in_items);
 }
 
 @(wrapper="igTextColored") 
-wrapper_text_colored :: proc(col: Vec4, fmt : string, args : ..any) {
-    fmt_str := fmt.tprinf("{}\x00", fmt);
-    str := fmt.tprinf(fmt_str, ..args);
+wrapper_text_colored :: proc(col: Vec4, fmt_: string, args: ..any) {
+    fmt_str := fmt.tprintf("{}\x00", fmt_);
+    str := transmute([]byte)fmt.tprintf(fmt_str, ..args);
     igTextColored(col, cstring(&str[0]), nil);
 }
 
 @(wrapper="igTextUnformatted") 
 wrapper_unformatted_text :: proc(text: string) {
-    igTextUnformatted(cstring(&text[0]), cstring(&text[len(text)]));
+    bytes := transmute([]byte)text;
+    igTextUnformatted(cstring(&bytes[0]), cstring(&bytes[len(bytes)]));
 }
 
 @(wrapper="igText") 
-wrapper_text :: proc(fmt : string, args : ..any) {
-    str := fmt.tprinf(fmt, ..args);
+wrapper_text :: proc(fmt_: string, args: ..any) {
+    str := transmute([]byte)fmt.tprintf(fmt_, ..args);
     igTextUnformatted(cstring(&str[0]), cstring(&str[len(str)]));
 }
