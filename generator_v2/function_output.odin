@@ -28,7 +28,7 @@ Foreign_Func_Param :: struct {
     type: string,
 };
 
-output_foreign :: proc(json_path: string, output_path: string) {
+output_foreign :: proc(json_path: string, output_path: string, predefined_entites: []Predefined_Entity) {
     log.info("Outputting foreign...");
 
     json_bytes, _ := os.read_entire_file(json_path);
@@ -47,9 +47,18 @@ output_foreign :: proc(json_path: string, output_path: string) {
     insert_package_header(&sb);
 
     groups : [dynamic]Foreign_Func_Group;
+    overwrites : map[string]Foreign_Overwrite;
 
     { // Gather
         gather_foreign_proc_groups(&groups, obj);
+
+        for e in predefined_entites {
+            #partial switch fo in e {
+                case Foreign_Overwrite: {
+                    overwrites[fo.for_foreign] = fo;
+                }
+            }
+        }
 
         for g in &groups {
             for x in g.functions {
@@ -85,13 +94,29 @@ output_foreign :: proc(json_path: string, output_path: string) {
             fmt.sbprint(sb, "---;\n");
         }
 
+        output_overwrite :: proc(sb: ^strings.Builder, fo: Foreign_Overwrite, g: Foreign_Func_Group) {
+            fmt.sbprintf(sb, "\t{}", fo.name);
+            right_pad(sb, len(fo.name), g.longest_func_name);
+            fmt.sbprintf(sb, " :: {}\n", fo.body);
+        }
+
         for g in groups {
             for x in g.functions {
                 switch f in x {
                     case Foreign_Overload_Group:
-                        for y in f.functions do output_functions(&sb, y, g);
+                        for y in f.functions {
+                            if fo, ok := overwrites[y.link_name]; ok {
+                                output_overwrite(&sb, fo, g);
+                            } else {
+                                output_functions(&sb, y, g);
+                            }
+                        }
                     case Foreign_Func:
-                        output_functions(&sb, f, g);
+                        if fo, ok := overwrites[f.link_name]; ok {
+                            output_overwrite(&sb, fo, g);
+                        } else {
+                            output_functions(&sb, f, g);
+                        }
                 }
             }
 
@@ -358,8 +383,10 @@ convert_json_to_foreign_func :: proc(ov_obj: json.Object) -> (Foreign_Func, bool
         param.type = get_value_string(arg_obj["type"]);
 
         if param.type == "..." do param.name = "args";
-        
         if param.type == "va_list" do return Foreign_Func{}, false;
+
+        if param.name == "fmt" do param.name = "fmt_";
+        if param.name == "in" do param.name = "in_";
 
         append(&f.params, param);
         

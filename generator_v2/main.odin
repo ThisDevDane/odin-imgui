@@ -21,12 +21,16 @@ main :: proc() {
     context.logger = log.create_console_logger(opt = logger_opts);
 
     log.info("Generating odin source...");
+    
+    predefined_entities := process_predefined("imgui_predefined.odin");
+    output_predefined_copies("./output/copies.odin", predefined_entities);
 
     output_enums(STRUCTS_AND_ENUM_JSON_PATH, "./output/enums.odin");
-    output_structs(STRUCTS_AND_ENUM_JSON_PATH, "./output/structs.odin");
-    output_foreign(DEFINITION_JSON_PATH, "./output/foreign.odin");
-    wrapper_map := output_wrappers(DEFINITION_JSON_PATH, "./output/wrapper.odin");
+    output_structs(STRUCTS_AND_ENUM_JSON_PATH, "./output/structs.odin", predefined_entities);
+    output_foreign(DEFINITION_JSON_PATH, "./output/foreign.odin", predefined_entities);
+    wrapper_map := output_wrappers(DEFINITION_JSON_PATH, "./output/wrapper.odin", predefined_entities);
     output_header(DEFINITION_JSON_PATH, "./output/header.odin", wrapper_map);
+
 
     log.info("Done generating!!!");
 }
@@ -189,7 +193,7 @@ struct_name_map := map[string]string {
     "ImVec4" = "Vec4",
 };
 
-output_structs :: proc(json_path: string, output_path: string) {
+output_structs :: proc(json_path: string, output_path: string, predefined_entites: []Predefined_Entity) {
     log.info("Outputting structs...");
 
     json_bytes, _ := os.read_entire_file(json_path);
@@ -218,6 +222,7 @@ output_structs :: proc(json_path: string, output_path: string) {
     };
 
     definitions : [dynamic]Struct_Definition;
+    overwrites : map[string]Struct_Overwrite;
 
     
     { // Gather
@@ -246,34 +251,46 @@ output_structs :: proc(json_path: string, output_path: string) {
                 def.longest_field_name = max(def.longest_field_name, len(key));
             }
         }
+
+        for e in predefined_entites {
+            #partial switch so in e {
+                case Struct_Overwrite: {
+                    overwrites[so.for_struct] = so;
+                }
+            }
+        }
     }
     
     { // SB Output
         for def in definitions {
-            fmt.sbprintf(&sb, "%s :: struct ", clean_struct_key(def.name));
-            fmt.sbprint(&sb, '{');
-            fmt.sbprint(&sb, '\n');
+            if so, ok := overwrites[def.name]; ok {
+                fmt.sbprint(&sb, so.text);
+            } else {
+                fmt.sbprintf(&sb, "%s :: struct ", clean_struct_key(def.name));
+                fmt.sbprint(&sb, '{');
+                fmt.sbprint(&sb, '\n');
 
-            for f in def.fields {
-                key := clean_field_key(f.name, f.size);
-                fmt.sbprintf(&sb, "\t%s: ", key);
-                right_pad(&sb, len(key), def.longest_field_name);
+                for f in def.fields {
+                    key := clean_field_key(f.name, f.size);
+                    fmt.sbprintf(&sb, "\t%s: ", key);
+                    right_pad(&sb, len(key), def.longest_field_name);
 
-                if(f.size > 0) {
-                    fmt.sbprintf(&sb, "[%d]", f.size);                    
+                    if(f.size > 0) {
+                        fmt.sbprintf(&sb, "[%d]", f.size);                    
+                    }
+
+                    if v, ok := name_type_map[f.name]; ok {
+                        fmt.sbprint(&sb, v);
+                    } else {        
+                        fmt.sbprint(&sb, clean_type(f.type));
+                    }
+
+                    fmt.sbprint(&sb, ",\n");
                 }
 
-                if v, ok := name_type_map[f.name]; ok {
-                    fmt.sbprint(&sb, v);
-                } else {        
-                    fmt.sbprint(&sb, clean_type(f.type));
-                }
-
-                fmt.sbprint(&sb, ",\n");
+                fmt.sbprint(&sb, '}');
+                
             }
-
-            fmt.sbprint(&sb, '}');
-            
             fmt.sbprint(&sb, "\n\n");
         }
     }

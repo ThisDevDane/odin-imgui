@@ -1,134 +1,120 @@
-package imgui
+package imgui;
 
-import "core:fmt"
+////////////////////////////
+// Predefined Types
+@output_copy ID         :: distinct u32;
+@output_copy Draw_Idx   :: distinct u16; 
+@output_copy Wchar      :: distinct u16; 
+@output_copy Texture_ID :: distinct rawptr; 
 
-// ////////////////////////////
-// // Predefined Types
-// ID         :: distinct u32;
-// Draw_Idx   :: distinct u16; 
-// Wchar      :: distinct u16; 
-// Texture_ID :: distinct rawptr; 
+@output_copy Alloc_Func :: #type proc "c" (size: i64, user_data: rawptr) -> rawptr;
+@output_copy Free_Func :: #type proc "c" (ptr: rawptr, user_data: rawptr);
+@output_copy Items_Getter_Proc :: #type proc "c" (data: rawptr, idx: i32, out_text: ^cstring) -> bool;
+@output_copy Value_Getter_Proc :: #type proc "c" (data: rawptr, idx: i32) -> f32;
 
-// ///////////////////////////
-// // DUMMY STRUCTS
-// Context               :: opaque struct {};
-// Draw_List_Shared_Data :: opaque struct {};
+
+///////////////////////////
+// DUMMY STRUCTS
+@output_copy Context               :: opaque struct {};
+@output_copy Draw_List_Shared_Data :: opaque struct {};
 
 // ///////////////////////////
 // // Predefined structs
-// Im_Vector :: struct(T : typeid) {
-//     size     : i32,
-//     capacity : i32,
-//     data     : ^T,
-// }
+@output_copy
+Im_Vector :: struct(T : typeid) {
+    size     : i32,
+    capacity : i32,
+    data     : ^T,
+}
 
-// @(type="ImGuiStoragePair") 
-// Storage_Pair :: struct {
-//     key : ID,
-//     using _: struct #raw_union { 
-//         val_i : i32, 
-//         val_f : f32, 
-//         val_p : rawptr, 
-//     }
-// }
+@(struct_overwrite="ImGuiStoragePair") 
+Storage_Pair :: struct {
+    key : ID,
+    using _: struct #raw_union { 
+        val_i : i32, 
+        val_f : f32, 
+        val_p : rawptr, 
+    }
+}
 
-// @(type="ImVec2") 
-// Vec2 :: struct {
-//     x : f32,
-//     y : f32,
-// };
-
-// @(type="ImVec4") 
-// Vec4 :: struct {
-//     x : f32,
-//     y : f32,
-//     z : f32,
-//     w : f32,
-// };
-
-
-
-// ///////////////////////////
-// // Predefined proc protoypes
-// @(predefined="GetClipboardTextFn")
-// get_clipboard_text_function :: proc "c"(user_data : rawptr) -> cstring;
-// @(predefined="SetClipboardTextFn")
-// set_clipboard_text_function :: proc "c"(user_data : rawptr, text : cstring);
-// @(predefined="ImeSetInputScreenPosFn")
-// ime_set_input_screen_pos_function :: proc "c"(x, y : i32);
+///////////////////////////
+// Overwriting foreign declerations
+@(foreign_overwrite="igSetAllocatorFunctions")
+igSetAllocatorFunctions :: proc(alloc_func: Alloc_Func, free_func: Free_Func) ---;
+@(foreign_overwrite="igPlotHistogramFnPtr")
+igPlotHistogramFnPtr :: proc(label: cstring, values_getter: Value_Getter_Proc, data: rawptr, values_count: i32, values_offset: i32, overlay_text: cstring, scale_min: f32, scale_max: f32, graph_size: Vec2) ---;
+@(foreign_overwrite="igPlotLinesFnPtr")
+igPlotLinesFnPtr :: proc(label: cstring, values_getter: Value_Getter_Proc, data: rawptr, values_count: i32, values_offset: i32, overlay_text: cstring, scale_min: f32, scale_max: f32, graph_size: Vec2) ---;
+@(foreign_overwrite="igListBoxFnPtr")
+igListBoxFnPtr :: proc(label: cstring, current_item: ^i32, items_getter: Items_Getter_Proc, data: rawptr, items_count: i32, height_in_items: i32) -> bool ---;
+@(foreign_overwrite="igComboFnPtr")
+igComboFnPtr :: proc(label: cstring, current_item: ^i32, items_getter: Items_Getter_Proc, data: rawptr, items_count: i32, popup_max_height_in_items: i32) -> bool ---;
 
 ///////////////////////////
 // Predefined wrappers
+@(wrapper="igSetAllocatorFunctions")
+wrapper_set_allocator_functions :: inline proc(alloc_func: Alloc_Func, free_func: Free_Func) {
+    igSetAllocatorFunctions(alloc_func, free_func);
+}
+
+
+@(wrapper="igPlotHistogramFnPtr")
+wrapper_plot_histogram_fn_ptr :: proc(label: string,
+                                      values_getter: Value_Getter_Proc,
+                                      data: rawptr,
+                                      values_count: i32,
+                                      values_offset: i32,
+                                      overlay_text: string,
+                                      scale_min: f32,
+                                      scale_max: f32,
+                                      graph_size: Vec2) {
+    l := fmt.tprintf("{}\x00", label);
+    overlay := fmt.tprintf("{}\x00", overlay_text);
+    igPlotHistogramFnPtr(l, values_getter, data, values_count, values_offset, cstring(&overlay[0]), scale_min, scale_max, graph_size);
+}
+
+
+@(wrapper="igPlotLinesFnPtr")
+wrapper_plot_lines_fn_ptr :: proc(label: string, 
+                                  values_getter: Value_Getter_Proc, 
+                                  data: rawptr, 
+                                  values_count: i32, 
+                                  values_offset: i32, 
+                                  overlay_text: string, 
+                                  scale_min: f32, 
+                                  scale_max: f32, 
+                                  graph_size: Vec2) {
+    l := fmt.tprintf("{}\x00", label);
+    overlay := fmt.tprintf("{}\x00", overlay_text);
+    igPlotLinesFnPtr(l, values_getter, data, values_count, values_offset, cstring(&overlay[0]), scale_min, scale_max, graph_size);
+}
+
+@(wrapper="igListBoxFnPtr")
+wrapper_list_box_fn_ptr :: proc(label: string, current_item: ^i32, items_getter: Items_Getter_Proc, data: rawptr, items_count: i32, height_in_items: i32) -> bool {
+    l := fmt.tprintf("{}\x00", label);
+    return igListBoxFnPtr(cstring(&label[0]), current_item, items_getter, data, items_count, height_in_items);
+}
+
+@(wrapper="igComboFnPtr")
+wrapper_combo_fn_ptr :: proc(label: string, current_item: ^i32, items_getter: Items_Getter_Proc, data: rawptr, items_count: i32, popup_max_height_in_items: i32) -> bool {
+    l := fmt.tprintf("{}\x00", label);
+    return igComboFnPtr(cstring(&label[0]), current_item, items_getter, data, items_count, popup_max_height_in_items);
+}
 
 @(wrapper="igTextColored") 
-wrapper_text_colored :: proc(col: Vec4, fmt : string, args : ..any) -> bool {
+wrapper_text_colored :: proc(col: Vec4, fmt : string, args : ..any) {
     fmt_str := fmt.tprinf("{}\x00", fmt);
     str := fmt.tprinf(fmt_str, ..args);
-    return igTextColored(col, cstring(&str[0]), nil);
+    igTextColored(col, cstring(&str[0]), nil);
+}
+
+@(wrapper="igTextUnformatted") 
+wrapper_unformatted_text :: proc(text: string) {
+    igTextUnformatted(cstring(&text[0]), cstring(&text[len(text)]));
 }
 
 @(wrapper="igText") 
-wrapper_text :: proc(fmt : string, args : ..any) -> bool {
+wrapper_text :: proc(fmt : string, args : ..any) {
     str := fmt.tprinf(fmt, ..args);
-    return igTextUnformatted(cstring(&str[0]), cstring(&str[len(str)]));
-}
-
-// @(wrapper="igDragFloat")
-// wrapper_drag_float :: proc(label : string, v : ^f32, v_speed : f32 = 1.0, v_min : f32 = 0.0, v_max : f32 = 0.0, format : string = "%.3f", power : f32 = 1.0) -> bool {
-//     return igDragFloat(fmt.tprintf("{}/x00", label), v, v_speed, v_min, v_max, fmt.tprintf("{}\x00", format), power);
-// }
-
-@(wrapper="igDragFloat2")
-wrapper_drag_float2 :: proc(label : string, v : [2]f32, v_speed : f32 = 1.0, v_min : f32 = 0.0, v_max : f32 = 0.0, format : string = "%.3f", power : f32 = 1.0) -> bool {
-    return igDragFloat2(fmt.tprintf("{}/x00", label), v, v_speed, v_min, v_max, fmt.tprintf("{}\x00", format), power);
-}
-
-@(wrapper="igDragFloat3")
-wrapper_drag_float3 :: proc(label : string, v : [3]f32, v_speed : f32 = 1.0, v_min : f32 = 0.0, v_max : f32 = 0.0, format : string = "%.3f", power : f32 = 1.0) -> bool {
-    return igDragFloat3(fmt.tprintf("{}/x00", label), v, v_speed, v_min, v_max, fmt.tprintf("{}\x00", format), power);
-}
-
-@(wrapper="igDragFloat4")
-wrapper_drag_float4 :: proc(label : string, v : [4]f32, v_speed : f32 = 1.0, v_min : f32 = 0.0, v_max : f32 = 0.0, format : string = "%.3f", power : f32 = 1.0) -> bool {
-    return igDragFloat4(fmt.tprintf("{}/x00", label), v, v_speed, v_min, v_max, fmt.tprintf("{}\x00", format), power);
-}
-
-@(wrapper="igDragFloatRange2")
-wrapper_drag_float_range2 :: proc(label : string, v_current_min : ^f32, v_current_max : ^f32, v_speed : f32 = 1.0, v_min : f32 = 0.0, v_max : f32 = 0.0, format : cstring = "%.3f", format_max : cstring = nil, power : f32 = 1.0) -> bool {
-    return igDragFloatRange2(fmt.tprintf("{}/x00", label), v_current_min, v_current_max, v_speed, v_min, v_max, fmt.tprintf("{}\x00", format), fmt.tprintf("{}\x00", format_max));
-}
-
-@(wrapper="igDragInt")
-wrapper_drag_int :: proc(label : string, v : ^i32, v_speed : f32 = 1.0, v_min : i32 = 0, v_max : i32 = 0, format : cstring = "%d") -> bool {
-    return igDragInt(fmt.tprintf("{}/x00", label), v, v_speed, v_min, v_max, fmt.tprintf("{}\x00", format));
-}
-
-@(wrapper="igDragInt2")
-wrapper_drag_int2 :: proc(label : string, v : [2]i32, v_speed : f32 = 1.0, v_min : i32 = 0, v_max : i32 = 0, format : cstring = "%d") -> bool {
-    return igDragInt2(fmt.tprintf("{}/x00", label), v, v_speed, v_min, v_max, fmt.tprintf("{}\x00", format));
-}
-
-@(wrapper="igDragInt3")
-wrapper_drag_int3 :: proc(label : string, v : [3]i32, v_speed : f32 = 1.0, v_min : i32 = 0, v_max : i32 = 0, format : cstring = "%d") -> bool {
-    return igDragInt3(fmt.tprintf("{}/x00", label), v, v_speed, v_min, v_max, fmt.tprintf("{}\x00", format));
-}
-
-@(wrapper="igDragInt4")
-wrapper_drag_int4 :: proc(label : string, v : [4]i32, v_speed : f32 = 1.0, v_min : i32 = 0, v_max : i32 = 0, format : cstring = "%d") -> bool {
-    return igDragInt4(fmt.tprintf("{}/x00", label), v, v_speed, v_min, v_max, fmt.tprintf("{}\x00", format));
-}
-
-@(wrapper="igDragIntRange2")
-wrapper_drag_int_range2 :: proc(label : string, v_current_min : ^i32, v_current_max : ^i32, v_speed : f32 = 1.0, v_min : i32 = 0, v_max : i32 = 0, format : cstring = "%d", format_max : cstring = nil) -> bool {
-    return igDragIntRange2(fmt.tprintf("{}/x00", label), v_current_min, v_current_max, v_speed, v_min, v_max, fmt.tprintf("{}\x00", format), fmt.tprintf("{}\x00", format_max));
-}
-
-@(wrapper="igDragScalar")
-wrapper_drag_scalar :: proc(label : string, data_type : Data_Type, p_data : rawptr, v_speed : f32, p_min : rawptr = nil, p_max : rawptr = nil, format : cstring = nil, power : f32 = 1.0) -> bool {
-    return igDragScalar(fmt.tprintf("{}/x00", label), data_type, p_data, v_speed, p_min, p_max, fmt.tprintf("{}\x00", format), power);
-}
-
-@(wrapper="igDragScalarN")
-wrapper_drag_scalar_n :: proc(label : string, data_type : Data_Type, p_data : rawptr, components : i32, v_speed : f32, p_min : rawptr = nil, p_max : rawptr = nil, format : cstring = nil, power : f32 = 1.0) -> bool {
-    return igDragScalarN(fmt.tprintf("{}/x00", label), data_type, p_data, components, v_speed, p_min, p_max, fmt.tprintf("{}\x00", format), power);
+    igTextUnformatted(cstring(&str[0]), cstring(&str[len(str)]));
 }

@@ -11,20 +11,7 @@ import "core:odin/parser"
 
 Wrapper_Map :: distinct map[string]union{string, Wrapper_Func};
 
-Wrapper_Param :: struct {
-    name: string,
-    type: string,
-};
-
-Wrapper_Func :: struct {
-    name: string,
-    wrapper_for: string,
-    params: [dynamic]Wrapper_Param,
-    return_type: string,
-    body: string,
-};
-
-output_wrappers :: proc(json_path: string, output_path: string) -> ^Wrapper_Map {
+output_wrappers :: proc(json_path: string, output_path: string, predefined_entites: []Predefined_Entity) -> ^Wrapper_Map {
     log.info("Outputting wrappers...");
     res := new(Wrapper_Map);
 
@@ -49,68 +36,12 @@ output_wrappers :: proc(json_path: string, output_path: string) -> ^Wrapper_Map 
     { // Gather
         gather_foreign_proc_groups(&groups, obj);
 
-        predefined_file := ast.File {
-            fullpath = "imgui_predefined.odin"
-        };
-        src, _ := os.read_entire_file(predefined_file.fullpath);
-        predefined_file.src = src;
-
-        err_log : parser.Error_Handler : proc(pos: tokenizer.Pos, msg: string, args: ..any) {
-            log.errorf("%s(%d:%d): ", pos.file, pos.line, pos.column);
-            log.errorf(msg, ..args);
-        }
-
-        warn_log : parser.Warning_Handler : proc(pos: tokenizer.Pos, msg: string, args: ..any) {
-            log.warnf("%s(%d:%d): ", pos.file, pos.line, pos.column);
-            log.warnf(msg, ..args);
-        }
-
-        p := parser.Parser {
-            err  = err_log,
-            warn = warn_log,
-        };
-
-        ok := parser.parse_file(&p, &predefined_file);
-        if ok == false || p.error_count > 0 {
-            log.error("FAILED TO PARSE 'predefined_imgui.odin'");
-            os.exit(1);
-        }
-
-        for x in predefined_file.decls {
-            if decl, ok := x.derived.(ast.Value_Decl); ok {
-                if len(decl.attributes) < 1 do continue;
-
-                decl_name := decl.names[0].derived.(ast.Ident).name;
-
-                for attr in decl.attributes {
-                    for x in attr.elems {
-                        attr_name, attr_value := get_attr_elem(x); 
-
-                        switch attr_name {
-                            case "wrapper": {
-                                if decl.values[0].derived.id != ast.Proc_Lit {
-                                    log.errorf("%s cannot be a wrapper since it's not a procedure", decl_name);
-                                    continue;
-                                }
-                                w, ok := make_wrapper_from_ast(decl, attr_value, src);
-                                if ok == false do continue;
-
-                                predefined[w.wrapper_for] = w;
-                            }
-                        }
-                    }                
+        for x in predefined_entites {
+            #partial switch y in x {
+                case Wrapper_Func: {
+                    predefined[y.wrapper_for] = y;
                 }
             }
-        }
-
-        get_attr_elem :: proc(elem: ^ast.Expr) -> (name: string, value: string) {
-            v := elem.derived.(ast.Field_Value);
-            attr := v.field.derived.(ast.Ident);
-            attr_value := v.value.derived.(ast.Basic_Lit);
-
-            name = attr.name;
-            value = strings.trim(attr_value.tok.text, "\"");
-            return;
         }
     }
 
@@ -151,7 +82,7 @@ output_wrappers :: proc(json_path: string, output_path: string) -> ^Wrapper_Map 
         handle, err := os.open(output_path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC);
             
         if err != os.ERROR_NONE {
-            log.errorf("Couldn't create/open file for outputting foreign functions! %v", err);                
+            log.errorf("Couldn't create/open file for outputting wrappers! %v", err);                
             return nil;
         }
 
@@ -175,49 +106,6 @@ output_wrapper_call :: proc(sb: ^strings.Builder, w: Wrapper_Func) {
         if idx < len(w.params)-1 do fmt.sbprint(sb, ", ");
     }
     fmt.sbprintf(sb, ")",);
-}
-
-@(private="file")
-make_wrapper_from_ast :: proc(decl: ast.Value_Decl, wrapper_for: string, src: []u8) -> (Wrapper_Func, bool) {
-    decl_name := decl.names[0].derived.(ast.Ident).name;
-    proc_type := (decl.values[0].derived.(ast.Proc_Lit)).type;
-
-    if proc_type.results != nil && len(proc_type.results.list) > 1 {
-        log.errorf("Wrapper '%s' has more than one return value, not allowed", decl_name);
-        return Wrapper_Func{}, false;
-    }
-
-    res := Wrapper_Func{};
-    res.name = decl_name;
-    res.wrapper_for = wrapper_for;
-
-    if proc_type.results != nil {
-        res.return_type = proc_type.results.list[0].type.derived.(ast.Ident).name;
-    }
-
-    if proc_type.params != nil {
-        for p in proc_type.params.list {
-            param := Wrapper_Param{};
-            param.name = p.names[0].derived.(ast.Ident).name;
-            switch d in p.type.derived {
-                case ast.Ident:
-                    param.type = d.name;    
-                case ast.Array_Type:
-                    param.type = fmt.aprintf("[%s]%s", d.len.derived.(ast.Basic_Lit).tok.text, d.elem.derived.(ast.Ident).name);
-                case ast.Pointer_Type:
-                    param.type = fmt.aprintf("^%s", d.elem.derived.(ast.Ident).name);
-                case ast.Ellipsis:
-                    param.type = fmt.aprintf("..{}", d.expr.derived.(ast.Ident).name);
-                case :
-                    log.errorf("Unexpected paramter type in wrapper '{}': %v, %#v", res.name, param.name, d);
-            }
-            append(&res.params, param);
-        }
-    }
-
-    res.body = string(src[decl.pos.offset:decl.end.offset]);
-
-    return res, true;
 }
 
 @(private="file")
