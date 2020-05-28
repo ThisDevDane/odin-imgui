@@ -33,6 +33,7 @@ Foreign_Overwrite :: struct {
 Wrapper_Param :: struct {
     name: string,
     type: string,
+    default_value: string,
 };
 
 Wrapper_Func :: struct {
@@ -176,11 +177,6 @@ make_wrapper_from_ast :: proc(decl: ast.Value_Decl, wrapper_for: string, src: []
     decl_name := decl.names[0].derived.(ast.Ident).name;
     proc_type := (decl.values[0].derived.(ast.Proc_Lit)).type;
 
-    if proc_type.results != nil && len(proc_type.results.list) > 1 {
-        log.errorf("Wrapper '%s' has more than one return value, not allowed", decl_name);
-        return Wrapper_Func{}, false;
-    }
-
     res := Wrapper_Func{};
     res.name = strings.clone(decl_name);
     res.wrapper_for = strings.clone(wrapper_for);
@@ -190,28 +186,61 @@ make_wrapper_from_ast :: proc(decl: ast.Value_Decl, wrapper_for: string, src: []
     }
 
     if proc_type.params != nil {
-        for p in proc_type.params.list {
-            param := Wrapper_Param{};
-            param.name = strings.clone(p.names[0].derived.(ast.Ident).name);
+        parse_params_from_ast(&res, proc_type, src);
+    }
+
+    res.body = strings.clone(string(src[decl.pos.offset:decl.end.offset]));
+
+    if proc_type.results != nil {
+        if len(proc_type.results.list) > 1 {
+            log.errorf("Wrapper '%s' has more than one return value, not allowed", decl_name);
+            return Wrapper_Func{}, false;
+        }
+
+        for r in proc_type.results.list {
+            res.return_type = strings.clone(r.type.derived.(ast.Ident).name);
+        }
+    }
+
+    return res, true;
+}
+
+@(private="file")
+parse_params_from_ast :: proc(func: ^Wrapper_Func, proc_type: ^ast.Proc_Type, src: []u8) {
+    for p in proc_type.params.list {
+        param := Wrapper_Param{};
+        param.name = strings.clone(p.names[0].derived.(ast.Ident).name);
+        if p.default_value != nil {
+            switch e in p.default_value.derived {
+                case ast.Call_Expr:
+                    param.type = strings.clone(e.expr.derived.(ast.Ident).name);
+                    param.default_value = strings.clone(e.args[0].derived.(ast.Basic_Lit).tok.text);
+                case ast.Ident:
+                    param.default_value = strings.clone(e.name);
+                case:
+                    log.errorf("Unexpected default value! {}", e);
+            }
+        }
+        if p.type != nil {
             switch d in p.type.derived {
                 case ast.Ident:
                     param.type = strings.clone(d.name);
                 case ast.Array_Type:
-                    param.type = fmt.aprintf("[%s]%s", d.len.derived.(ast.Basic_Lit).tok.text, d.elem.derived.(ast.Ident).name);
+                    if d.len == nil {
+                        param.type = fmt.aprintf("[]%s", d.elem.derived.(ast.Ident).name);
+                    } else {
+                        param.type = fmt.aprintf("[%s]%s", d.len.derived.(ast.Basic_Lit).tok.text, d.elem.derived.(ast.Ident).name);
+                    }
                 case ast.Pointer_Type:
                     param.type = fmt.aprintf("^%s", d.elem.derived.(ast.Ident).name);
                 case ast.Ellipsis:
                     param.type = fmt.aprintf("..{}", d.expr.derived.(ast.Ident).name);
                 case :
-                    log.errorf("Unexpected paramter type in wrapper '{}': %v, %#v", res.name, param.name, d);
+                    log.errorf("Unexpected paramter type in wrapper '{}': %v, %#v", func.name, param.name, d);
             }
-            append(&res.params, param);
         }
+        append(&func.params, param);
     }
-
-    res.body = strings.clone(string(src[decl.pos.offset:decl.end.offset]));
-
-    return res, true;
 }
 
 @(private="file")

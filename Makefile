@@ -7,6 +7,7 @@ LINK = lib
 PROGRAM_NAME = odin-imgui-gen
 
 FLAGS = --out=$(EXE_NAME) --llvm-api
+# FLAGS = --out=$(EXE_NAME)
 
 GENERATOR_SRC = ./generator_v2
 EXE_NAME = $(PROGRAM_NAME).exe

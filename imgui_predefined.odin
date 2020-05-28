@@ -120,6 +120,26 @@ igComboFnPtr :: proc(label: cstring, current_item: ^i32, items_getter: Items_Get
 
 ///////////////////////////
 // Predefined wrappers
+@(wrapper="igInputText")
+wrapper_input_text :: inline proc(label: string, buf: []u8, flags := Input_Text_Flags(0), callback : Input_Text_Callback = nil, user_data : rawptr = nil) {
+    l := strings.clone_to_cstring(label, context.temp_allocator);
+    return igInputText(l, cstring(&buf[0]), len(buf), flags, callback, user_data);
+}
+
+@(wrapper="igGetWindowPos")
+wrapper_get_window_pos :: proc() -> Vec2 {
+    res := Vec2{};
+    igGetWindowPos(&res);
+    return res;
+}
+
+@(wrapper="igGetWindowSize")
+wrapper_get_window_size :: proc() -> Vec2 {
+    res := Vec2{};
+    igGetWindowSize(&res);
+    return res;
+}
+
 @(wrapper="igSetAllocatorFunctions")
 wrapper_set_allocator_functions :: inline proc(alloc_func: Alloc_Func, free_func: Free_Func) {
     igSetAllocatorFunctions(alloc_func, free_func);

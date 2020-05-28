@@ -90,8 +90,8 @@ output_foreign :: proc(json_path: string, output_path: string, predefined_entite
             output_param_list(sb, f);
             fmt.sbprint(sb, ") ");
 
-            if function_has_return(f) == true {
-                fmt.sbprintf(sb, "-> {} ", clean_type(f.return_type));
+            if t, ok := function_has_return(f); ok == true {
+                fmt.sbprintf(sb, "-> {} ", clean_type(t));
             }
 
             fmt.sbprint(sb, "---;\n");
@@ -172,7 +172,7 @@ output_header :: proc(json_path: string, output_path: string, wrapper_map: ^Wrap
     { // Gather
         gather_foreign_proc_groups(&groups, obj);
 
-        calculate_longest :: proc(g: ^Foreign_Func_Group, f: Foreign_Func) {
+        calculate_longest :: proc(g: ^Foreign_Func_Group, f: Foreign_Func, wrapper_map: ^Wrapper_Map) {
             g.longest_func_name = max(g.longest_func_name, len(clean_func_name(f.link_name)));
 
             sbu := strings.make_builder();
@@ -181,10 +181,10 @@ output_header :: proc(json_path: string, output_path: string, wrapper_map: ^Wrap
 
             prl_len := len(strings.to_string(sbu));
 
-            if function_has_return(f) == true {
+            if t, ok := function_has_return(f, wrapper_map); ok == true {
                 sbr := strings.make_builder();
                 defer strings.destroy_builder(&sbr);
-                fmt.sbprintf(&sbr, "-> {} ", clean_type(f.return_type));
+                fmt.sbprintf(&sbr, "-> {} ", clean_type(t));
                 prl_len += len(strings.to_string(sbr));
             }
 
@@ -195,79 +195,15 @@ output_header :: proc(json_path: string, output_path: string, wrapper_map: ^Wrap
             for x in g.functions {
                 switch f in x {
                     case Foreign_Overload_Group:
-                        for y in f.functions do calculate_longest(&g, y);
+                        for y in f.functions do calculate_longest(&g, y, wrapper_map);
                     case Foreign_Func:
-                        calculate_longest(&g, f);
+                        calculate_longest(&g, f, wrapper_map);
                 }
             }
         }
     }
 
     { // SB Output
-        write_header :: proc(sb: ^strings.Builder, wrapper_map: ^Wrapper_Map, g: Foreign_Func_Group, f: Foreign_Func) {
-            name := clean_func_name(f.link_name);
-
-            fmt.sbprintf(sb, "{} ", name);
-            right_pad(sb, len(name), g.longest_func_name);
-
-            fmt.sbprintf(sb, ":: inline proc(");
-
-            sbu := strings.make_builder();
-            defer strings.destroy_builder(&sbu);
-
-            if v, ok := wrapper_map[f.link_name]; ok {
-                switch w in v {
-                    case Wrapper_Func: {
-                        write_wrapper_param_list(&sbu, w);
-                    }
-                    case string: {
-                        output_param_list(&sbu, f, true, false, true);
-                    }
-                }
-            } else {
-                output_param_list(&sbu, f, true, false, true);
-            }
-            
-            param_list := strings.to_string(sbu);
-            fmt.sbprint(sb, param_list);
-            fmt.sbprint(sb, ") ");
-
-            return_length := 0;
-
-            if function_has_return(f) == true {
-                sbr := strings.make_builder();
-                defer strings.destroy_builder(&sbr);
-                fmt.sbprintf(&sbr, "-> {} ", clean_type(f.return_type));
-                return_str := strings.to_string(sbr);
-                return_length = len(return_str);
-                fmt.sbprint(sb, return_str);
-            }
-
-            right_pad(sb, len(param_list)+return_length, g.longest_param_return_list);
-            fmt.sbprint(sb, "do ");
-
-            if function_has_return(f) == true do fmt.sbprint(sb, "return ");
-
-            if v, ok := wrapper_map[f.link_name]; ok {
-                switch w in v {
-                    case Wrapper_Func: {
-                        output_wrapper_call(sb, w);
-                        fmt.sbprint(sb, ";");
-                    }
-                    case string: {
-                        fmt.sbprintf(sb, "{}(", w);
-                        output_call_list(sb, f);
-                        fmt.sbprint(sb, ");");
-                    }
-                }
-            } else {
-                fmt.sbprintf(sb, "{}(", f.link_name);
-                output_call_list(sb, f);
-                fmt.sbprint(sb, ");");
-            }
-            fmt.sbprint(sb, "\n");
-        }
-
         for g in groups {
             for x in g.functions {
                 switch f in x {
@@ -305,6 +241,69 @@ output_header :: proc(json_path: string, output_path: string, wrapper_map: ^Wrap
 }
 
 @(private="file")
+write_header :: proc(sb: ^strings.Builder, wrapper_map: ^Wrapper_Map, g: Foreign_Func_Group, f: Foreign_Func) {
+    name := clean_func_name(f.link_name);
+
+    fmt.sbprintf(sb, "{} ", name);
+    right_pad(sb, len(name), g.longest_func_name);
+
+    fmt.sbprintf(sb, ":: inline proc(");
+
+    sbu := strings.make_builder();
+    defer strings.destroy_builder(&sbu);
+
+    if v, ok := wrapper_map[f.link_name]; ok {
+        switch w in v {
+            case Wrapper_Func: {
+                write_wrapper_param_list(&sbu, w);
+            }
+            case string: {
+                output_param_list(&sbu, f, true, false, true);
+            }
+        }
+    } else {
+        output_param_list(&sbu, f, true, false, true);
+    }
+    
+    param_list := strings.to_string(sbu);
+    fmt.sbprint(sb, param_list);
+    fmt.sbprint(sb, ") ");
+
+    return_length := 0;
+
+    if t, ok := function_has_return(f, wrapper_map); ok == true {
+        sbr := strings.make_builder();
+        defer strings.destroy_builder(&sbr);
+        fmt.sbprintf(&sbr, "-> {} ", clean_type(t));
+        return_str := strings.to_string(sbr);
+        return_length = len(return_str);
+        fmt.sbprint(sb, return_str);
+    }
+
+    right_pad(sb, len(param_list)+return_length, g.longest_param_return_list);
+    fmt.sbprint(sb, "do ");
+
+    if _, ok := function_has_return(f, wrapper_map); ok == true do fmt.sbprint(sb, "return ");
+
+    if v, ok := wrapper_map[f.link_name]; ok {
+        switch w in v {
+            case Wrapper_Func: {
+                output_wrapper_call(sb, w);
+                fmt.sbprint(sb, ";");
+            }
+            case string: {
+                fmt.sbprintf(sb, "{}(", w);
+                output_call_list(sb, f);
+                fmt.sbprint(sb, ");");
+            }
+        }
+    } else {
+        output_foreign_call(sb, f);
+    }
+    fmt.sbprint(sb, "\n");
+}
+
+@(private="file")
 count_cimgui_overloads :: proc(arr: json.Array) -> int {
     count := 0;
     for x in arr {
@@ -326,7 +325,7 @@ gather_foreign_proc_groups :: proc(groups : ^[dynamic]Foreign_Func_Group, obj: j
 
         for ov, idx in overloads {
             ov_obj := ov.value.(json.Object);
-            if is_nonUDT(ov_obj)       do continue;
+            // if is_nonUDT(ov_obj)       do continue;
             if is_vector(ov_obj)       do continue;
             if is_pool(ov_obj)         do continue;
             if is_chunk_stream(ov_obj) do continue;
@@ -531,8 +530,17 @@ reset_group_info :: proc() {
     g_last_was_ig = false;
 }
 
-function_has_return :: proc(f: Foreign_Func) -> bool {
-    return f.return_type != "" && f.return_type != "void";
+function_has_return :: proc(f: Foreign_Func, wrapper_map: ^Wrapper_Map = nil) -> (string, bool) {
+    if wrapper_map != nil {
+        if v, ok := wrapper_map[f.link_name]; ok {
+            #partial switch x in v {
+                case Wrapper_Func:
+                    return x.return_type, x.return_type != "";
+            }
+        }
+    }
+
+    return f.return_type, f.return_type != "" && f.return_type != "void";
 }
 
 output_param_list :: proc(sb: ^strings.Builder, f: Foreign_Func, 
@@ -548,8 +556,11 @@ output_param_list :: proc(sb: ^strings.Builder, f: Foreign_Func,
 
         if add_default && p.parsed_default != "" {
             if type == "string" {
-                fmt.sbprintf(sb, "{} := \"\"", p.name);
-            // } else if strings.index(type, "^") == -1 && type != "rawptr" {
+                if p.parsed_default == "nil" {
+                    fmt.sbprintf(sb, "{} := \"\"", p.name);
+                } else {
+                    fmt.sbprintf(sb, "{} := {}", p.name, p.parsed_default);                    
+                }
             } else if p.parsed_default != "nil" {
                 fmt.sbprintf(sb, "{} := {}({})", p.name, type, p.parsed_default);
             } else {

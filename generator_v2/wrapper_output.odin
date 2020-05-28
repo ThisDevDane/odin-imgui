@@ -96,7 +96,15 @@ output_wrappers :: proc(json_path: string, output_path: string, predefined_entit
 
 write_wrapper_param_list :: proc(sb: ^strings.Builder, w: Wrapper_Func) {
     for p, idx in w.params {
-        fmt.sbprintf(sb, "{}: {}", p.name, p.type);
+        if p.default_value != "" {
+            if p.default_value != "nil" {
+                fmt.sbprintf(sb, "{} := {}({})", p.name, p.type, p.default_value);
+            } else {
+                fmt.sbprintf(sb, "{} : {} = {}", p.name, p.type, p.default_value);
+            }
+        } else {
+            fmt.sbprintf(sb, "{}: {}", p.name, p.type);   
+        }
         if idx < len(w.params)-1 do fmt.sbprint(sb, ", ");
     }
 }
@@ -124,7 +132,7 @@ write_wrapper :: proc(sb: ^strings.Builder, f: Foreign_Func, wrapper_name: strin
         if idx < len(f.params)-1 do fmt.sbprint(sb, ", ");
     }
     fmt.sbprint(sb, ") ");
-    if function_has_return(f) == true do fmt.sbprintf(sb, "-> {} ", clean_type(f.return_type));
+    if t, ok := function_has_return(f); ok == true do fmt.sbprintf(sb, "-> {} ", clean_type(t));
     fmt.sbprint(sb, "{\n");
 
     var_map : map[string]string;
@@ -138,7 +146,7 @@ write_wrapper :: proc(sb: ^strings.Builder, f: Foreign_Func, wrapper_name: strin
     }           
 
     fmt.sbprint(sb, "\t");
-    if function_has_return(f) == true do fmt.sbprint(sb, "return ");
+    if _, ok := function_has_return(f); ok == true do fmt.sbprint(sb, "return ");
     
 
     fmt.sbprintf(sb, "{}(", f.link_name);
