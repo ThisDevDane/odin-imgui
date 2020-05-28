@@ -299,6 +299,7 @@ write_header :: proc(sb: ^strings.Builder, wrapper_map: ^Wrapper_Map, g: Foreign
         }
     } else {
         output_foreign_call(sb, f);
+        fmt.sbprint(sb, ";");
     }
     fmt.sbprint(sb, "\n");
 }

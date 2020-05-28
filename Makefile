@@ -16,7 +16,7 @@ PDB_NAME = $(PROGRAM_NAME).pdb
 
 DIST_DIR = ./dist
 ODIN_OUTPUT_DIR = ./output
-EXTERNAL_LIB_DIR = ./external
+EXTERNAL_LIB_DIR = ./output/external
 
 CIMGUI_SRC= ./cimgui/cimgui.cpp ./cimgui/imgui/imgui.cpp ./cimgui/imgui/imgui_draw.cpp ./cimgui/imgui/imgui_demo.cpp ./cimgui/imgui/imgui_widgets.cpp
 CIMGUI_OBJS=cimgui.obj imgui.obj imgui_draw.obj imgui_demo.obj imgui_widgets.obj
