@@ -14,6 +14,7 @@ EXE_NAME = $(PROGRAM_NAME).exe
 OBJ_NAME = $(PROGRAM_NAME).exe
 PDB_NAME = $(PROGRAM_NAME).pdb
 
+EXAMPLES_DIR = ./examples
 DIST_DIR = ./dist
 ODIN_OUTPUT_DIR = ./output
 EXTERNAL_LIB_DIR = ./output/external
@@ -32,6 +33,10 @@ build_prod:
 	$(OC) build $(GENERATOR_SRC) $(FLAGS) --opt=3 --vet
 
 all: cimgui build_prod
+
+sdl_opengl:
+	@echo "[SDL OpenGL Example]"
+	$(OC) run $(EXAMPLES_DIR)/sdl_opengl --llvm-api --debug
 
 generate: build_debug
 	@echo "[Generate]"
