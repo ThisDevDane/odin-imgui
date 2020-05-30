@@ -47,6 +47,9 @@
 		},
 		{
 			"path": "E:\\Odin\\shared\\odin-sdl2"
+		},
+		{
+			"path": "E:\\Odin\\shared\\odin-gl"
 		}
 	]
 }
