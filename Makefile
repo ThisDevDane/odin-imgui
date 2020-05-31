@@ -36,7 +36,7 @@ all: cimgui build_prod
 
 sdl_opengl:
 	@echo "[SDL OpenGL Example]"
-	$(OC) run $(EXAMPLES_DIR)/sdl_opengl --llvm-api --debug
+	$(OC) run $(EXAMPLES_DIR)/sdl_opengl --debug
 
 generate: build_debug
 	@echo "[Generate]"

@@ -1,4 +1,4 @@
-package imgui;
+package predefined;
 
 ////////////////////////////
 // Predefined Types
