@@ -30,9 +30,9 @@ build_debug:
 
 build_prod:
 	@echo "[Build Production]"
-	$(OC) build $(GENERATOR_SRC) $(FLAGS) --opt=3 --vet
+	$(OC) build $(GENERATOR_SRC) $(FLAGS) --opt=3
 
-all: cimgui build_prod
+all: cimgui build_debug
 
 sdl_opengl:
 	@echo "[SDL OpenGL Example]"
@@ -50,7 +50,7 @@ vet:
 dist: clean all generate
 	@echo "[Build Distribute]"
 	7z a $(CIMGUI_LIB_ARCHIVE) $(EXTERNAL_LIB_DIR)/*
-	cp output/* dist
+	cp output/*.odin dist
 
 clean:
 	@echo "[Clean]"

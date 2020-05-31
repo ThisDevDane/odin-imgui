@@ -5,9 +5,6 @@ import "core:fmt"
 import "core:os"
 import "core:strings"
 import "core:encoding/json";
-import "core:odin/ast"
-import "core:odin/tokenizer"
-import "core:odin/parser"
 
 Wrapper_Map :: distinct map[string]union{string, Wrapper_Func};
 

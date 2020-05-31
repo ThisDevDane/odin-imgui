@@ -324,7 +324,7 @@ gather_foreign_proc_groups :: proc(groups : ^[dynamic]Foreign_Func_Group, obj: j
 
         ov_group := Foreign_Overload_Group{};
 
-        for ov, idx in overloads {
+        for ov in overloads {
             ov_obj := ov.value.(json.Object);
             // if is_nonUDT(ov_obj)       do continue;
             if is_vector(ov_obj)       do continue;

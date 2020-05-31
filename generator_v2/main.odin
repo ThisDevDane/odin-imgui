@@ -5,9 +5,6 @@ import "core:fmt"
 import "core:os"
 import "core:strings"
 import "core:encoding/json";
-import "core:odin/ast"
-import "core:odin/tokenizer"
-import "core:odin/parser"
 
 DEFINITION_JSON_PATH       :: "./cimgui/generator/output/definitions.json";
 STRUCTS_AND_ENUM_JSON_PATH :: "./cimgui/generator/output/structs_and_enums.json";

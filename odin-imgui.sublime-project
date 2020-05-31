@@ -22,6 +22,10 @@
 					"shell_cmd": "make generate"
 				},
 				{
+					"name": "Vet",
+					"shell_cmd": "make vet"
+				},
+				{
 					"name": "Dist",
 					"shell_cmd": "make dist"
 				},

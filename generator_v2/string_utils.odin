@@ -1,7 +1,6 @@
 package main;
 
 import "core:strings";
-import "core:log";
 import "core:fmt";
 import "core:strconv";
 
