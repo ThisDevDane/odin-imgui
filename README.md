@@ -21,7 +21,7 @@ WIP:
 
 ## Implementations
 
-Implementations are reusable bits of code using popular odin libraries/bidings, currently there are;
+Implementations are reusable bits of code using popular odin libraries/bidings, inside the `impl` folder there currently are;
 
  - SDL using [`odin-sdl2`](https://github.com/JoshuaManton/odin-sdl2)
  - OpenGL using [`odin-gl`](https://github.com/vassvik/odin-gl)
