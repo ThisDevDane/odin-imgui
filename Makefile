@@ -50,7 +50,12 @@ vet:
 dist: clean all generate
 	@echo "[Build Distribute]"
 	7z a $(CIMGUI_LIB_ARCHIVE) $(EXTERNAL_LIB_DIR)/*
-	cp output/*.odin dist
+	cp $(ODIN_OUTPUT_DIR)/*.odin dist
+
+update: clean all generate
+	@echo "[Update]"
+	cp -f $(ODIN_OUTPUT_DIR)/*.odin .
+	cp -rf $(EXTERNAL_LIB_DIR) .
 
 clean:
 	@echo "[Clean]"

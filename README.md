@@ -1,11 +1,29 @@
-# odin-imgui
+#odin-imgui
+
+This is an odin wrapper for [dear imgui v1.76](https://github.com/ocornut/imgui) (Generated from the auto-generated [cimgui](https://github.com/cimgui/cimgui.git)).
 ![scrshot](https://i.imgur.com/nOA6iSl.png)
-This is a (work in progress) wrapper for [dear imgui v1.74](https://github.com/ocornut/imgui) (based on the auto-generated [cimgui](https://github.com/cimgui/cimgui.git)).
 
 You can download the latest release with pre-built cimgui binaries [here.](https://github.com/ThisDrunkDane/odin-dear_imgui/releases/latest)
 
-## Notes:
+##Examples
+
+You can find examples of setting up `odin-imgui` using the provided [implementations](#implementations) inside the `examples` folder, current examples exists;
+
+Done:
+ - SDL with OpenGL 4.5
+
+WIP:
+ - SDL with D3D11
+
+## Implementations
+
+Implementations are reusable bits of code using popular odin libraries/bidings, currently there are;
+
+ - SDL using [`odin-sdl2`](https://github.com/JoshuaManton/odin-sdl2)
+ - OpenGL using [`odin-gl`](https://github.com/vassvik/odin-gl)
+
+##Notes:
 * Most functions have been wrapped or bound, those missing will either be added by the maintainer over time or by PR (PRs VERY WELCOME)
 
-## Building cimgui
-In the repo there is a batch script called `build-cimgui.bat`. Make sure you have pulled in the submodule too, then it should be as simple as running that script with a command prompt that has the Visual C++ Compiler (`cl`) and the Microsoft Library Manager (`lib`) in it's `PATH`. This will build a release and debug build of cimgui and put it into a folder called external in the repo root. This is where the odin source files expects to find the libs.
+##Building cimgui
+If you want to build cimgui yourself instead of using the binaries that exist in the repo, you can just call `make cimgui` from a command prompt that has `cl` and `link` in their path.
