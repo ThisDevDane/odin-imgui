@@ -10,6 +10,8 @@ package imgui;
 @output_copy Texture_ID :: distinct rawptr; 
 @output_copy File_Handle :: distinct uintptr; 
 
+//@output_copy Draw_Callback_ResetRenderState :: imgui.Draw_Callback(~uintptr(0)); 
+
 @output_copy Alloc_Func :: #type proc "c" (size: i64, user_data: rawptr) -> rawptr;
 @output_copy Free_Func :: #type proc "c" (ptr: rawptr, user_data: rawptr);
 @output_copy Items_Getter_Proc :: #type proc "c" (data: rawptr, idx: i32, out_text: ^cstring) -> bool;
@@ -123,18 +125,6 @@ igComboStr_arr :: proc(label: cstring, current_item: ^i32, items: ^cstring, item
 
 ///////////////////////////
 // Predefined wrappers
-@(wrapper="igComboStr_arr")
-wrapper_combo_str_arr :: proc(label: string, current_item: ^i32, items: []string, popup_max_height_in_items: i32) -> bool {
-    l := strings.clone_to_cstring(label, context.temp_allocator);
-
-    data := make([]cstring, len(items), context.temp_allocator);
-    for item, idx in items {
-        data[idx] = strings.clone_to_cstring(label, context.temp_allocator);
-    }
-
-    return igComboStr_arr(l, current_item, &data[0], i32(len(items)), popup_max_height_in_items);
-}
-
 @(wrapper="igInputText")
 wrapper_input_text :: inline proc(label: string, buf: []u8, flags := Input_Text_Flags(0), callback : Input_Text_Callback = nil, user_data : rawptr = nil) -> bool {
     l := strings.clone_to_cstring(label, context.temp_allocator);
@@ -207,15 +197,42 @@ wrapper_plot_lines_fn_ptr :: proc(label: string,
 }
 
 @(wrapper="igListBoxFnPtr")
-wrapper_list_box_fn_ptr :: proc(label: string, current_item: ^i32, items_getter: Items_Getter_Proc, data: rawptr, items_count: i32, height_in_items: i32) -> bool {
+wrapper_list_box_fn_ptr :: proc(label: string, current_item: ^i32, items_getter: Items_Getter_Proc, data: rawptr, items_count: i32, height_in_items := i32(0))-> bool {
     l := strings.clone_to_cstring(label, context.temp_allocator);
     return igListBoxFnPtr(l, current_item, items_getter, data, items_count, height_in_items);
 }
 
 @(wrapper="igComboFnPtr")
-wrapper_combo_fn_ptr :: proc(label: string, current_item: ^i32, items_getter: Items_Getter_Proc, data: rawptr, items_count: i32, popup_max_height_in_items: i32) -> bool {
+wrapper_combo_fn_ptr :: proc(label: string, current_item: ^i32, items_getter: Items_Getter_Proc, data: rawptr, items_count: i32, popup_max_height_in_items := i32(0)) -> bool {
     l := strings.clone_to_cstring(label, context.temp_allocator);
     return igComboFnPtr(l, current_item, items_getter, data, items_count, popup_max_height_in_items);
+}
+
+@(wrapper="igComboStr_arr")
+wrapper_combo_str_arr :: proc(label: string, current_item: ^i32, items: []string, popup_max_height_in_items := i32(0)) -> bool {
+    l := strings.clone_to_cstring(label, context.temp_allocator);
+
+    data := make([]cstring, len(items), context.temp_allocator);
+    for item, idx in items {
+        data[idx] = strings.clone_to_cstring(item, context.temp_allocator);
+    }
+
+    return igComboStr_arr(l, current_item, &data[0], i32(len(items)), popup_max_height_in_items);
+}
+
+@(wrapper="igTextEx") 
+wrapper_text_ex :: proc(text: string, flags := Text_Flags(0)) {
+    t := strings.clone_to_cstring(text, context.temp_allocator);
+    ptr := transmute(^u8)t;
+    end_ptr := mem.ptr_offset(ptr, len(t));
+    igTextEx(cstring(ptr), cstring(end_ptr), flags);
+}
+
+@(wrapper="igTextWrapped") 
+wrapper_text_wrapped :: proc(fmt_: string, args: ..any) {
+    fmt_str := fmt.tprintf("{}\x00", fmt_);
+    str := transmute([]byte)fmt.tprintf(fmt_str, ..args);
+    igTextWrapped(cstring(&str[0]), nil);
 }
 
 @(wrapper="igTextColored") 
@@ -225,14 +242,24 @@ wrapper_text_colored :: proc(col: Vec4, fmt_: string, args: ..any) {
     igTextColored(col, cstring(&str[0]), nil);
 }
 
+@(wrapper="igTextDisabled") 
+wrapper_text_disabled :: proc(fmt_: string, args: ..any) {
+    fmt_str := fmt.tprintf("{}\x00", fmt_);
+    str := transmute([]byte)fmt.tprintf(fmt_str, ..args);
+    igTextDisabled(cstring(&str[0]), nil);
+}
+
 @(wrapper="igTextUnformatted") 
 wrapper_unformatted_text :: proc(text: string) {
-    bytes := transmute([]byte)text;
-    igTextUnformatted(cstring(&bytes[0]), cstring(&bytes[len(bytes)]));
+    t := strings.clone_to_cstring(text, context.temp_allocator);
+    ptr := transmute(^u8)t;
+    end_ptr := mem.ptr_offset(ptr, len(t));
+    igTextUnformatted(cstring(ptr), cstring(end_ptr));
 }
 
 @(wrapper="igText") 
 wrapper_text :: proc(fmt_: string, args: ..any) {
-    str := transmute([]byte)fmt.tprintf(fmt_, ..args);
+    fmt_str := fmt.tprintf("{}\x00", fmt_);
+    str := transmute([]byte)fmt.tprintf(fmt_str, ..args);
     igTextUnformatted(cstring(&str[0]), cstring(&str[len(str)-1]));
 }

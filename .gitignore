@@ -1,10 +1,12 @@
 external/*
 dist/*
 output/*
-.vs/*
+.vs
 
 *.exe
 *.json
 *.sublime-workspace
 *.pdb
 *.obj
+
+imgui.ini

@@ -31,6 +31,7 @@ output_wrappers :: proc(json_path: string, output_path: string, predefined_entit
     insert_package_header(&sb);
     fmt.sbprint(&sb, "import \"core:fmt\";\n");
     fmt.sbprint(&sb, "import \"core:strings\";\n");
+    fmt.sbprint(&sb, "import \"core:mem\";\n");
 
     groups : [dynamic]Foreign_Func_Group;
     predefined : map[string]Wrapper_Func;
@@ -112,6 +113,7 @@ write_wrapper_param_list :: proc(sb: ^strings.Builder, w: Wrapper_Func) {
 output_wrapper_call :: proc(sb: ^strings.Builder, w: Wrapper_Func) {
     fmt.sbprintf(sb, "{}(", w.name);
     for p, idx in w.params {
+        if strings.has_prefix(p.type, "..") do fmt.sbprint(sb, "..");
         fmt.sbprint(sb, p.name);
         if idx < len(w.params)-1 do fmt.sbprint(sb, ", ");
     }
