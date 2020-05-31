@@ -28,7 +28,6 @@ main :: proc() {
     wrapper_map := output_wrappers(DEFINITION_JSON_PATH, "./output/wrapper.odin", predefined_entities);
     output_header(DEFINITION_JSON_PATH, "./output/header.odin", wrapper_map);
 
-
     log.info("Done generating!!!");
 }
 
