@@ -8,7 +8,7 @@ import "core:runtime";
 import sdl "shared:odin-sdl2";
 import gl  "shared:odin-gl";
 
-import imgui "../../output";
+import imgui "../..";
 import imgl  "../../impl/opengl";
 import imsdl "../../impl/sdl";
 

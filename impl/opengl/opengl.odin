@@ -6,7 +6,7 @@ import "core:strings";
 
 import gl  "shared:odin-gl";
 
-import imgui "../../output";
+import imgui "../..";
 
 OpenGL_State :: struct {
     shader_program: u32,

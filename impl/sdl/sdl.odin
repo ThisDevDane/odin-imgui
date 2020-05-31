@@ -5,7 +5,7 @@ import "core:fmt";
 
 import sdl "shared:odin-sdl2";
 
-import imgui "../../output";
+import imgui "../..";
 
 SDL_State :: struct {
     time: u64,
