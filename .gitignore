@@ -4,6 +4,7 @@ output/*
 
 *.exe
 *.json
+*.sublime-project
 *.sublime-workspace
 *.pdb
 *.obj
