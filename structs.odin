@@ -18,11 +18,11 @@ Draw_Channel :: struct {
 
 //ImDrawCmd 
 Draw_Cmd :: struct {
-	elem_count:         u32,
 	clip_rect:          Vec4,
 	texture_id:         Texture_ID,
 	vtx_offset:         u32,
 	idx_offset:         u32,
+	elem_count:         u32,
 	user_callback:      Draw_Callback,
 	user_callback_data: rawptr,
 }
@@ -46,20 +46,20 @@ Draw_Data_Builder :: struct {
 
 //ImDrawList 
 Draw_List :: struct {
-	cmd_buffer:          Im_Vector(Draw_Cmd),
-	idx_buffer:          Im_Vector(Draw_Idx),
-	vtx_buffer:          Im_Vector(Draw_Vert),
-	flags:               Draw_List_Flags,
-	_data:               ^Draw_List_Shared_Data,
-	_owner_name:         cstring,
-	_vtx_current_offset: u32,
-	_vtx_current_idx:    u32,
-	_vtx_write_ptr:      ^Draw_Vert,
-	_idx_write_ptr:      ^Draw_Idx,
-	_clip_rect_stack:    Im_Vector(Vec4),
-	_texture_id_stack:   Im_Vector(Texture_ID),
-	_path:               Im_Vector(Vec2),
-	_splitter:           Draw_List_Splitter,
+	cmd_buffer:        Im_Vector(Draw_Cmd),
+	idx_buffer:        Im_Vector(Draw_Idx),
+	vtx_buffer:        Im_Vector(Draw_Vert),
+	flags:             Draw_List_Flags,
+	_data:             ^Draw_List_Shared_Data,
+	_owner_name:       cstring,
+	_vtx_current_idx:  u32,
+	_vtx_write_ptr:    ^Draw_Vert,
+	_idx_write_ptr:    ^Draw_Idx,
+	_clip_rect_stack:  Im_Vector(Vec4),
+	_texture_id_stack: Im_Vector(Texture_ID),
+	_path:             Im_Vector(Vec2),
+	_cmd_header:       Draw_Cmd,
+	_splitter:         Draw_List_Splitter,
 }
 
 //ImDrawListSharedData 
@@ -132,11 +132,11 @@ Font_Atlas :: struct {
 
 //ImFontAtlasCustomRect 
 Font_Atlas_Custom_Rect :: struct {
-	id:              u32,
 	width:           u16,
 	height:          u16,
 	x:               u16,
 	y:               u16,
+	glyph_id:        u32,
 	glyph_advance_x: f32,
 	glyph_offset:    Vec2,
 	font:            ^ImFont,
@@ -201,22 +201,23 @@ Column_Data :: struct {
 
 //ImGuiColumns 
 Columns :: struct {
-	id:                    ImID,
-	flags:                 Columns_Flags,
-	is_first_frame:        bool,
-	is_being_resized:      bool,
-	current:               i32,
-	count:                 i32,
-	off_min_x:             f32,
-	off_max_x:             f32,
-	line_min_y:            f32,
-	line_max_y:            f32,
-	host_cursor_pos_y:     f32,
-	host_cursor_max_pos_x: f32,
-	host_clip_rect:        Rect,
-	host_work_rect:        Rect,
-	columns:               Im_Vector(Column_Data),
-	splitter:              Draw_List_Splitter,
+	id:                     ImID,
+	flags:                  Columns_Flags,
+	is_first_frame:         bool,
+	is_being_resized:       bool,
+	current:                i32,
+	count:                  i32,
+	off_min_x:              f32,
+	off_max_x:              f32,
+	line_min_y:             f32,
+	line_max_y:             f32,
+	host_cursor_pos_y:      f32,
+	host_cursor_max_pos_x:  f32,
+	host_initial_clip_rect: Rect,
+	host_backup_clip_rect:  Rect,
+	host_work_rect:         Rect,
+	columns:                Im_Vector(Column_Data),
+	splitter:               Draw_List_Splitter,
 }
 
 //ImGuiContext 
@@ -236,6 +237,9 @@ Context :: struct {
 	within_frame_scope:                              bool,
 	within_frame_scope_with_implicit_window:         bool,
 	within_end_child:                                bool,
+	test_engine_hook_items:                          bool,
+	test_engine_hook_id_info:                        ImID,
+	test_engine:                                     rawptr,
 	windows:                                         Im_Vector(^ImWindow),
 	windows_focus_order:                             Im_Vector(^ImWindow),
 	windows_temp_sort_buffer:                        Im_Vector(^ImWindow),
@@ -319,9 +323,11 @@ Context :: struct {
 	nav_move_result_local:                           Nav_Move_Result,
 	nav_move_result_local_visible_set:               Nav_Move_Result,
 	nav_move_result_other:                           Nav_Move_Result,
+	nav_wrap_request_window:                         ^ImWindow,
+	nav_wrap_request_flags:                          Nav_Move_Flags,
 	nav_windowing_target:                            ^ImWindow,
 	nav_windowing_target_anim:                       ^ImWindow,
-	nav_windowing_list:                              ^ImWindow,
+	nav_windowing_list_window:                       ^ImWindow,
 	nav_windowing_timer:                             f32,
 	nav_windowing_highlight_alpha:                   f32,
 	nav_windowing_toggle_layer:                      bool,
@@ -352,6 +358,7 @@ Context :: struct {
 	drag_drop_accept_id_curr:                        ImID,
 	drag_drop_accept_id_prev:                        ImID,
 	drag_drop_accept_frame_count:                    i32,
+	drag_drop_hold_just_pressed_id:                  ImID,
 	drag_drop_payload_buf_heap:                      Im_Vector(u8),
 	drag_drop_payload_buf_local:                     [16]u8,
 	current_tab_bar:                                 ^Tab_Bar,
@@ -406,6 +413,11 @@ Data_Type_Info :: struct {
 	size:      uint,
 	print_fmt: cstring,
 	scan_fmt:  cstring,
+}
+
+//ImGuiDataTypeTempStorage 
+Data_Type_Temp_Storage :: struct {
+	data: [8]u8,
 }
 
 //ImGuiGroupData 
@@ -500,6 +512,7 @@ IO :: struct {
 	keys_down_duration_prev:                 [512]f32,
 	nav_inputs_down_duration:                [21]f32,
 	nav_inputs_down_duration_prev:           [21]f32,
+	pen_pressure:                            f32,
 	input_queue_surrogate:                   Wchar16,
 	input_queue_characters:                  Im_Vector(Wchar),
 }
@@ -597,6 +610,7 @@ Next_Window_Data :: struct {
 	pos_pivot_val:           Vec2,
 	size_val:                Vec2,
 	content_size_val:        Vec2,
+	scroll_val:              Vec2,
 	collapsed_val:           bool,
 	size_constraint_rect:    Rect,
 	size_callback:           Size_Callback,
@@ -678,42 +692,43 @@ Storage_Pair :: struct {
 
 //ImGuiStyle 
 Style :: struct {
-	alpha:                       f32,
-	window_padding:              Vec2,
-	window_rounding:             f32,
-	window_border_size:          f32,
-	window_min_size:             Vec2,
-	window_title_align:          Vec2,
-	window_menu_button_position: Dir,
-	child_rounding:              f32,
-	child_border_size:           f32,
-	popup_rounding:              f32,
-	popup_border_size:           f32,
-	frame_padding:               Vec2,
-	frame_rounding:              f32,
-	frame_border_size:           f32,
-	item_spacing:                Vec2,
-	item_inner_spacing:          Vec2,
-	touch_extra_padding:         Vec2,
-	indent_spacing:              f32,
-	columns_min_spacing:         f32,
-	scrollbar_size:              f32,
-	scrollbar_rounding:          f32,
-	grab_min_size:               f32,
-	grab_rounding:               f32,
-	tab_rounding:                f32,
-	tab_border_size:             f32,
-	color_button_position:       Dir,
-	button_text_align:           Vec2,
-	selectable_text_align:       Vec2,
-	display_window_padding:      Vec2,
-	display_safe_area_padding:   Vec2,
-	mouse_cursor_scale:          f32,
-	anti_aliased_lines:          bool,
-	anti_aliased_fill:           bool,
-	curve_tessellation_tol:      f32,
-	circle_segment_max_error:    f32,
-	colors:                      [48]Vec4,
+	alpha:                                     f32,
+	window_padding:                            Vec2,
+	window_rounding:                           f32,
+	window_border_size:                        f32,
+	window_min_size:                           Vec2,
+	window_title_align:                        Vec2,
+	window_menu_button_position:               Dir,
+	child_rounding:                            f32,
+	child_border_size:                         f32,
+	popup_rounding:                            f32,
+	popup_border_size:                         f32,
+	frame_padding:                             Vec2,
+	frame_rounding:                            f32,
+	frame_border_size:                         f32,
+	item_spacing:                              Vec2,
+	item_inner_spacing:                        Vec2,
+	touch_extra_padding:                       Vec2,
+	indent_spacing:                            f32,
+	columns_min_spacing:                       f32,
+	scrollbar_size:                            f32,
+	scrollbar_rounding:                        f32,
+	grab_min_size:                             f32,
+	grab_rounding:                             f32,
+	tab_rounding:                              f32,
+	tab_border_size:                           f32,
+	tab_min_width_for_unselected_close_button: f32,
+	color_button_position:                     Dir,
+	button_text_align:                         Vec2,
+	selectable_text_align:                     Vec2,
+	display_window_padding:                    Vec2,
+	display_safe_area_padding:                 Vec2,
+	mouse_cursor_scale:                        f32,
+	anti_aliased_lines:                        bool,
+	anti_aliased_fill:                         bool,
+	curve_tessellation_tol:                    f32,
+	circle_segment_max_error:                  f32,
+	colors:                                    [48]Vec4,
 }
 
 Style_Mod :: struct {
@@ -863,10 +878,11 @@ ImWindow :: struct {
 
 //ImGuiWindowSettings 
 Window_Settings :: struct {
-	id:        ImID,
-	pos:       Vec2_ih,
-	size:      Vec2_ih,
-	collapsed: bool,
+	id:         ImID,
+	pos:        Vec2_ih,
+	size:       Vec2_ih,
+	collapsed:  bool,
+	want_apply: bool,
 }
 
 //ImGuiWindowTempData 

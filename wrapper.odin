@@ -208,21 +208,21 @@ swr_igBeginPopup :: proc(str_id: string, flags: Window_Flags) -> bool {
 }
 
 // AUTO_GENERATED for 'igBeginPopupContextItem'
-swr_igBeginPopupContextItem :: proc(str_id: string, mouse_button: Mouse_Button) -> bool {
+swr_igBeginPopupContextItem :: proc(str_id: string, popup_flags: Popup_Flags) -> bool {
 	str0 := strings.clone_to_cstring(str_id, context.temp_allocator);
-	return igBeginPopupContextItem(str0, mouse_button);
+	return igBeginPopupContextItem(str0, popup_flags);
 }
 
 // AUTO_GENERATED for 'igBeginPopupContextVoid'
-swr_igBeginPopupContextVoid :: proc(str_id: string, mouse_button: Mouse_Button) -> bool {
+swr_igBeginPopupContextVoid :: proc(str_id: string, popup_flags: Popup_Flags) -> bool {
 	str0 := strings.clone_to_cstring(str_id, context.temp_allocator);
-	return igBeginPopupContextVoid(str0, mouse_button);
+	return igBeginPopupContextVoid(str0, popup_flags);
 }
 
 // AUTO_GENERATED for 'igBeginPopupContextWindow'
-swr_igBeginPopupContextWindow :: proc(str_id: string, mouse_button: Mouse_Button, also_over_items: bool) -> bool {
+swr_igBeginPopupContextWindow :: proc(str_id: string, popup_flags: Popup_Flags) -> bool {
 	str0 := strings.clone_to_cstring(str_id, context.temp_allocator);
-	return igBeginPopupContextWindow(str0, mouse_button, also_over_items);
+	return igBeginPopupContextWindow(str0, popup_flags);
 }
 
 // AUTO_GENERATED for 'igBeginPopupModal'
@@ -353,10 +353,10 @@ swr_igComboStr :: proc(label: string, current_item: ^i32, items_separated_by_zer
 	return igComboStr(str0, current_item, str2, popup_max_height_in_items);
 }
 
-// PREDEFINED FOR 'igComboFnPtr'
-wrapper_combo_fn_ptr :: proc(label: string, current_item: ^i32, items_getter: Items_Getter_Proc, data: rawptr, items_count: i32, popup_max_height_in_items := i32(0)) -> bool {
-    l := strings.clone_to_cstring(label, context.temp_allocator);
-    return igComboFnPtr(l, current_item, items_getter, data, items_count, popup_max_height_in_items);
+// AUTO_GENERATED for 'igComboFnBoolPtr'
+swr_igComboFnBoolPtr :: proc(label: string, current_item: ^i32, items_getter: ^^^^bool(, data: rawptr, items_count: i32, popup_max_height_in_items: i32) -> bool {
+	str0 := strings.clone_to_cstring(label, context.temp_allocator);
+	return igComboFnBoolPtr(str0, current_item, items_getter, data, items_count, popup_max_height_in_items);
 }
 
 // AUTO_GENERATED for 'igCreateNewWindowSettings'
@@ -800,9 +800,9 @@ swr_igInvisibleButton :: proc(str_id: string, size: Vec2) -> bool {
 }
 
 // AUTO_GENERATED for 'igIsPopupOpenStr'
-swr_igIsPopupOpenStr :: proc(str_id: string) -> bool {
+swr_igIsPopupOpenStr :: proc(str_id: string, flags: Popup_Flags) -> bool {
 	str0 := strings.clone_to_cstring(str_id, context.temp_allocator);
-	return igIsPopupOpenStr(str0);
+	return igIsPopupOpenStr(str0, flags);
 }
 
 // AUTO_GENERATED for 'igLabelText'
@@ -819,10 +819,10 @@ swr_igListBoxStr_arr :: proc(label: string, current_item: ^i32, items: string, i
 	return igListBoxStr_arr(str0, current_item, str2, items_count, height_in_items);
 }
 
-// PREDEFINED FOR 'igListBoxFnPtr'
-wrapper_list_box_fn_ptr :: proc(label: string, current_item: ^i32, items_getter: Items_Getter_Proc, data: rawptr, items_count: i32, height_in_items := i32(0))-> bool {
-    l := strings.clone_to_cstring(label, context.temp_allocator);
-    return igListBoxFnPtr(l, current_item, items_getter, data, items_count, height_in_items);
+// AUTO_GENERATED for 'igListBoxFnBoolPtr'
+swr_igListBoxFnBoolPtr :: proc(label: string, current_item: ^i32, items_getter: ^^^^bool(, data: rawptr, items_count: i32, height_in_items: i32) -> bool {
+	str0 := strings.clone_to_cstring(label, context.temp_allocator);
+	return igListBoxFnBoolPtr(str0, current_item, items_getter, data, items_count, height_in_items);
 }
 
 // AUTO_GENERATED for 'igListBoxHeaderVec2'
@@ -883,15 +883,15 @@ swr_igMenuItemBoolPtr :: proc(label: string, shortcut: string, p_selected: ^bool
 }
 
 // AUTO_GENERATED for 'igOpenPopup'
-swr_igOpenPopup :: proc(str_id: string) {
+swr_igOpenPopup :: proc(str_id: string, popup_flags: Popup_Flags) {
 	str0 := strings.clone_to_cstring(str_id, context.temp_allocator);
-	igOpenPopup(str0);
+	igOpenPopup(str0, popup_flags);
 }
 
-// AUTO_GENERATED for 'igOpenPopupOnItemClick'
-swr_igOpenPopupOnItemClick :: proc(str_id: string, mouse_button: Mouse_Button) -> bool {
+// AUTO_GENERATED for 'igOpenPopupContextItem'
+swr_igOpenPopupContextItem :: proc(str_id: string, popup_flags: Popup_Flags) -> bool {
 	str0 := strings.clone_to_cstring(str_id, context.temp_allocator);
-	return igOpenPopupOnItemClick(str0, mouse_button);
+	return igOpenPopupContextItem(str0, popup_flags);
 }
 
 // PREDEFINED FOR 'igPlotEx'
@@ -917,19 +917,11 @@ swr_igPlotHistogramFloatPtr :: proc(label: string, values: ^f32, values_count: i
 	igPlotHistogramFloatPtr(str0, values, values_count, values_offset, str4, scale_min, scale_max, graph_size, stride);
 }
 
-// PREDEFINED FOR 'igPlotHistogramFnPtr'
-wrapper_plot_histogram_fn_ptr :: proc(label: string,
-                                      values_getter: Value_Getter_Proc,
-                                      data: rawptr,
-                                      values_count: i32,
-                                      values_offset: i32,
-                                      overlay_text: string,
-                                      scale_min: f32,
-                                      scale_max: f32,
-                                      graph_size: Vec2) {
-    l := strings.clone_to_cstring(label, context.temp_allocator);
-    overlay := strings.clone_to_cstring(overlay_text, context.temp_allocator);
-    igPlotHistogramFnPtr(l, values_getter, data, values_count, values_offset, overlay, scale_min, scale_max, graph_size);
+// AUTO_GENERATED for 'igPlotHistogramFnFloatPtr'
+swr_igPlotHistogramFnFloatPtr :: proc(label: string, values_getter: ^^float(, data: rawptr, values_count: i32, values_offset: i32, overlay_text: string, scale_min: f32, scale_max: f32, graph_size: Vec2) {
+	str0 := strings.clone_to_cstring(label, context.temp_allocator);
+	str5 := strings.clone_to_cstring(overlay_text, context.temp_allocator);
+	igPlotHistogramFnFloatPtr(str0, values_getter, data, values_count, values_offset, str5, scale_min, scale_max, graph_size);
 }
 
 // AUTO_GENERATED for 'igPlotLinesFloatPtr'
@@ -939,19 +931,11 @@ swr_igPlotLinesFloatPtr :: proc(label: string, values: ^f32, values_count: i32, 
 	igPlotLinesFloatPtr(str0, values, values_count, values_offset, str4, scale_min, scale_max, graph_size, stride);
 }
 
-// PREDEFINED FOR 'igPlotLinesFnPtr'
-wrapper_plot_lines_fn_ptr :: proc(label: string, 
-                                  values_getter: Value_Getter_Proc, 
-                                  data: rawptr, 
-                                  values_count: i32, 
-                                  values_offset: i32, 
-                                  overlay_text: string, 
-                                  scale_min: f32, 
-                                  scale_max: f32, 
-                                  graph_size: Vec2) {
-    l := strings.clone_to_cstring(label, context.temp_allocator);
-    overlay := strings.clone_to_cstring(overlay_text, context.temp_allocator);
-    igPlotLinesFnPtr(l, values_getter, data, values_count, values_offset, overlay, scale_min, scale_max, graph_size);
+// AUTO_GENERATED for 'igPlotLinesFnFloatPtr'
+swr_igPlotLinesFnFloatPtr :: proc(label: string, values_getter: ^^float(, data: rawptr, values_count: i32, values_offset: i32, overlay_text: string, scale_min: f32, scale_max: f32, graph_size: Vec2) {
+	str0 := strings.clone_to_cstring(label, context.temp_allocator);
+	str5 := strings.clone_to_cstring(overlay_text, context.temp_allocator);
+	igPlotLinesFnFloatPtr(str0, values_getter, data, values_count, values_offset, str5, scale_min, scale_max, graph_size);
 }
 
 // AUTO_GENERATED for 'igProgressBar'
@@ -1205,16 +1189,16 @@ swr_igTabItemEx :: proc(tab_bar: ^Tab_Bar, label: string, p_open: ^bool, flags: 
 }
 
 // AUTO_GENERATED for 'igTabItemLabelAndCloseButton'
-swr_igTabItemLabelAndCloseButton :: proc(draw_list: ^Draw_List, bb: Rect, flags: Tab_Item_Flags, frame_padding: Vec2, label: string, tab_id: ImID, close_button_id: ImID) -> bool {
+swr_igTabItemLabelAndCloseButton :: proc(draw_list: ^Draw_List, bb: Rect, flags: Tab_Item_Flags, frame_padding: Vec2, label: string, tab_id: ImID, close_button_id: ImID, is_contents_visible: bool) -> bool {
 	str4 := strings.clone_to_cstring(label, context.temp_allocator);
-	return igTabItemLabelAndCloseButton(draw_list, bb, flags, frame_padding, str4, tab_id, close_button_id);
+	return igTabItemLabelAndCloseButton(draw_list, bb, flags, frame_padding, str4, tab_id, close_button_id, is_contents_visible);
 }
 
 // AUTO_GENERATED for 'igTempInputScalar'
-swr_igTempInputScalar :: proc(bb: Rect, id: ImID, label: string, data_type: Data_Type, p_data: rawptr, format: string) -> bool {
+swr_igTempInputScalar :: proc(bb: Rect, id: ImID, label: string, data_type: Data_Type, p_data: rawptr, format: string, p_clamp_min: rawptr, p_clamp_max: rawptr) -> bool {
 	str2 := strings.clone_to_cstring(label, context.temp_allocator);
 	str5 := strings.clone_to_cstring(format, context.temp_allocator);
-	return igTempInputScalar(bb, id, str2, data_type, p_data, str5);
+	return igTempInputScalar(bb, id, str2, data_type, p_data, str5, p_clamp_min, p_clamp_max);
 }
 
 // AUTO_GENERATED for 'igTempInputText'

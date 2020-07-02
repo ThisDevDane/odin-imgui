@@ -52,8 +52,6 @@ foreign cimgui {
 	ImDrawList_ChannelsMerge            :: proc(self: ^Draw_List) ---;
 	ImDrawList_ChannelsSetCurrent       :: proc(self: ^Draw_List, n: i32) ---;
 	ImDrawList_ChannelsSplit            :: proc(self: ^Draw_List, count: i32) ---;
-	ImDrawList_Clear                    :: proc(self: ^Draw_List) ---;
-	ImDrawList_ClearFreeMemory          :: proc(self: ^Draw_List) ---;
 	ImDrawList_CloneOutput              :: proc(self: ^Draw_List) -> ^Draw_List ---;
 	ImDrawList_GetClipRectMax           :: proc(pOut: ^Vec2, self: ^Draw_List) ---;
 	ImDrawList_GetClipRectMin           :: proc(pOut: ^Vec2, self: ^Draw_List) ---;
@@ -79,13 +77,17 @@ foreign cimgui {
 	ImDrawList_PushClipRect             :: proc(self: ^Draw_List, clip_rect_min: Vec2, clip_rect_max: Vec2, intersect_with_current_clip_rect: bool) ---;
 	ImDrawList_PushClipRectFullScreen   :: proc(self: ^Draw_List) ---;
 	ImDrawList_PushTextureID            :: proc(self: ^Draw_List, texture_id: Texture_ID) ---;
-	ImDrawList_UpdateClipRect           :: proc(self: ^Draw_List) ---;
-	ImDrawList_UpdateTextureID          :: proc(self: ^Draw_List) ---;
+	ImDrawList__ClearFreeMemory         :: proc(self: ^Draw_List) ---;
+	ImDrawList__OnChangedClipRect       :: proc(self: ^Draw_List) ---;
+	ImDrawList__OnChangedTextureID      :: proc(self: ^Draw_List) ---;
+	ImDrawList__OnChangedVtxOffset      :: proc(self: ^Draw_List) ---;
+	ImDrawList__PopUnusedDrawCmd        :: proc(self: ^Draw_List) ---;
+	ImDrawList__ResetForNewFrame        :: proc(self: ^Draw_List) ---;
 
 	ImFontAtlasCustomRect_IsPacked :: proc(self: ^Font_Atlas_Custom_Rect) -> bool ---;
 
 	ImFontAtlas_AddCustomRectFontGlyph                :: proc(self: ^Font_Atlas, font: ^ImFont, id: Wchar, width: i32, height: i32, advance_x: f32, offset: Vec2) -> i32 ---;
-	ImFontAtlas_AddCustomRectRegular                  :: proc(self: ^Font_Atlas, id: u32, width: i32, height: i32) -> i32 ---;
+	ImFontAtlas_AddCustomRectRegular                  :: proc(self: ^Font_Atlas, width: i32, height: i32) -> i32 ---;
 	ImFontAtlas_AddFont                               :: proc(self: ^Font_Atlas, font_cfg: ^Font_Config) -> ^ImFont ---;
 	ImFontAtlas_AddFontDefault                        :: proc(self: ^Font_Atlas, font_cfg: ^Font_Config) -> ^ImFont ---;
 	ImFontAtlas_AddFontFromFileTTF                    :: proc(self: ^Font_Atlas, filename: cstring, size_pixels: f32, font_cfg: ^Font_Config, glyph_ranges: ^Wchar) -> ^ImFont ---;
@@ -258,6 +260,7 @@ foreign cimgui {
 	ImRect_GetWidth     :: proc(self: ^Rect) -> f32 ---;
 	ImRect_IsInverted   :: proc(self: ^Rect) -> bool ---;
 	ImRect_Overlaps     :: proc(self: ^Rect, r: Rect) -> bool ---;
+	ImRect_ToVec4       :: proc(pOut: ^Vec4, self: ^Rect) ---;
 	ImRect_Translate    :: proc(self: ^Rect, d: Vec2) ---;
 	ImRect_TranslateX   :: proc(self: ^Rect, dx: f32) ---;
 	ImRect_TranslateY   :: proc(self: ^Rect, dy: f32) ---;
@@ -282,9 +285,9 @@ foreign cimgui {
 	igBeginMenu                               :: proc(label: cstring, enabled: bool) -> bool ---;
 	igBeginMenuBar                            :: proc() -> bool ---;
 	igBeginPopup                              :: proc(str_id: cstring, flags: Window_Flags) -> bool ---;
-	igBeginPopupContextItem                   :: proc(str_id: cstring, mouse_button: Mouse_Button) -> bool ---;
-	igBeginPopupContextVoid                   :: proc(str_id: cstring, mouse_button: Mouse_Button) -> bool ---;
-	igBeginPopupContextWindow                 :: proc(str_id: cstring, mouse_button: Mouse_Button, also_over_items: bool) -> bool ---;
+	igBeginPopupContextItem                   :: proc(str_id: cstring, popup_flags: Popup_Flags) -> bool ---;
+	igBeginPopupContextVoid                   :: proc(str_id: cstring, popup_flags: Popup_Flags) -> bool ---;
+	igBeginPopupContextWindow                 :: proc(str_id: cstring, popup_flags: Popup_Flags) -> bool ---;
 	igBeginPopupEx                            :: proc(id: ImID, extra_flags: Window_Flags) -> bool ---;
 	igBeginPopupModal                         :: proc(name: cstring, p_open: ^bool, flags: Window_Flags) -> bool ---;
 	igBeginTabBar                             :: proc(str_id: cstring, flags: Tab_Bar_Flags) -> bool ---;
@@ -313,6 +316,7 @@ foreign cimgui {
 	igCheckboxFlags                           :: proc(label: cstring, flags: ^u32, flags_value: u32) -> bool ---;
 	igClearActiveID                           :: proc() ---;
 	igClearDragDrop                           :: proc() ---;
+	igClearIniSettings                        :: proc() ---;
 	igCloseButton                             :: proc(id: ImID, pos: Vec2) -> bool ---;
 	igCloseCurrentPopup                       :: proc() ---;
 	igClosePopupToLevel                       :: proc(remaining: i32, restore_focus_to_window_under_popup: bool) ---;
@@ -335,11 +339,12 @@ foreign cimgui {
 	igColumns                                 :: proc(count: i32, id: cstring, border: bool) ---;
 	igComboStr_arr                            :: proc(label: cstring, current_item: ^i32, items: ^cstring, items_count: i32, popup_max_height_in_items: i32) -> bool ---
 	igComboStr                                :: proc(label: cstring, current_item: ^i32, items_separated_by_zeros: cstring, popup_max_height_in_items: i32) -> bool ---;
-	igComboFnPtr                              :: proc(label: cstring, current_item: ^i32, items_getter: Items_Getter_Proc, data: rawptr, items_count: i32, popup_max_height_in_items: i32) -> bool ---
+	igComboFnBoolPtr                          :: proc(label: cstring, current_item: ^i32, items_getter: ^^^^bool(, data: rawptr, items_count: i32, popup_max_height_in_items: i32) -> bool ---;
 	igCreateContext                           :: proc(shared_font_atlas: ^Font_Atlas) -> ^Context ---;
 	igCreateNewWindowSettings                 :: proc(name: cstring) -> ^Window_Settings ---;
 	igDataTypeApplyOp                         :: proc(data_type: Data_Type, op: i32, output: rawptr, arg_1: rawptr, arg_2: rawptr) ---;
 	igDataTypeApplyOpFromText                 :: proc(buf: cstring, initial_value_buf: cstring, data_type: Data_Type, p_data: rawptr, format: cstring) -> bool ---;
+	igDataTypeClamp                           :: proc(data_type: Data_Type, p_data: rawptr, p_min: rawptr, p_max: rawptr) -> bool ---;
 	igDataTypeFormatString                    :: proc(buf: cstring, buf_size: i32, data_type: Data_Type, p_data: rawptr, format: cstring) -> i32 ---;
 	igDataTypeGetInfo                         :: proc(data_type: Data_Type) -> ^Data_Type_Info ---;
 	igDebugCheckVersionAndDataLayout          :: proc(version_str: cstring, sz_io: uint, sz_style: uint, sz_vec2: uint, sz_vec4: uint, sz_drawvert: uint, sz_drawidx: uint) -> bool ---;
@@ -552,6 +557,7 @@ foreign cimgui {
 	igImUpperPowerOfTwo                       :: proc(v: i32) -> i32 ---;
 	igImage                                   :: proc(user_texture_id: Texture_ID, size: Vec2, uv0: Vec2, uv1: Vec2, tint_col: Vec4, border_col: Vec4) ---;
 	igImageButton                             :: proc(user_texture_id: Texture_ID, size: Vec2, uv0: Vec2, uv1: Vec2, frame_padding: i32, bg_col: Vec4, tint_col: Vec4) -> bool ---;
+	igImageButtonEx                           :: proc(id: ImID, texture_id: Texture_ID, size: Vec2, uv0: Vec2, uv1: Vec2, padding: Vec2, bg_col: Vec4, tint_col: Vec4) -> bool ---;
 	igIndent                                  :: proc(indent_w: f32) ---;
 	igInitialize                              :: proc(ctx: ^Context) ---;
 	igInputDouble                             :: proc(label: cstring, v: ^f64, step: f64, step_fast: f64, format: cstring, flags: Input_Text_Flags) -> bool ---;
@@ -604,8 +610,8 @@ foreign cimgui {
 	igIsMouseReleased                         :: proc(button: Mouse_Button) -> bool ---;
 	igIsNavInputDown                          :: proc(n: Nav_Input) -> bool ---;
 	igIsNavInputTest                          :: proc(n: Nav_Input, rm: Input_Read_Mode) -> bool ---;
-	igIsPopupOpenStr                          :: proc(str_id: cstring) -> bool ---;
-	igIsPopupOpenID                           :: proc(id: ImID) -> bool ---;
+	igIsPopupOpenStr                          :: proc(str_id: cstring, flags: Popup_Flags) -> bool ---;
+	igIsPopupOpenID                           :: proc(id: ImID, popup_flags: Popup_Flags) -> bool ---;
 	igIsRectVisibleNil                        :: proc(size: Vec2) -> bool ---;
 	igIsRectVisibleVec2                       :: proc(rect_min: Vec2, rect_max: Vec2) -> bool ---;
 	igIsWindowAppearing                       :: proc() -> bool ---;
@@ -621,7 +627,7 @@ foreign cimgui {
 	igKeepAliveID                             :: proc(id: ImID) ---;
 	igLabelText                               :: proc(label: cstring, fmt_: cstring, #c_vararg args: ..any) ---;
 	igListBoxStr_arr                          :: proc(label: cstring, current_item: ^i32, items: cstring, items_count: i32, height_in_items: i32) -> bool ---;
-	igListBoxFnPtr                            :: proc(label: cstring, current_item: ^i32, items_getter: Items_Getter_Proc, data: rawptr, items_count: i32, height_in_items: i32) -> bool ---
+	igListBoxFnBoolPtr                        :: proc(label: cstring, current_item: ^i32, items_getter: ^^^^bool(, data: rawptr, items_count: i32, height_in_items: i32) -> bool ---;
 	igListBoxFooter                           :: proc() ---;
 	igListBoxHeaderVec2                       :: proc(label: cstring, size: Vec2) -> bool ---;
 	igListBoxHeaderInt                        :: proc(label: cstring, items_count: i32, height_in_items: i32) -> bool ---;
@@ -651,14 +657,14 @@ foreign cimgui {
 	igNewFrame                                :: proc() ---;
 	igNewLine                                 :: proc() ---;
 	igNextColumn                              :: proc() ---;
-	igOpenPopup                               :: proc(str_id: cstring) ---;
-	igOpenPopupEx                             :: proc(id: ImID) ---;
-	igOpenPopupOnItemClick                    :: proc(str_id: cstring, mouse_button: Mouse_Button) -> bool ---;
+	igOpenPopup                               :: proc(str_id: cstring, popup_flags: Popup_Flags) ---;
+	igOpenPopupContextItem                    :: proc(str_id: cstring, popup_flags: Popup_Flags) -> bool ---;
+	igOpenPopupEx                             :: proc(id: ImID, popup_flags: Popup_Flags) ---;
 	igPlotEx                                  :: proc(plot_type: Plot_Type, label: cstring, values_getter: Value_Getter_Proc, data: rawptr, values_count: i32, values_offset: i32, overlay_text: cstring, scale_min: f32, scale_max: f32, frame_size: Vec2) -> i32 ---
 	igPlotHistogramFloatPtr                   :: proc(label: cstring, values: ^f32, values_count: i32, values_offset: i32, overlay_text: cstring, scale_min: f32, scale_max: f32, graph_size: Vec2, stride: i32) ---;
-	igPlotHistogramFnPtr                      :: proc(label: cstring, values_getter: Value_Getter_Proc, data: rawptr, values_count: i32, values_offset: i32, overlay_text: cstring, scale_min: f32, scale_max: f32, graph_size: Vec2) ---
+	igPlotHistogramFnFloatPtr                 :: proc(label: cstring, values_getter: ^^float(, data: rawptr, values_count: i32, values_offset: i32, overlay_text: cstring, scale_min: f32, scale_max: f32, graph_size: Vec2) ---;
 	igPlotLinesFloatPtr                       :: proc(label: cstring, values: ^f32, values_count: i32, values_offset: i32, overlay_text: cstring, scale_min: f32, scale_max: f32, graph_size: Vec2, stride: i32) ---;
-	igPlotLinesFnPtr                          :: proc(label: cstring, values_getter: Value_Getter_Proc, data: rawptr, values_count: i32, values_offset: i32, overlay_text: cstring, scale_min: f32, scale_max: f32, graph_size: Vec2) ---
+	igPlotLinesFnFloatPtr                     :: proc(label: cstring, values_getter: ^^float(, data: rawptr, values_count: i32, values_offset: i32, overlay_text: cstring, scale_min: f32, scale_max: f32, graph_size: Vec2) ---;
 	igPopAllowKeyboardFocus                   :: proc() ---;
 	igPopButtonRepeat                         :: proc() ---;
 	igPopClipRect                             :: proc() ---;
@@ -749,6 +755,7 @@ foreign cimgui {
 	igSetNextWindowContentSize                :: proc(size: Vec2) ---;
 	igSetNextWindowFocus                      :: proc() ---;
 	igSetNextWindowPos                        :: proc(pos: Vec2, cond: Cond, pivot: Vec2) ---;
+	igSetNextWindowScroll                     :: proc(scroll: Vec2) ---;
 	igSetNextWindowSize                       :: proc(size: Vec2, cond: Cond) ---;
 	igSetNextWindowSizeConstraints            :: proc(size_min: Vec2, size_max: Vec2, custom_callback: Size_Callback, custom_callback_data: rawptr) ---;
 	igSetScrollFromPosXFloat                  :: proc(local_x: f32, center_x_ratio: f32) ---;
@@ -764,6 +771,7 @@ foreign cimgui {
 	igSetStateStorage                         :: proc(storage: ^Storage) ---;
 	igSetTabItemClosed                        :: proc(tab_or_docked_window_label: cstring) ---;
 	igSetTooltip                              :: proc(fmt_: cstring, #c_vararg args: ..any) ---;
+	igSetWindowClipRectBeforeSetChannel       :: proc(window: ^ImWindow, clip_rect: Rect) ---;
 	igSetWindowCollapsedBool                  :: proc(collapsed: bool, cond: Cond) ---;
 	igSetWindowCollapsedStr                   :: proc(name: cstring, collapsed: bool, cond: Cond) ---;
 	igSetWindowCollapsedWindowPtr             :: proc(window: ^ImWindow, collapsed: bool, cond: Cond) ---;
@@ -813,9 +821,9 @@ foreign cimgui {
 	igTabItemBackground                       :: proc(draw_list: ^Draw_List, bb: Rect, flags: Tab_Item_Flags, col: u32) ---;
 	igTabItemCalcSize                         :: proc(pOut: ^Vec2, label: cstring, has_close_button: bool) ---;
 	igTabItemEx                               :: proc(tab_bar: ^Tab_Bar, label: cstring, p_open: ^bool, flags: Tab_Item_Flags) -> bool ---;
-	igTabItemLabelAndCloseButton              :: proc(draw_list: ^Draw_List, bb: Rect, flags: Tab_Item_Flags, frame_padding: Vec2, label: cstring, tab_id: ImID, close_button_id: ImID) -> bool ---;
+	igTabItemLabelAndCloseButton              :: proc(draw_list: ^Draw_List, bb: Rect, flags: Tab_Item_Flags, frame_padding: Vec2, label: cstring, tab_id: ImID, close_button_id: ImID, is_contents_visible: bool) -> bool ---;
 	igTempInputIsActive                       :: proc(id: ImID) -> bool ---;
-	igTempInputScalar                         :: proc(bb: Rect, id: ImID, label: cstring, data_type: Data_Type, p_data: rawptr, format: cstring) -> bool ---;
+	igTempInputScalar                         :: proc(bb: Rect, id: ImID, label: cstring, data_type: Data_Type, p_data: rawptr, format: cstring, p_clamp_min: rawptr, p_clamp_max: rawptr) -> bool ---;
 	igTempInputText                           :: proc(bb: Rect, id: ImID, label: cstring, buf: cstring, buf_size: i32, flags: Input_Text_Flags) -> bool ---;
 	igText                                    :: proc(fmt_: cstring, #c_vararg args: ..any) ---;
 	igTextColored                             :: proc(col: Vec4, fmt_: cstring, #c_vararg args: ..any) ---;

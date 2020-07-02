@@ -174,6 +174,7 @@ Combo_Flags :: enum i32 {
 }
 
 Cond :: enum i32 {
+	None         = 0,
 	Always       = 1 << 0,
 	Once         = 1 << 1,
 	FirstUseEver = 1 << 2,
@@ -468,11 +469,26 @@ Next_Window_Data_Flags :: enum i32 {
 	HasSizeConstraint = 1 << 4,
 	HasFocus          = 1 << 5,
 	HasBgAlpha        = 1 << 6,
+	HasScroll         = 1 << 7,
 }
 
 Plot_Type :: enum i32 {
 	Lines     = 0,
 	Histogram = 1,
+}
+
+Popup_Flags :: enum i32 {
+	None                    = 0,
+	MouseButtonLeft         = 0,
+	MouseButtonRight        = 1,
+	MouseButtonMiddle       = 2,
+	MouseButtonMask         = 0x1F,
+	MouseButtonDefault      = 1,
+	NoOpenOverExistingPopup = 1 << 5,
+	NoOpenOverItems         = 1 << 6,
+	AnyPopupId              = 1 << 7,
+	AnyPopupLevel           = 1 << 8,
+	AnyPopup                = AnyPopupId | AnyPopupLevel,
 }
 
 Popup_Position_Policy :: enum i32 {
@@ -567,6 +583,7 @@ Tab_Item_Flags :: enum i32 {
 	SetSelected                  = 1 << 1,
 	NoCloseWithMiddleMouseButton = 1 << 2,
 	NoPushId                     = 1 << 3,
+	NoTooltip                    = 1 << 4,
 }
 
 Text_Flags :: enum i32 {

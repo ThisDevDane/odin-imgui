@@ -36,7 +36,7 @@ all: cimgui build_debug
 
 sdl_opengl:
 	@echo "[SDL OpenGL Example]"
-	$(OC) run $(EXAMPLES_DIR)/sdl_opengl --debug
+	$(OC) run $(EXAMPLES_DIR)/sdl_opengl --debug --llvm-api
 
 generate: build_debug
 	@echo "[Generate]"
@@ -60,9 +60,9 @@ update: clean all generate
 clean:
 	@echo "[Clean]"
 	rm -rf $(ODIN_OUTPUT_DIR)
-	rm -rf $(EXE_NAME)
-	rm -rf $(PDB_NAME)
-	rm -rf $(OBJ_NAME)
+	rm -rf *.exe
+	rm -rf *.pdb
+	rm -rf *.obj
 	rm -rf $(EXTERNAL_LIB_DIR)
 	rm -rf $(DIST_DIR)
 
