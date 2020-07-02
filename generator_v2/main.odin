@@ -173,7 +173,6 @@ output_enums :: proc(json_path: string, output_path: string) {
     clean_field_key :: proc(key: string, enum_name: string) -> string {
         key := key;
         key = strings.trim_space(key);
-        log.debug(key);
         key = key[len(enum_name):];
         key = strings.trim(key, "_");
         key = strings.to_pascal_case(key);
