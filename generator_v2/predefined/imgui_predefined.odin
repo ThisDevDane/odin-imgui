@@ -111,14 +111,14 @@ Storage_Pair :: struct {
 igSetAllocatorFunctions :: proc(alloc_func: Alloc_Func, free_func: Free_Func) ---;
 @(foreign_overwrite="igPlotEx")
 igPlotEx :: proc(plot_type: Plot_Type, label: cstring, values_getter: Value_Getter_Proc, data: rawptr, values_count: i32, values_offset: i32, overlay_text: cstring, scale_min: f32, scale_max: f32, frame_size: Vec2) -> i32 ---;
-@(foreign_overwrite="igPlotHistogramFnPtr")
-igPlotHistogramFnPtr :: proc(label: cstring, values_getter: Value_Getter_Proc, data: rawptr, values_count: i32, values_offset: i32, overlay_text: cstring, scale_min: f32, scale_max: f32, graph_size: Vec2) ---;
-@(foreign_overwrite="igPlotLinesFnPtr")
-igPlotLinesFnPtr :: proc(label: cstring, values_getter: Value_Getter_Proc, data: rawptr, values_count: i32, values_offset: i32, overlay_text: cstring, scale_min: f32, scale_max: f32, graph_size: Vec2) ---;
-@(foreign_overwrite="igListBoxFnPtr")
-igListBoxFnPtr :: proc(label: cstring, current_item: ^i32, items_getter: Items_Getter_Proc, data: rawptr, items_count: i32, height_in_items: i32) -> bool ---;
-@(foreign_overwrite="igComboFnPtr")
-igComboFnPtr :: proc(label: cstring, current_item: ^i32, items_getter: Items_Getter_Proc, data: rawptr, items_count: i32, popup_max_height_in_items: i32) -> bool ---;
+@(foreign_overwrite="igPlotHistogramFnFloatPtr")
+igPlotHistogramFnFloatPtr :: proc(label: cstring, values_getter: Value_Getter_Proc, data: rawptr, values_count: i32, values_offset: i32, overlay_text: cstring, scale_min: f32, scale_max: f32, graph_size: Vec2) ---;
+@(foreign_overwrite="igPlotLinesFnFloatPtr")
+igPlotLinesFnFloatPtr :: proc(label: cstring, values_getter: Value_Getter_Proc, data: rawptr, values_count: i32, values_offset: i32, overlay_text: cstring, scale_min: f32, scale_max: f32, graph_size: Vec2) ---;
+@(foreign_overwrite="igListBoxFnBoolPtr")
+igListBoxFnBoolPtr :: proc(label: cstring, current_item: ^i32, items_getter: Items_Getter_Proc, data: rawptr, items_count: i32, height_in_items: i32) -> bool ---;
+@(foreign_overwrite="igComboFnBoolPtr")
+igComboFnBoolPtr :: proc(label: cstring, current_item: ^i32, items_getter: Items_Getter_Proc, data: rawptr, items_count: i32, popup_max_height_in_items: i32) -> bool ---;
 @(foreign_overwrite="igComboStr_arr")
 igComboStr_arr :: proc(label: cstring, current_item: ^i32, items: ^cstring, items_count: i32, popup_max_height_in_items: i32) -> bool ---;
 
@@ -166,8 +166,8 @@ wrapper_plot_ex :: proc(plot_type: Plot_Type,
     return igPlotEx(plot_type, l, values_getter, data, values_count, values_offset, overlay, scale_min, scale_max, frame_size);
 }
 
-@(wrapper="igPlotHistogramFnPtr")
-wrapper_plot_histogram_fn_ptr :: proc(label: string,
+@(wrapper="igPlotHistogramFnFloatPtr")
+wrapper_plot_histogram_fn_float_ptr :: proc(label: string,
                                       values_getter: Value_Getter_Proc,
                                       data: rawptr,
                                       values_count: i32,
@@ -178,11 +178,11 @@ wrapper_plot_histogram_fn_ptr :: proc(label: string,
                                       graph_size: Vec2) {
     l := strings.clone_to_cstring(label, context.temp_allocator);
     overlay := strings.clone_to_cstring(overlay_text, context.temp_allocator);
-    igPlotHistogramFnPtr(l, values_getter, data, values_count, values_offset, overlay, scale_min, scale_max, graph_size);
+    igPlotHistogramFnFloatPtr(l, values_getter, data, values_count, values_offset, overlay, scale_min, scale_max, graph_size);
 }
 
-@(wrapper="igPlotLinesFnPtr")
-wrapper_plot_lines_fn_ptr :: proc(label: string, 
+@(wrapper="igPlotLinesFnFloatPtr")
+wrapper_plot_lines_fn_float_ptr :: proc(label: string, 
                                   values_getter: Value_Getter_Proc, 
                                   data: rawptr, 
                                   values_count: i32, 
@@ -193,19 +193,19 @@ wrapper_plot_lines_fn_ptr :: proc(label: string,
                                   graph_size: Vec2) {
     l := strings.clone_to_cstring(label, context.temp_allocator);
     overlay := strings.clone_to_cstring(overlay_text, context.temp_allocator);
-    igPlotLinesFnPtr(l, values_getter, data, values_count, values_offset, overlay, scale_min, scale_max, graph_size);
+    igPlotLinesFnFloatPtr(l, values_getter, data, values_count, values_offset, overlay, scale_min, scale_max, graph_size);
 }
 
-@(wrapper="igListBoxFnPtr")
-wrapper_list_box_fn_ptr :: proc(label: string, current_item: ^i32, items_getter: Items_Getter_Proc, data: rawptr, items_count: i32, height_in_items := i32(0))-> bool {
+@(wrapper="igListBoxFnBoolPtr")
+wrapper_list_box_fn_bool_ptr :: proc(label: string, current_item: ^i32, items_getter: Items_Getter_Proc, data: rawptr, items_count: i32, height_in_items := i32(0))-> bool {
     l := strings.clone_to_cstring(label, context.temp_allocator);
-    return igListBoxFnPtr(l, current_item, items_getter, data, items_count, height_in_items);
+    return igListBoxFnBoolPtr(l, current_item, items_getter, data, items_count, height_in_items);
 }
 
-@(wrapper="igComboFnPtr")
-wrapper_combo_fn_ptr :: proc(label: string, current_item: ^i32, items_getter: Items_Getter_Proc, data: rawptr, items_count: i32, popup_max_height_in_items := i32(0)) -> bool {
+@(wrapper="igComboFnBoolPtr")
+wrapper_combo_fn_bool_ptr :: proc(label: string, current_item: ^i32, items_getter: Items_Getter_Proc, data: rawptr, items_count: i32, popup_max_height_in_items := i32(0)) -> bool {
     l := strings.clone_to_cstring(label, context.temp_allocator);
-    return igComboFnPtr(l, current_item, items_getter, data, items_count, popup_max_height_in_items);
+    return igComboFnBoolPtr(l, current_item, items_getter, data, items_count, popup_max_height_in_items);
 }
 
 @(wrapper="igComboStr_arr")

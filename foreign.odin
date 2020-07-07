@@ -339,7 +339,7 @@ foreign cimgui {
 	igColumns                                 :: proc(count: i32, id: cstring, border: bool) ---;
 	igComboStr_arr                            :: proc(label: cstring, current_item: ^i32, items: ^cstring, items_count: i32, popup_max_height_in_items: i32) -> bool ---
 	igComboStr                                :: proc(label: cstring, current_item: ^i32, items_separated_by_zeros: cstring, popup_max_height_in_items: i32) -> bool ---;
-	igComboFnBoolPtr                          :: proc(label: cstring, current_item: ^i32, items_getter: ^^^^bool(, data: rawptr, items_count: i32, popup_max_height_in_items: i32) -> bool ---;
+	igComboFnBoolPtr                          :: proc(label: cstring, current_item: ^i32, items_getter: Items_Getter_Proc, data: rawptr, items_count: i32, popup_max_height_in_items: i32) -> bool ---
 	igCreateContext                           :: proc(shared_font_atlas: ^Font_Atlas) -> ^Context ---;
 	igCreateNewWindowSettings                 :: proc(name: cstring) -> ^Window_Settings ---;
 	igDataTypeApplyOp                         :: proc(data_type: Data_Type, op: i32, output: rawptr, arg_1: rawptr, arg_2: rawptr) ---;
@@ -627,7 +627,7 @@ foreign cimgui {
 	igKeepAliveID                             :: proc(id: ImID) ---;
 	igLabelText                               :: proc(label: cstring, fmt_: cstring, #c_vararg args: ..any) ---;
 	igListBoxStr_arr                          :: proc(label: cstring, current_item: ^i32, items: cstring, items_count: i32, height_in_items: i32) -> bool ---;
-	igListBoxFnBoolPtr                        :: proc(label: cstring, current_item: ^i32, items_getter: ^^^^bool(, data: rawptr, items_count: i32, height_in_items: i32) -> bool ---;
+	igListBoxFnBoolPtr                        :: proc(label: cstring, current_item: ^i32, items_getter: Items_Getter_Proc, data: rawptr, items_count: i32, height_in_items: i32) -> bool ---
 	igListBoxFooter                           :: proc() ---;
 	igListBoxHeaderVec2                       :: proc(label: cstring, size: Vec2) -> bool ---;
 	igListBoxHeaderInt                        :: proc(label: cstring, items_count: i32, height_in_items: i32) -> bool ---;
@@ -662,9 +662,9 @@ foreign cimgui {
 	igOpenPopupEx                             :: proc(id: ImID, popup_flags: Popup_Flags) ---;
 	igPlotEx                                  :: proc(plot_type: Plot_Type, label: cstring, values_getter: Value_Getter_Proc, data: rawptr, values_count: i32, values_offset: i32, overlay_text: cstring, scale_min: f32, scale_max: f32, frame_size: Vec2) -> i32 ---
 	igPlotHistogramFloatPtr                   :: proc(label: cstring, values: ^f32, values_count: i32, values_offset: i32, overlay_text: cstring, scale_min: f32, scale_max: f32, graph_size: Vec2, stride: i32) ---;
-	igPlotHistogramFnFloatPtr                 :: proc(label: cstring, values_getter: ^^float(, data: rawptr, values_count: i32, values_offset: i32, overlay_text: cstring, scale_min: f32, scale_max: f32, graph_size: Vec2) ---;
+	igPlotHistogramFnFloatPtr                 :: proc(label: cstring, values_getter: Value_Getter_Proc, data: rawptr, values_count: i32, values_offset: i32, overlay_text: cstring, scale_min: f32, scale_max: f32, graph_size: Vec2) ---
 	igPlotLinesFloatPtr                       :: proc(label: cstring, values: ^f32, values_count: i32, values_offset: i32, overlay_text: cstring, scale_min: f32, scale_max: f32, graph_size: Vec2, stride: i32) ---;
-	igPlotLinesFnFloatPtr                     :: proc(label: cstring, values_getter: ^^float(, data: rawptr, values_count: i32, values_offset: i32, overlay_text: cstring, scale_min: f32, scale_max: f32, graph_size: Vec2) ---;
+	igPlotLinesFnFloatPtr                     :: proc(label: cstring, values_getter: Value_Getter_Proc, data: rawptr, values_count: i32, values_offset: i32, overlay_text: cstring, scale_min: f32, scale_max: f32, graph_size: Vec2) ---
 	igPopAllowKeyboardFocus                   :: proc() ---;
 	igPopButtonRepeat                         :: proc() ---;
 	igPopClipRect                             :: proc() ---;

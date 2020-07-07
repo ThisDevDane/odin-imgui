@@ -147,7 +147,7 @@ main :: proc() {
                     return true;
                 }
 
-                imgui.combo_fn_ptr("combo fn ptr", &curr_3, item_getter, &items, i32(len(items)));
+                imgui.combo_fn_bool_ptr("combo fn ptr", &curr_3, item_getter, &items, i32(len(items)));
 
                 imgui.end();
             }

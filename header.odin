@@ -387,7 +387,7 @@ combo :: proc {
 };
 combo_str_arr                                  :: inline proc(label: string, current_item: ^i32, items: []string, popup_max_height_in_items := i32(0)) -> bool                                                                                                    do return wrapper_combo_str_arr(label, current_item, items, popup_max_height_in_items);
 combo_str                                      :: inline proc(label: string, current_item: ^i32, items_separated_by_zeros: string, popup_max_height_in_items := i32(-1)) -> bool                                                                                  do return swr_igComboStr(label, current_item, items_separated_by_zeros, popup_max_height_in_items);
-combo_fn_bool_ptr                              :: inline proc(label: string, current_item: ^i32, items_getter: ^^^^bool(, data: rawptr, items_count: i32, popup_max_height_in_items := i32(-1)) -> bool                                                           do return swr_igComboFnBoolPtr(label, current_item, items_getter, data, items_count, popup_max_height_in_items);
+combo_fn_bool_ptr                              :: inline proc(label: string, current_item: ^i32, items_getter: Items_Getter_Proc, data: rawptr, items_count: i32, popup_max_height_in_items := i32(0)) -> bool                                                    do return wrapper_combo_fn_bool_ptr(label, current_item, items_getter, data, items_count, popup_max_height_in_items);
 
 create_context                                 :: inline proc(shared_font_atlas : ^Font_Atlas = nil) -> ^Context                                                                                                                                                  do return igCreateContext(shared_font_atlas);
 create_new_window_settings                     :: inline proc(name: string) -> ^Window_Settings                                                                                                                                                                   do return swr_igCreateNewWindowSettings(name);
@@ -731,7 +731,7 @@ list_box :: proc {
 	list_box_fn_bool_ptr,
 };
 list_box_str_arr                               :: inline proc(label: string, current_item: ^i32, items: string, items_count: i32, height_in_items := i32(-1)) -> bool                                                                                             do return swr_igListBoxStr_arr(label, current_item, items, items_count, height_in_items);
-list_box_fn_bool_ptr                           :: inline proc(label: string, current_item: ^i32, items_getter: ^^^^bool(, data: rawptr, items_count: i32, height_in_items := i32(-1)) -> bool                                                                     do return swr_igListBoxFnBoolPtr(label, current_item, items_getter, data, items_count, height_in_items);
+list_box_fn_bool_ptr                           :: inline proc(label: string, current_item: ^i32, items_getter: Items_Getter_Proc, data: rawptr, items_count: i32, height_in_items := i32(0)) -> bool                                                              do return wrapper_list_box_fn_bool_ptr(label, current_item, items_getter, data, items_count, height_in_items);
 
 list_box_footer                                :: inline proc()                                                                                                                                                                                                   do igListBoxFooter();
 
@@ -790,7 +790,7 @@ plot_histogram :: proc {
 	plot_histogram_fn_float_ptr,
 };
 plot_histogram_float_ptr                       :: inline proc(label: string, values: ^f32, values_count: i32, values_offset := i32(0), overlay_text := "", scale_min := f32(max(f32)), scale_max := f32(max(f32)), graph_size := Vec2(Vec2 {0,0}), stride := i32(size_of(f32))) do swr_igPlotHistogramFloatPtr(label, values, values_count, values_offset, overlay_text, scale_min, scale_max, graph_size, stride);
-plot_histogram_fn_float_ptr                    :: inline proc(label: string, values_getter: ^^float(, data: rawptr, values_count: i32, values_offset := i32(0), overlay_text := "", scale_min := f32(max(f32)), scale_max := f32(max(f32)), graph_size := Vec2(Vec2 {0,0})) do swr_igPlotHistogramFnFloatPtr(label, values_getter, data, values_count, values_offset, overlay_text, scale_min, scale_max, graph_size);
+plot_histogram_fn_float_ptr                    :: inline proc(label: string, values_getter: Value_Getter_Proc, data: rawptr, values_count: i32, values_offset: i32, overlay_text: string, scale_min: f32, scale_max: f32, graph_size: Vec2)                       do wrapper_plot_histogram_fn_float_ptr(label, values_getter, data, values_count, values_offset, overlay_text, scale_min, scale_max, graph_size);
 
 
 plot_lines :: proc {
@@ -798,7 +798,7 @@ plot_lines :: proc {
 	plot_lines_fn_float_ptr,
 };
 plot_lines_float_ptr                           :: inline proc(label: string, values: ^f32, values_count: i32, values_offset := i32(0), overlay_text := "", scale_min := f32(max(f32)), scale_max := f32(max(f32)), graph_size := Vec2(Vec2 {0,0}), stride := i32(size_of(f32))) do swr_igPlotLinesFloatPtr(label, values, values_count, values_offset, overlay_text, scale_min, scale_max, graph_size, stride);
-plot_lines_fn_float_ptr                        :: inline proc(label: string, values_getter: ^^float(, data: rawptr, values_count: i32, values_offset := i32(0), overlay_text := "", scale_min := f32(max(f32)), scale_max := f32(max(f32)), graph_size := Vec2(Vec2 {0,0})) do swr_igPlotLinesFnFloatPtr(label, values_getter, data, values_count, values_offset, overlay_text, scale_min, scale_max, graph_size);
+plot_lines_fn_float_ptr                        :: inline proc(label: string, values_getter: Value_Getter_Proc, data: rawptr, values_count: i32, values_offset: i32, overlay_text: string, scale_min: f32, scale_max: f32, graph_size: Vec2)                       do wrapper_plot_lines_fn_float_ptr(label, values_getter, data, values_count, values_offset, overlay_text, scale_min, scale_max, graph_size);
 
 pop_allow_keyboard_focus                       :: inline proc()                                                                                                                                                                                                   do igPopAllowKeyboardFocus();
 pop_button_repeat                              :: inline proc()                                                                                                                                                                                                   do igPopButtonRepeat();
