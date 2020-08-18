@@ -221,8 +221,17 @@ output_structs :: proc(json_path: string, output_path: string, predefined_entite
     
     { // Gather
         obj := js.value.(json.Object);
+        blacklist : map[string]bool;
+        for k, v in obj["locations"].value.(json.Object) {
+            location := get_value_string(v);
+            if location == "internal" do blacklist[k] = true;
+        }
+
         for k, v in obj["structs"].value.(json.Object) {
             def := Struct_Definition{};
+
+            if _, ok := blacklist[k]; ok do continue;
+
             def.name = k;
 
             for x in v.value.(json.Array) {

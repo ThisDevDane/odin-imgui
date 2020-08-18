@@ -22,58 +22,17 @@ package predefined;
 
 // ///////////////////////////
 // // Predefined structs
+
 @output_copy
-Im_Chunk_Stream :: struct(T : typeid) {
-    buf: Im_Vector(T),
-}
+Draw_List_Shared_Data :: opaque struct {};
+@output_copy
+Context :: opaque struct {};
 
 @output_copy
 Im_Vector :: struct(T : typeid) {
     size:     i32, 
     capacity: i32,
     data:     ^T,
-}
-
-@output_copy
-Im_Pool :: struct(T : typeid) {
-    buf:      Im_Vector(T),
-    map_:     Storage,
-    free_idx: i32,
-}
-
-@output_copy
-STB_Textedit_State :: struct {
-    cursor:                i32,
-    select_start:          i32,
-    select_end:            i32,
-    insert_mode:           u8,
-    cursor_at_end_of_line: u8,
-    initialized:           u8,
-    has_preferred_x:       u8,
-    single_line:           u8,
-    padding1:              u8, 
-    padding2:              u8, 
-    padding3:              u8,
-    preferred_x:           f32,
-    undo_state:            STB_Undo_State,
-}
-
-@output_copy
-STB_Undo_State :: struct {
-    undo_rec:        [99]STB_Undo_Record,
-    undo_char:       [999]Wchar,
-    undo_point:      i16, 
-    redo_point:      i16,
-    undo_char_point: i32, 
-    redo_char_point: i32,
-}
-
-@output_copy
-STB_Undo_Record :: struct {
-    where_:        i32,
-    insert_length: i32,
-    delete_length: i32,
-    char_storage:  i32,
 }
 
 @(struct_overwrite="ImGuiStyleMod") 
@@ -220,13 +179,13 @@ wrapper_combo_str_arr :: proc(label: string, current_item: ^i32, items: []string
     return igComboStr_arr(l, current_item, &data[0], i32(len(items)), popup_max_height_in_items);
 }
 
-@(wrapper="igTextEx") 
-wrapper_text_ex :: proc(text: string, flags := Text_Flags(0)) {
-    t := strings.clone_to_cstring(text, context.temp_allocator);
-    ptr := transmute(^u8)t;
-    end_ptr := mem.ptr_offset(ptr, len(t));
-    igTextEx(cstring(ptr), cstring(end_ptr), flags);
-}
+// @(wrapper="igTextEx") 
+// wrapper_text_ex :: proc(text: string, flags := Text_Flags(0)) {
+//     t := strings.clone_to_cstring(text, context.temp_allocator);
+//     ptr := transmute(^u8)t;
+//     end_ptr := mem.ptr_offset(ptr, len(t));
+//     igTextEx(cstring(ptr), cstring(end_ptr), flags);
+// }
 
 @(wrapper="igTextWrapped") 
 wrapper_text_wrapped :: proc(fmt_: string, args: ..any) {

@@ -326,11 +326,8 @@ gather_foreign_proc_groups :: proc(groups : ^[dynamic]Foreign_Func_Group, obj: j
 
         for ov in overloads {
             ov_obj := ov.value.(json.Object);
-            // if is_nonUDT(ov_obj)       do continue;
             if is_vector(ov_obj)       do continue;
-            if is_pool(ov_obj)         do continue;
-            if is_chunk_stream(ov_obj) do continue;
-            if is_bit_vector(ov_obj)   do continue;
+            if is_internal(ov_obj)     do continue;
             if is_ctor_dtor(ov_obj)    do continue;
 
             f, ok := convert_json_to_foreign_func(ov_obj);
@@ -397,6 +394,13 @@ is_bit_vector :: proc(obj: json.Object) -> bool {
 is_nonUDT :: proc(obj: json.Object) -> bool {
     _, ok := obj["nonUDT"];
     return ok == true;
+}
+
+@(private="file")
+is_internal :: proc(obj: json.Object) -> bool {
+    v, ok := obj["location"];
+    if ok == false do return false;
+    return get_value_string(v) == "internal";
 }
 
 @(private="file")
