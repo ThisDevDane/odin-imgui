@@ -61,12 +61,19 @@ output_enums :: proc(json_path: string, output_path: string) {
     
     { // Gather
         obj := js.value.(json.Object);
+        blacklist : map[string]bool;
+        for k, v in obj["locations"].value.(json.Object) {
+            location := get_value_string(v);
+            if location == "internal" do blacklist[k] = true;
+        }
+
         for k, v in obj["enums"].value.(json.Object) {
             def := Enum_Defintion{};
 
-            def.name = k;
-            if def.name == "ImGuiDataTypePrivate_" do continue; //NOTE(Hoej): if more exceptions come, rewrite
+            if _, ok := blacklist[k]; ok do continue;
 
+            def.name = k;
+            
             for x in v.value.(json.Array) {
                 field := x.value.(json.Object);
                 res := Enum_Field{};
