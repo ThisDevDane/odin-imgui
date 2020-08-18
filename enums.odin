@@ -14,22 +14,18 @@ Draw_Corner_Flags :: enum i32 {
 }
 
 Draw_List_Flags :: enum i32 {
-	None             = 0,
-	AntiAliasedLines = 1 << 0,
-	AntiAliasedFill  = 1 << 1,
-	AllowVtxOffset   = 1 << 2,
+	None                   = 0,
+	AntiAliasedLines       = 1 << 0,
+	AntiAliasedLinesUseTex = 1 << 1,
+	AntiAliasedFill        = 1 << 2,
+	AllowVtxOffset         = 1 << 3,
 }
 
 Font_Atlas_Flags :: enum i32 {
 	None               = 0,
 	NoPowerOfTwoHeight = 1 << 0,
 	NoMouseCursors     = 1 << 1,
-}
-
-Axis :: enum i32 {
-	None = -1,
-	X    = 0,
-	Y    = 1,
+	NoBakedLines       = 1 << 2,
 }
 
 Backend_Flags :: enum i32 {
@@ -41,31 +37,12 @@ Backend_Flags :: enum i32 {
 }
 
 Button_Flags :: enum i32 {
-	None                          = 0,
-	Repeat                        = 1 << 0,
-	PressedOnClick                = 1 << 1,
-	PressedOnClickRelease         = 1 << 2,
-	PressedOnClickReleaseAnywhere = 1 << 3,
-	PressedOnRelease              = 1 << 4,
-	PressedOnDoubleClick          = 1 << 5,
-	PressedOnDragDropHold         = 1 << 6,
-	FlattenChildren               = 1 << 7,
-	AllowItemOverlap              = 1 << 8,
-	DontClosePopups               = 1 << 9,
-	Disabled                      = 1 << 10,
-	AlignTextBaseLine             = 1 << 11,
-	NoKeyModifiers                = 1 << 12,
-	NoHoldingActiveId             = 1 << 13,
-	NoNavFocus                    = 1 << 14,
-	NoHoveredOnFocus              = 1 << 15,
-	MouseButtonLeft               = 1 << 16,
-	MouseButtonRight              = 1 << 17,
-	MouseButtonMiddle             = 1 << 18,
-	MouseButtonMask               = MouseButtonLeft | MouseButtonRight | MouseButtonMiddle,
-	MouseButtonShift              = 16,
-	MouseButtonDefault            = MouseButtonLeft,
-	PressedOnMask                 = PressedOnClick | PressedOnClickRelease | PressedOnClickReleaseAnywhere | PressedOnRelease | PressedOnDoubleClick | PressedOnDragDropHold,
-	PressedOnDefault              = PressedOnClickRelease,
+	None               = 0,
+	MouseButtonLeft    = 1 << 0,
+	MouseButtonRight   = 1 << 1,
+	MouseButtonMiddle  = 1 << 2,
+	MouseButtonMask    = MouseButtonLeft | MouseButtonRight | MouseButtonMiddle,
+	MouseButtonDefault = MouseButtonLeft,
 }
 
 Col :: enum i32 {
@@ -152,15 +129,6 @@ Color_Edit_Flags :: enum i32 {
 	InputMask        = InputRgb | InputHsv,
 }
 
-Columns_Flags :: enum i32 {
-	None                   = 0,
-	NoBorder               = 1 << 0,
-	NoResize               = 1 << 1,
-	NoPreserveWidths       = 1 << 2,
-	NoForceWithinWindow    = 1 << 3,
-	GrowParentContentsSize = 1 << 4,
-}
-
 Combo_Flags :: enum i32 {
 	None           = 0,
 	PopupAlignLeft = 1 << 0,
@@ -230,11 +198,6 @@ Drag_Drop_Flags :: enum i32 {
 	AcceptPeekOnly           = AcceptBeforeDelivery | AcceptNoDrawDefaultRect,
 }
 
-Drag_Flags :: enum i32 {
-	None     = 0,
-	Vertical = 1 << 0,
-}
-
 Focused_Flags :: enum i32 {
 	None                = 0,
 	ChildWindows        = 1 << 0,
@@ -254,24 +217,6 @@ Hovered_Flags :: enum i32 {
 	AllowWhenDisabled            = 1 << 7,
 	RectOnly                     = AllowWhenBlockedByPopup | AllowWhenBlockedByActiveItem | AllowWhenOverlapped,
 	RootAndChildWindows          = RootWindow | ChildWindows,
-}
-
-Input_Read_Mode :: enum i32 {
-	Down       = 0,
-	Pressed    = 1,
-	Released   = 2,
-	Repeat     = 3,
-	RepeatSlow = 4,
-	RepeatFast = 5,
-}
-
-Input_Source :: enum i32 {
-	None        = 0,
-	Mouse       = 1,
-	Nav         = 2,
-	NavKeyboard = 3,
-	NavGamepad  = 4,
-	Count       = 5,
 }
 
 Input_Text_Flags :: enum i32 {
@@ -297,29 +242,6 @@ Input_Text_Flags :: enum i32 {
 	CallbackResize      = 1 << 18,
 	Multiline           = 1 << 20,
 	NoMarkEdited        = 1 << 21,
-}
-
-Item_Flags :: enum i32 {
-	None                     = 0,
-	NoTabStop                = 1 << 0,
-	ButtonRepeat             = 1 << 1,
-	Disabled                 = 1 << 2,
-	NoNav                    = 1 << 3,
-	NoNavDefaultFocus        = 1 << 4,
-	SelectableDontClosePopup = 1 << 5,
-	MixedValue               = 1 << 6,
-	Default                  = 0,
-}
-
-Item_Status_Flags :: enum i32 {
-	None             = 0,
-	HoveredRect      = 1 << 0,
-	HasDisplayRect   = 1 << 1,
-	Edited           = 1 << 2,
-	ToggledSelection = 1 << 3,
-	ToggledOpen      = 1 << 4,
-	HasDeactivated   = 1 << 5,
-	Deactivated      = 1 << 6,
 }
 
 Key_Mod_Flags :: enum i32 {
@@ -356,19 +278,6 @@ Key :: enum i32 {
 	Count       = 22,
 }
 
-Layout_Type :: enum i32 {
-	Horizontal = 0,
-	Vertical   = 1,
-}
-
-Log_Type :: enum i32 {
-	None      = 0,
-	Tty       = 1,
-	File      = 2,
-	Buffer    = 3,
-	Clipboard = 4,
-}
-
 Mouse_Button :: enum i32 {
 	Left   = 0,
 	Right  = 1,
@@ -388,27 +297,6 @@ Mouse_Cursor :: enum i32 {
 	Hand       = 7,
 	NotAllowed = 8,
 	Count      = 9,
-}
-
-Nav_Dir_Source_Flags :: enum i32 {
-	None      = 0,
-	Keyboard  = 1 << 0,
-	PadDpad   = 1 << 1,
-	PadLstick = 1 << 2,
-}
-
-Nav_Forward :: enum i32 {
-	None          = 0,
-	ForwardQueued = 1,
-	ForwardActive = 2,
-}
-
-Nav_Highlight_Flags :: enum i32 {
-	None        = 0,
-	TypeDefault = 1 << 0,
-	TypeThin    = 1 << 1,
-	AlwaysDraw  = 1 << 2,
-	NoRounding  = 1 << 3,
 }
 
 Nav_Input :: enum i32 {
@@ -437,46 +325,6 @@ Nav_Input :: enum i32 {
 	InternalStart = KeyMenu,
 }
 
-Nav_Layer :: enum i32 {
-	Main  = 0,
-	Menu  = 1,
-	Count = 2,
-}
-
-Nav_Move_Flags :: enum i32 {
-	None                = 0,
-	LoopX               = 1 << 0,
-	LoopY               = 1 << 1,
-	WrapX               = 1 << 2,
-	WrapY               = 1 << 3,
-	AllowCurrentNavId   = 1 << 4,
-	AlsoScoreVisibleSet = 1 << 5,
-	ScrollToEdge        = 1 << 6,
-}
-
-Next_Item_Data_Flags :: enum i32 {
-	None     = 0,
-	HasWidth = 1 << 0,
-	HasOpen  = 1 << 1,
-}
-
-Next_Window_Data_Flags :: enum i32 {
-	None              = 0,
-	HasPos            = 1 << 0,
-	HasSize           = 1 << 1,
-	HasContentSize    = 1 << 2,
-	HasCollapsed      = 1 << 3,
-	HasSizeConstraint = 1 << 4,
-	HasFocus          = 1 << 5,
-	HasBgAlpha        = 1 << 6,
-	HasScroll         = 1 << 7,
-}
-
-Plot_Type :: enum i32 {
-	Lines     = 0,
-	Histogram = 1,
-}
-
 Popup_Flags :: enum i32 {
 	None                    = 0,
 	MouseButtonLeft         = 0,
@@ -491,20 +339,6 @@ Popup_Flags :: enum i32 {
 	AnyPopup                = AnyPopupId | AnyPopupLevel,
 }
 
-Popup_Position_Policy :: enum i32 {
-	Default  = 0,
-	ComboBox = 1,
-}
-
-Selectable_Flags_Private :: enum i32 {
-	NgActiveId   = 1 << 20,
-	NClick       = 1 << 21,
-	NRelease     = 1 << 22,
-	IlWidth      = 1 << 23,
-	EredWhenHeld = 1 << 24,
-	DOnHover     = 1 << 25,
-}
-
 Selectable_Flags :: enum i32 {
 	None             = 0,
 	DontClosePopups  = 1 << 0,
@@ -514,16 +348,13 @@ Selectable_Flags :: enum i32 {
 	AllowItemOverlap = 1 << 4,
 }
 
-Separator_Flags :: enum i32 {
-	None           = 0,
-	Horizontal     = 1 << 0,
-	Vertical       = 1 << 1,
-	SpanAllColumns = 1 << 2,
-}
-
 Slider_Flags :: enum i32 {
-	None     = 0,
-	Vertical = 1 << 0,
+	None            = 0,
+	ClampOnInput    = 1 << 4,
+	Logarithmic     = 1 << 5,
+	NoRoundToFormat = 1 << 6,
+	NoInput         = 1 << 7,
+	InvalidMask     = 0x7000000F,
 }
 
 Style_Var :: enum i32 {
@@ -553,12 +384,6 @@ Style_Var :: enum i32 {
 	Count               = 23,
 }
 
-Tab_Bar_Flags_Private :: enum i32 {
-	E     = 1 << 20,
-	Ed    = 1 << 21,
-	Tings = 1 << 22,
-}
-
 Tab_Bar_Flags :: enum i32 {
 	None                         = 0,
 	Reorderable                  = 1 << 0,
@@ -573,10 +398,6 @@ Tab_Bar_Flags :: enum i32 {
 	FittingPolicyDefault         = FittingPolicyResizeDown,
 }
 
-Tab_Item_Flags_Private :: enum i32 {
-	Button = 1 << 20,
-}
-
 Tab_Item_Flags :: enum i32 {
 	None                         = 0,
 	UnsavedDocument              = 1 << 0,
@@ -584,20 +405,6 @@ Tab_Item_Flags :: enum i32 {
 	NoCloseWithMiddleMouseButton = 1 << 2,
 	NoPushId                     = 1 << 3,
 	NoTooltip                    = 1 << 4,
-}
-
-Text_Flags :: enum i32 {
-	None                       = 0,
-	NoWidthForLargeClippedText = 1 << 0,
-}
-
-Tooltip_Flags :: enum i32 {
-	None                    = 0,
-	OverridePreviousTooltip = 1 << 0,
-}
-
-Tree_Node_Flags_Private :: enum i32 {
-	ElForTrailingButton = 1 << 20,
 }
 
 Tree_Node_Flags :: enum i32 {

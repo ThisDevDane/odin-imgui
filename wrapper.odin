@@ -6,8 +6,6 @@ import "core:mem";
 
 
 
-
-
 // AUTO_GENERATED for 'ImDrawList_AddTextVec2'
 swr_ImDrawList_AddTextVec2 :: proc(self: ^Draw_List, pos: Vec2, col: u32, text_begin: string, text_end: string) {
 	str3 := strings.clone_to_cstring(text_begin, context.temp_allocator);
@@ -67,7 +65,6 @@ swr_ImFont_RenderText :: proc(self: ^ImFont, draw_list: ^Draw_List, size: f32, p
 }
 
 
-
 // AUTO_GENERATED for 'ImGuiIO_AddInputCharactersUTF8'
 swr_ImGuiIO_AddInputCharactersUTF8 :: proc(self: ^IO, str: string) {
 	str1 := strings.clone_to_cstring(str, context.temp_allocator);
@@ -84,18 +81,11 @@ swr_ImGuiInputTextCallbackData_InsertChars :: proc(self: ^Input_Text_Callback_Da
 
 
 
-
-
-
-
-
-
 // AUTO_GENERATED for 'ImGuiPayload_IsDataType'
 swr_ImGuiPayload_IsDataType :: proc(self: ^Payload, type: string) -> bool {
 	str1 := strings.clone_to_cstring(type, context.temp_allocator);
 	return ImGuiPayload_IsDataType(self, str1);
 }
-
 
 
 
@@ -129,23 +119,6 @@ swr_ImGuiTextFilter_PassFilter :: proc(self: ^Text_Filter, text: string, text_en
 
 
 
-
-// AUTO_GENERATED for 'ImGuiWindow_GetIDStr'
-swr_ImGuiWindow_GetIDStr :: proc(self: ^ImWindow, str: string, str_end: string) -> ImID {
-	str1 := strings.clone_to_cstring(str, context.temp_allocator);
-	str2 := strings.clone_to_cstring(str_end, context.temp_allocator);
-	return ImGuiWindow_GetIDStr(self, str1, str2);
-}
-
-// AUTO_GENERATED for 'ImGuiWindow_GetIDNoKeepAliveStr'
-swr_ImGuiWindow_GetIDNoKeepAliveStr :: proc(self: ^ImWindow, str: string, str_end: string) -> ImID {
-	str1 := strings.clone_to_cstring(str, context.temp_allocator);
-	str2 := strings.clone_to_cstring(str_end, context.temp_allocator);
-	return ImGuiWindow_GetIDNoKeepAliveStr(self, str1, str2);
-}
-
-
-
 // AUTO_GENERATED for 'igAcceptDragDropPayload'
 swr_igAcceptDragDropPayload :: proc(type: string, flags: Drag_Drop_Flags) -> ^Payload {
 	str0 := strings.clone_to_cstring(type, context.temp_allocator);
@@ -158,12 +131,6 @@ swr_igArrowButton :: proc(str_id: string, dir: Dir) -> bool {
 	return igArrowButton(str0, dir);
 }
 
-// AUTO_GENERATED for 'igArrowButtonEx'
-swr_igArrowButtonEx :: proc(str_id: string, dir: Dir, size_arg: Vec2, flags: Button_Flags) -> bool {
-	str0 := strings.clone_to_cstring(str_id, context.temp_allocator);
-	return igArrowButtonEx(str0, dir, size_arg, flags);
-}
-
 // AUTO_GENERATED for 'igBegin'
 swr_igBegin :: proc(name: string, p_open: ^bool, flags: Window_Flags) -> bool {
 	str0 := strings.clone_to_cstring(name, context.temp_allocator);
@@ -174,18 +141,6 @@ swr_igBegin :: proc(name: string, p_open: ^bool, flags: Window_Flags) -> bool {
 swr_igBeginChildStr :: proc(str_id: string, size: Vec2, border: bool, flags: Window_Flags) -> bool {
 	str0 := strings.clone_to_cstring(str_id, context.temp_allocator);
 	return igBeginChildStr(str0, size, border, flags);
-}
-
-// AUTO_GENERATED for 'igBeginChildEx'
-swr_igBeginChildEx :: proc(name: string, id: ImID, size_arg: Vec2, border: bool, flags: Window_Flags) -> bool {
-	str0 := strings.clone_to_cstring(name, context.temp_allocator);
-	return igBeginChildEx(str0, id, size_arg, border, flags);
-}
-
-// AUTO_GENERATED for 'igBeginColumns'
-swr_igBeginColumns :: proc(str_id: string, count: i32, flags: Columns_Flags) {
-	str0 := strings.clone_to_cstring(str_id, context.temp_allocator);
-	igBeginColumns(str0, count, flags);
 }
 
 // AUTO_GENERATED for 'igBeginCombo'
@@ -255,12 +210,6 @@ swr_igButton :: proc(label: string, size: Vec2) -> bool {
 	return igButton(str0, size);
 }
 
-// AUTO_GENERATED for 'igButtonEx'
-swr_igButtonEx :: proc(label: string, size_arg: Vec2, flags: Button_Flags) -> bool {
-	str0 := strings.clone_to_cstring(label, context.temp_allocator);
-	return igButtonEx(str0, size_arg, flags);
-}
-
 // AUTO_GENERATED for 'igCalcTextSize'
 swr_igCalcTextSize :: proc(pOut: ^Vec2, text: string, text_end: string, hide_text_after_double_hash: bool, wrap_width: f32) {
 	str1 := strings.clone_to_cstring(text, context.temp_allocator);
@@ -322,12 +271,6 @@ swr_igColorPicker4 :: proc(label: string, col: [4]f32, flags: Color_Edit_Flags, 
 	return igColorPicker4(str0, col, flags, ref_col);
 }
 
-// AUTO_GENERATED for 'igColorTooltip'
-swr_igColorTooltip :: proc(text: string, col: ^f32, flags: Color_Edit_Flags) {
-	str0 := strings.clone_to_cstring(text, context.temp_allocator);
-	igColorTooltip(str0, col, flags);
-}
-
 // AUTO_GENERATED for 'igColumns'
 swr_igColumns :: proc(count: i32, id: string, border: bool) {
 	str1 := strings.clone_to_cstring(id, context.temp_allocator);
@@ -359,154 +302,96 @@ wrapper_combo_fn_bool_ptr :: proc(label: string, current_item: ^i32, items_gette
     return igComboFnBoolPtr(l, current_item, items_getter, data, items_count, popup_max_height_in_items);
 }
 
-// AUTO_GENERATED for 'igCreateNewWindowSettings'
-swr_igCreateNewWindowSettings :: proc(name: string) -> ^Window_Settings {
-	str0 := strings.clone_to_cstring(name, context.temp_allocator);
-	return igCreateNewWindowSettings(str0);
-}
-
-// AUTO_GENERATED for 'igDataTypeApplyOpFromText'
-swr_igDataTypeApplyOpFromText :: proc(buf: string, initial_value_buf: string, data_type: Data_Type, p_data: rawptr, format: string) -> bool {
-	str0 := strings.clone_to_cstring(buf, context.temp_allocator);
-	str1 := strings.clone_to_cstring(initial_value_buf, context.temp_allocator);
-	str4 := strings.clone_to_cstring(format, context.temp_allocator);
-	return igDataTypeApplyOpFromText(str0, str1, data_type, p_data, str4);
-}
-
-// AUTO_GENERATED for 'igDataTypeFormatString'
-swr_igDataTypeFormatString :: proc(buf: string, buf_size: i32, data_type: Data_Type, p_data: rawptr, format: string) -> i32 {
-	str0 := strings.clone_to_cstring(buf, context.temp_allocator);
-	str4 := strings.clone_to_cstring(format, context.temp_allocator);
-	return igDataTypeFormatString(str0, buf_size, data_type, p_data, str4);
-}
-
 // AUTO_GENERATED for 'igDebugCheckVersionAndDataLayout'
 swr_igDebugCheckVersionAndDataLayout :: proc(version_str: string, sz_io: uint, sz_style: uint, sz_vec2: uint, sz_vec4: uint, sz_drawvert: uint, sz_drawidx: uint) -> bool {
 	str0 := strings.clone_to_cstring(version_str, context.temp_allocator);
 	return igDebugCheckVersionAndDataLayout(str0, sz_io, sz_style, sz_vec2, sz_vec4, sz_drawvert, sz_drawidx);
 }
 
-// AUTO_GENERATED for 'igDragBehavior'
-swr_igDragBehavior :: proc(id: ImID, data_type: Data_Type, p_v: rawptr, v_speed: f32, p_min: rawptr, p_max: rawptr, format: string, power: f32, flags: Drag_Flags) -> bool {
-	str6 := strings.clone_to_cstring(format, context.temp_allocator);
-	return igDragBehavior(id, data_type, p_v, v_speed, p_min, p_max, str6, power, flags);
-}
-
 // AUTO_GENERATED for 'igDragFloat'
-swr_igDragFloat :: proc(label: string, v: ^f32, v_speed: f32, v_min: f32, v_max: f32, format: string, power: f32) -> bool {
+swr_igDragFloat :: proc(label: string, v: ^f32, v_speed: f32, v_min: f32, v_max: f32, format: string, flags: Slider_Flags) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
 	str5 := strings.clone_to_cstring(format, context.temp_allocator);
-	return igDragFloat(str0, v, v_speed, v_min, v_max, str5, power);
+	return igDragFloat(str0, v, v_speed, v_min, v_max, str5, flags);
 }
 
 // AUTO_GENERATED for 'igDragFloat2'
-swr_igDragFloat2 :: proc(label: string, v: [2]f32, v_speed: f32, v_min: f32, v_max: f32, format: string, power: f32) -> bool {
+swr_igDragFloat2 :: proc(label: string, v: [2]f32, v_speed: f32, v_min: f32, v_max: f32, format: string, flags: Slider_Flags) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
 	str5 := strings.clone_to_cstring(format, context.temp_allocator);
-	return igDragFloat2(str0, v, v_speed, v_min, v_max, str5, power);
+	return igDragFloat2(str0, v, v_speed, v_min, v_max, str5, flags);
 }
 
 // AUTO_GENERATED for 'igDragFloat3'
-swr_igDragFloat3 :: proc(label: string, v: [3]f32, v_speed: f32, v_min: f32, v_max: f32, format: string, power: f32) -> bool {
+swr_igDragFloat3 :: proc(label: string, v: [3]f32, v_speed: f32, v_min: f32, v_max: f32, format: string, flags: Slider_Flags) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
 	str5 := strings.clone_to_cstring(format, context.temp_allocator);
-	return igDragFloat3(str0, v, v_speed, v_min, v_max, str5, power);
+	return igDragFloat3(str0, v, v_speed, v_min, v_max, str5, flags);
 }
 
 // AUTO_GENERATED for 'igDragFloat4'
-swr_igDragFloat4 :: proc(label: string, v: [4]f32, v_speed: f32, v_min: f32, v_max: f32, format: string, power: f32) -> bool {
+swr_igDragFloat4 :: proc(label: string, v: [4]f32, v_speed: f32, v_min: f32, v_max: f32, format: string, flags: Slider_Flags) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
 	str5 := strings.clone_to_cstring(format, context.temp_allocator);
-	return igDragFloat4(str0, v, v_speed, v_min, v_max, str5, power);
+	return igDragFloat4(str0, v, v_speed, v_min, v_max, str5, flags);
 }
 
 // AUTO_GENERATED for 'igDragFloatRange2'
-swr_igDragFloatRange2 :: proc(label: string, v_current_min: ^f32, v_current_max: ^f32, v_speed: f32, v_min: f32, v_max: f32, format: string, format_max: string, power: f32) -> bool {
+swr_igDragFloatRange2 :: proc(label: string, v_current_min: ^f32, v_current_max: ^f32, v_speed: f32, v_min: f32, v_max: f32, format: string, format_max: string, flags: Slider_Flags) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
 	str6 := strings.clone_to_cstring(format, context.temp_allocator);
 	str7 := strings.clone_to_cstring(format_max, context.temp_allocator);
-	return igDragFloatRange2(str0, v_current_min, v_current_max, v_speed, v_min, v_max, str6, str7, power);
+	return igDragFloatRange2(str0, v_current_min, v_current_max, v_speed, v_min, v_max, str6, str7, flags);
 }
 
 // AUTO_GENERATED for 'igDragInt'
-swr_igDragInt :: proc(label: string, v: ^i32, v_speed: f32, v_min: i32, v_max: i32, format: string) -> bool {
+swr_igDragInt :: proc(label: string, v: ^i32, v_speed: f32, v_min: i32, v_max: i32, format: string, flags: Slider_Flags) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
 	str5 := strings.clone_to_cstring(format, context.temp_allocator);
-	return igDragInt(str0, v, v_speed, v_min, v_max, str5);
+	return igDragInt(str0, v, v_speed, v_min, v_max, str5, flags);
 }
 
 // AUTO_GENERATED for 'igDragInt2'
-swr_igDragInt2 :: proc(label: string, v: [2]i32, v_speed: f32, v_min: i32, v_max: i32, format: string) -> bool {
+swr_igDragInt2 :: proc(label: string, v: [2]i32, v_speed: f32, v_min: i32, v_max: i32, format: string, flags: Slider_Flags) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
 	str5 := strings.clone_to_cstring(format, context.temp_allocator);
-	return igDragInt2(str0, v, v_speed, v_min, v_max, str5);
+	return igDragInt2(str0, v, v_speed, v_min, v_max, str5, flags);
 }
 
 // AUTO_GENERATED for 'igDragInt3'
-swr_igDragInt3 :: proc(label: string, v: [3]i32, v_speed: f32, v_min: i32, v_max: i32, format: string) -> bool {
+swr_igDragInt3 :: proc(label: string, v: [3]i32, v_speed: f32, v_min: i32, v_max: i32, format: string, flags: Slider_Flags) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
 	str5 := strings.clone_to_cstring(format, context.temp_allocator);
-	return igDragInt3(str0, v, v_speed, v_min, v_max, str5);
+	return igDragInt3(str0, v, v_speed, v_min, v_max, str5, flags);
 }
 
 // AUTO_GENERATED for 'igDragInt4'
-swr_igDragInt4 :: proc(label: string, v: [4]i32, v_speed: f32, v_min: i32, v_max: i32, format: string) -> bool {
+swr_igDragInt4 :: proc(label: string, v: [4]i32, v_speed: f32, v_min: i32, v_max: i32, format: string, flags: Slider_Flags) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
 	str5 := strings.clone_to_cstring(format, context.temp_allocator);
-	return igDragInt4(str0, v, v_speed, v_min, v_max, str5);
+	return igDragInt4(str0, v, v_speed, v_min, v_max, str5, flags);
 }
 
 // AUTO_GENERATED for 'igDragIntRange2'
-swr_igDragIntRange2 :: proc(label: string, v_current_min: ^i32, v_current_max: ^i32, v_speed: f32, v_min: i32, v_max: i32, format: string, format_max: string) -> bool {
+swr_igDragIntRange2 :: proc(label: string, v_current_min: ^i32, v_current_max: ^i32, v_speed: f32, v_min: i32, v_max: i32, format: string, format_max: string, flags: Slider_Flags) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
 	str6 := strings.clone_to_cstring(format, context.temp_allocator);
 	str7 := strings.clone_to_cstring(format_max, context.temp_allocator);
-	return igDragIntRange2(str0, v_current_min, v_current_max, v_speed, v_min, v_max, str6, str7);
+	return igDragIntRange2(str0, v_current_min, v_current_max, v_speed, v_min, v_max, str6, str7, flags);
 }
 
 // AUTO_GENERATED for 'igDragScalar'
-swr_igDragScalar :: proc(label: string, data_type: Data_Type, p_data: rawptr, v_speed: f32, p_min: rawptr, p_max: rawptr, format: string, power: f32) -> bool {
+swr_igDragScalar :: proc(label: string, data_type: Data_Type, p_data: rawptr, v_speed: f32, p_min: rawptr, p_max: rawptr, format: string, flags: Slider_Flags) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
 	str6 := strings.clone_to_cstring(format, context.temp_allocator);
-	return igDragScalar(str0, data_type, p_data, v_speed, p_min, p_max, str6, power);
+	return igDragScalar(str0, data_type, p_data, v_speed, p_min, p_max, str6, flags);
 }
 
 // AUTO_GENERATED for 'igDragScalarN'
-swr_igDragScalarN :: proc(label: string, data_type: Data_Type, p_data: rawptr, components: i32, v_speed: f32, p_min: rawptr, p_max: rawptr, format: string, power: f32) -> bool {
+swr_igDragScalarN :: proc(label: string, data_type: Data_Type, p_data: rawptr, components: i32, v_speed: f32, p_min: rawptr, p_max: rawptr, format: string, flags: Slider_Flags) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
 	str7 := strings.clone_to_cstring(format, context.temp_allocator);
-	return igDragScalarN(str0, data_type, p_data, components, v_speed, p_min, p_max, str7, power);
-}
-
-// AUTO_GENERATED for 'igFindOrCreateWindowSettings'
-swr_igFindOrCreateWindowSettings :: proc(name: string) -> ^Window_Settings {
-	str0 := strings.clone_to_cstring(name, context.temp_allocator);
-	return igFindOrCreateWindowSettings(str0);
-}
-
-// AUTO_GENERATED for 'igFindRenderedTextEnd'
-swr_igFindRenderedTextEnd :: proc(text: string, text_end: string) -> cstring {
-	str0 := strings.clone_to_cstring(text, context.temp_allocator);
-	str1 := strings.clone_to_cstring(text_end, context.temp_allocator);
-	return igFindRenderedTextEnd(str0, str1);
-}
-
-// AUTO_GENERATED for 'igFindSettingsHandler'
-swr_igFindSettingsHandler :: proc(type_name: string) -> ^Settings_Handler {
-	str0 := strings.clone_to_cstring(type_name, context.temp_allocator);
-	return igFindSettingsHandler(str0);
-}
-
-// AUTO_GENERATED for 'igFindWindowByName'
-swr_igFindWindowByName :: proc(name: string) -> ^ImWindow {
-	str0 := strings.clone_to_cstring(name, context.temp_allocator);
-	return igFindWindowByName(str0);
-}
-
-// AUTO_GENERATED for 'igGetColumnsID'
-swr_igGetColumnsID :: proc(str_id: string, count: i32) -> ImID {
-	str0 := strings.clone_to_cstring(str_id, context.temp_allocator);
-	return igGetColumnsID(str0, count);
+	return igDragScalarN(str0, data_type, p_data, components, v_speed, p_min, p_max, str7, flags);
 }
 
 // AUTO_GENERATED for 'igGetIDStr'
@@ -534,161 +419,6 @@ wrapper_get_window_size :: proc() -> Vec2 {
     res := Vec2{};
     igGetWindowSize(&res);
     return res;
-}
-
-// AUTO_GENERATED for 'igImFileLoadToMemory'
-swr_igImFileLoadToMemory :: proc(filename: string, mode: string, out_file_size: ^uint, padding_bytes: i32) -> rawptr {
-	str0 := strings.clone_to_cstring(filename, context.temp_allocator);
-	str1 := strings.clone_to_cstring(mode, context.temp_allocator);
-	return igImFileLoadToMemory(str0, str1, out_file_size, padding_bytes);
-}
-
-// AUTO_GENERATED for 'igImFileOpen'
-swr_igImFileOpen :: proc(filename: string, mode: string) -> File_Handle {
-	str0 := strings.clone_to_cstring(filename, context.temp_allocator);
-	str1 := strings.clone_to_cstring(mode, context.temp_allocator);
-	return igImFileOpen(str0, str1);
-}
-
-// AUTO_GENERATED for 'igImFormatString'
-swr_igImFormatString :: proc(buf: string, buf_size: uint, fmt_: string, args: ..any) -> i32 {
-	str0 := strings.clone_to_cstring(buf, context.temp_allocator);
-	str2 := strings.clone_to_cstring(fmt_, context.temp_allocator);
-	return igImFormatString(str0, buf_size, str2, args);
-}
-
-// AUTO_GENERATED for 'igImHashStr'
-swr_igImHashStr :: proc(data: string, data_size: uint, seed: u32) -> u32 {
-	str0 := strings.clone_to_cstring(data, context.temp_allocator);
-	return igImHashStr(str0, data_size, seed);
-}
-
-// AUTO_GENERATED for 'igImParseFormatFindEnd'
-swr_igImParseFormatFindEnd :: proc(format: string) -> cstring {
-	str0 := strings.clone_to_cstring(format, context.temp_allocator);
-	return igImParseFormatFindEnd(str0);
-}
-
-// AUTO_GENERATED for 'igImParseFormatFindStart'
-swr_igImParseFormatFindStart :: proc(format: string) -> cstring {
-	str0 := strings.clone_to_cstring(format, context.temp_allocator);
-	return igImParseFormatFindStart(str0);
-}
-
-// AUTO_GENERATED for 'igImParseFormatPrecision'
-swr_igImParseFormatPrecision :: proc(format: string, default_value: i32) -> i32 {
-	str0 := strings.clone_to_cstring(format, context.temp_allocator);
-	return igImParseFormatPrecision(str0, default_value);
-}
-
-// AUTO_GENERATED for 'igImParseFormatTrimDecorations'
-swr_igImParseFormatTrimDecorations :: proc(format: string, buf: string, buf_size: uint) -> cstring {
-	str0 := strings.clone_to_cstring(format, context.temp_allocator);
-	str1 := strings.clone_to_cstring(buf, context.temp_allocator);
-	return igImParseFormatTrimDecorations(str0, str1, buf_size);
-}
-
-// AUTO_GENERATED for 'igImStrSkipBlank'
-swr_igImStrSkipBlank :: proc(str: string) -> cstring {
-	str0 := strings.clone_to_cstring(str, context.temp_allocator);
-	return igImStrSkipBlank(str0);
-}
-
-// AUTO_GENERATED for 'igImStrTrimBlanks'
-swr_igImStrTrimBlanks :: proc(str: string) {
-	str0 := strings.clone_to_cstring(str, context.temp_allocator);
-	igImStrTrimBlanks(str0);
-}
-
-// AUTO_GENERATED for 'igImStrchrRange'
-swr_igImStrchrRange :: proc(str_begin: string, str_end: string, c: i8) -> cstring {
-	str0 := strings.clone_to_cstring(str_begin, context.temp_allocator);
-	str1 := strings.clone_to_cstring(str_end, context.temp_allocator);
-	return igImStrchrRange(str0, str1, c);
-}
-
-// AUTO_GENERATED for 'igImStrdup'
-swr_igImStrdup :: proc(str: string) -> cstring {
-	str0 := strings.clone_to_cstring(str, context.temp_allocator);
-	return igImStrdup(str0);
-}
-
-// AUTO_GENERATED for 'igImStrdupcpy'
-swr_igImStrdupcpy :: proc(dst: string, p_dst_size: ^uint, str: string) -> cstring {
-	str0 := strings.clone_to_cstring(dst, context.temp_allocator);
-	str2 := strings.clone_to_cstring(str, context.temp_allocator);
-	return igImStrdupcpy(str0, p_dst_size, str2);
-}
-
-// AUTO_GENERATED for 'igImStreolRange'
-swr_igImStreolRange :: proc(str: string, str_end: string) -> cstring {
-	str0 := strings.clone_to_cstring(str, context.temp_allocator);
-	str1 := strings.clone_to_cstring(str_end, context.temp_allocator);
-	return igImStreolRange(str0, str1);
-}
-
-// AUTO_GENERATED for 'igImStricmp'
-swr_igImStricmp :: proc(str1: string, str2: string) -> i32 {
-	str0 := strings.clone_to_cstring(str1, context.temp_allocator);
-	str1 := strings.clone_to_cstring(str2, context.temp_allocator);
-	return igImStricmp(str0, str1);
-}
-
-// AUTO_GENERATED for 'igImStristr'
-swr_igImStristr :: proc(haystack: string, haystack_end: string, needle: string, needle_end: string) -> cstring {
-	str0 := strings.clone_to_cstring(haystack, context.temp_allocator);
-	str1 := strings.clone_to_cstring(haystack_end, context.temp_allocator);
-	str2 := strings.clone_to_cstring(needle, context.temp_allocator);
-	str3 := strings.clone_to_cstring(needle_end, context.temp_allocator);
-	return igImStristr(str0, str1, str2, str3);
-}
-
-// AUTO_GENERATED for 'igImStrncpy'
-swr_igImStrncpy :: proc(dst: string, src: string, count: uint) {
-	str0 := strings.clone_to_cstring(dst, context.temp_allocator);
-	str1 := strings.clone_to_cstring(src, context.temp_allocator);
-	igImStrncpy(str0, str1, count);
-}
-
-// AUTO_GENERATED for 'igImStrnicmp'
-swr_igImStrnicmp :: proc(str1: string, str2: string, count: uint) -> i32 {
-	str0 := strings.clone_to_cstring(str1, context.temp_allocator);
-	str1 := strings.clone_to_cstring(str2, context.temp_allocator);
-	return igImStrnicmp(str0, str1, count);
-}
-
-// AUTO_GENERATED for 'igImTextCharFromUtf8'
-swr_igImTextCharFromUtf8 :: proc(out_char: ^u32, in_text: string, in_text_end: string) -> i32 {
-	str1 := strings.clone_to_cstring(in_text, context.temp_allocator);
-	str2 := strings.clone_to_cstring(in_text_end, context.temp_allocator);
-	return igImTextCharFromUtf8(out_char, str1, str2);
-}
-
-// AUTO_GENERATED for 'igImTextCountCharsFromUtf8'
-swr_igImTextCountCharsFromUtf8 :: proc(in_text: string, in_text_end: string) -> i32 {
-	str0 := strings.clone_to_cstring(in_text, context.temp_allocator);
-	str1 := strings.clone_to_cstring(in_text_end, context.temp_allocator);
-	return igImTextCountCharsFromUtf8(str0, str1);
-}
-
-// AUTO_GENERATED for 'igImTextCountUtf8BytesFromChar'
-swr_igImTextCountUtf8BytesFromChar :: proc(in_text: string, in_text_end: string) -> i32 {
-	str0 := strings.clone_to_cstring(in_text, context.temp_allocator);
-	str1 := strings.clone_to_cstring(in_text_end, context.temp_allocator);
-	return igImTextCountUtf8BytesFromChar(str0, str1);
-}
-
-// AUTO_GENERATED for 'igImTextStrFromUtf8'
-swr_igImTextStrFromUtf8 :: proc(buf: ^Wchar, buf_size: i32, in_text: string, in_text_end: string, in_remaining: ^cstring) -> i32 {
-	str2 := strings.clone_to_cstring(in_text, context.temp_allocator);
-	str3 := strings.clone_to_cstring(in_text_end, context.temp_allocator);
-	return igImTextStrFromUtf8(buf, buf_size, str2, str3, in_remaining);
-}
-
-// AUTO_GENERATED for 'igImTextStrToUtf8'
-swr_igImTextStrToUtf8 :: proc(buf: string, buf_size: i32, in_text: ^Wchar, in_text_end: ^Wchar) -> i32 {
-	str0 := strings.clone_to_cstring(buf, context.temp_allocator);
-	return igImTextStrToUtf8(str0, buf_size, in_text, in_text_end);
 }
 
 // AUTO_GENERATED for 'igInputDouble'
@@ -770,14 +500,6 @@ wrapper_input_text :: inline proc(label: string, buf: []u8, flags := Input_Text_
     return igInputText(l, cstring(&buf[0]), uint(len(buf)), flags, callback, user_data);
 }
 
-// AUTO_GENERATED for 'igInputTextEx'
-swr_igInputTextEx :: proc(label: string, hint: string, buf: string, buf_size: i32, size_arg: Vec2, flags: Input_Text_Flags, callback: Input_Text_Callback, user_data: rawptr) -> bool {
-	str0 := strings.clone_to_cstring(label, context.temp_allocator);
-	str1 := strings.clone_to_cstring(hint, context.temp_allocator);
-	str2 := strings.clone_to_cstring(buf, context.temp_allocator);
-	return igInputTextEx(str0, str1, str2, buf_size, size_arg, flags, callback, user_data);
-}
-
 // AUTO_GENERATED for 'igInputTextMultiline'
 swr_igInputTextMultiline :: proc(label: string, buf: string, buf_size: uint, size: Vec2, flags: Input_Text_Flags, callback: Input_Text_Callback, user_data: rawptr) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
@@ -794,9 +516,9 @@ swr_igInputTextWithHint :: proc(label: string, hint: string, buf: string, buf_si
 }
 
 // AUTO_GENERATED for 'igInvisibleButton'
-swr_igInvisibleButton :: proc(str_id: string, size: Vec2) -> bool {
+swr_igInvisibleButton :: proc(str_id: string, size: Vec2, flags: Button_Flags) -> bool {
 	str0 := strings.clone_to_cstring(str_id, context.temp_allocator);
-	return igInvisibleButton(str0, size);
+	return igInvisibleButton(str0, size, flags);
 }
 
 // AUTO_GENERATED for 'igIsPopupOpenStr'
@@ -849,13 +571,6 @@ swr_igLoadIniSettingsFromMemory :: proc(ini_data: string, ini_size: uint) {
 	igLoadIniSettingsFromMemory(str0, ini_size);
 }
 
-// AUTO_GENERATED for 'igLogRenderedText'
-swr_igLogRenderedText :: proc(ref_pos: ^Vec2, text: string, text_end: string) {
-	str1 := strings.clone_to_cstring(text, context.temp_allocator);
-	str2 := strings.clone_to_cstring(text_end, context.temp_allocator);
-	igLogRenderedText(ref_pos, str1, str2);
-}
-
 // AUTO_GENERATED for 'igLogText'
 swr_igLogText :: proc(fmt_: string, args: ..any) {
 	str0 := strings.clone_to_cstring(fmt_, context.temp_allocator);
@@ -892,22 +607,6 @@ swr_igOpenPopup :: proc(str_id: string, popup_flags: Popup_Flags) {
 swr_igOpenPopupContextItem :: proc(str_id: string, popup_flags: Popup_Flags) -> bool {
 	str0 := strings.clone_to_cstring(str_id, context.temp_allocator);
 	return igOpenPopupContextItem(str0, popup_flags);
-}
-
-// PREDEFINED FOR 'igPlotEx'
-wrapper_plot_ex :: proc(plot_type: Plot_Type, 
-                        label: string, 
-                        values_getter: Value_Getter_Proc, 
-                        data: rawptr, 
-                        values_count: i32, 
-                        values_offset: i32, 
-                        overlay_text: string, 
-                        scale_min: f32, 
-                        scale_max: f32, 
-                        frame_size: Vec2) -> i32 {
-    l := strings.clone_to_cstring(label, context.temp_allocator);
-    overlay := strings.clone_to_cstring(overlay_text, context.temp_allocator);
-    return igPlotEx(plot_type, l, values_getter, data, values_count, values_offset, overlay, scale_min, scale_max, frame_size);
 }
 
 // AUTO_GENERATED for 'igPlotHistogramFloatPtr'
@@ -983,41 +682,6 @@ swr_igRadioButtonBool :: proc(label: string, active: bool) -> bool {
 swr_igRadioButtonIntPtr :: proc(label: string, v: ^i32, v_button: i32) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
 	return igRadioButtonIntPtr(str0, v, v_button);
-}
-
-// AUTO_GENERATED for 'igRenderText'
-swr_igRenderText :: proc(pos: Vec2, text: string, text_end: string, hide_text_after_hash: bool) {
-	str1 := strings.clone_to_cstring(text, context.temp_allocator);
-	str2 := strings.clone_to_cstring(text_end, context.temp_allocator);
-	igRenderText(pos, str1, str2, hide_text_after_hash);
-}
-
-// AUTO_GENERATED for 'igRenderTextClipped'
-swr_igRenderTextClipped :: proc(pos_min: Vec2, pos_max: Vec2, text: string, text_end: string, text_size_if_known: ^Vec2, align: Vec2, clip_rect: ^Rect) {
-	str2 := strings.clone_to_cstring(text, context.temp_allocator);
-	str3 := strings.clone_to_cstring(text_end, context.temp_allocator);
-	igRenderTextClipped(pos_min, pos_max, str2, str3, text_size_if_known, align, clip_rect);
-}
-
-// AUTO_GENERATED for 'igRenderTextClippedEx'
-swr_igRenderTextClippedEx :: proc(draw_list: ^Draw_List, pos_min: Vec2, pos_max: Vec2, text: string, text_end: string, text_size_if_known: ^Vec2, align: Vec2, clip_rect: ^Rect) {
-	str3 := strings.clone_to_cstring(text, context.temp_allocator);
-	str4 := strings.clone_to_cstring(text_end, context.temp_allocator);
-	igRenderTextClippedEx(draw_list, pos_min, pos_max, str3, str4, text_size_if_known, align, clip_rect);
-}
-
-// AUTO_GENERATED for 'igRenderTextEllipsis'
-swr_igRenderTextEllipsis :: proc(draw_list: ^Draw_List, pos_min: Vec2, pos_max: Vec2, clip_max_x: f32, ellipsis_max_x: f32, text: string, text_end: string, text_size_if_known: ^Vec2) {
-	str5 := strings.clone_to_cstring(text, context.temp_allocator);
-	str6 := strings.clone_to_cstring(text_end, context.temp_allocator);
-	igRenderTextEllipsis(draw_list, pos_min, pos_max, clip_max_x, ellipsis_max_x, str5, str6, text_size_if_known);
-}
-
-// AUTO_GENERATED for 'igRenderTextWrapped'
-swr_igRenderTextWrapped :: proc(pos: Vec2, text: string, text_end: string, wrap_width: f32) {
-	str1 := strings.clone_to_cstring(text, context.temp_allocator);
-	str2 := strings.clone_to_cstring(text_end, context.temp_allocator);
-	igRenderTextWrapped(pos, str1, str2, wrap_width);
 }
 
 // AUTO_GENERATED for 'igSaveIniSettingsToDisk'
@@ -1104,124 +768,86 @@ swr_igShowStyleSelector :: proc(label: string) -> bool {
 }
 
 // AUTO_GENERATED for 'igSliderAngle'
-swr_igSliderAngle :: proc(label: string, v_rad: ^f32, v_degrees_min: f32, v_degrees_max: f32, format: string) -> bool {
+swr_igSliderAngle :: proc(label: string, v_rad: ^f32, v_degrees_min: f32, v_degrees_max: f32, format: string, flags: Slider_Flags) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
 	str4 := strings.clone_to_cstring(format, context.temp_allocator);
-	return igSliderAngle(str0, v_rad, v_degrees_min, v_degrees_max, str4);
-}
-
-// AUTO_GENERATED for 'igSliderBehavior'
-swr_igSliderBehavior :: proc(bb: Rect, id: ImID, data_type: Data_Type, p_v: rawptr, p_min: rawptr, p_max: rawptr, format: string, power: f32, flags: Slider_Flags, out_grab_bb: ^Rect) -> bool {
-	str6 := strings.clone_to_cstring(format, context.temp_allocator);
-	return igSliderBehavior(bb, id, data_type, p_v, p_min, p_max, str6, power, flags, out_grab_bb);
+	return igSliderAngle(str0, v_rad, v_degrees_min, v_degrees_max, str4, flags);
 }
 
 // AUTO_GENERATED for 'igSliderFloat'
-swr_igSliderFloat :: proc(label: string, v: ^f32, v_min: f32, v_max: f32, format: string, power: f32) -> bool {
+swr_igSliderFloat :: proc(label: string, v: ^f32, v_min: f32, v_max: f32, format: string, flags: Slider_Flags) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
 	str4 := strings.clone_to_cstring(format, context.temp_allocator);
-	return igSliderFloat(str0, v, v_min, v_max, str4, power);
+	return igSliderFloat(str0, v, v_min, v_max, str4, flags);
 }
 
 // AUTO_GENERATED for 'igSliderFloat2'
-swr_igSliderFloat2 :: proc(label: string, v: [2]f32, v_min: f32, v_max: f32, format: string, power: f32) -> bool {
+swr_igSliderFloat2 :: proc(label: string, v: [2]f32, v_min: f32, v_max: f32, format: string, flags: Slider_Flags) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
 	str4 := strings.clone_to_cstring(format, context.temp_allocator);
-	return igSliderFloat2(str0, v, v_min, v_max, str4, power);
+	return igSliderFloat2(str0, v, v_min, v_max, str4, flags);
 }
 
 // AUTO_GENERATED for 'igSliderFloat3'
-swr_igSliderFloat3 :: proc(label: string, v: [3]f32, v_min: f32, v_max: f32, format: string, power: f32) -> bool {
+swr_igSliderFloat3 :: proc(label: string, v: [3]f32, v_min: f32, v_max: f32, format: string, flags: Slider_Flags) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
 	str4 := strings.clone_to_cstring(format, context.temp_allocator);
-	return igSliderFloat3(str0, v, v_min, v_max, str4, power);
+	return igSliderFloat3(str0, v, v_min, v_max, str4, flags);
 }
 
 // AUTO_GENERATED for 'igSliderFloat4'
-swr_igSliderFloat4 :: proc(label: string, v: [4]f32, v_min: f32, v_max: f32, format: string, power: f32) -> bool {
+swr_igSliderFloat4 :: proc(label: string, v: [4]f32, v_min: f32, v_max: f32, format: string, flags: Slider_Flags) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
 	str4 := strings.clone_to_cstring(format, context.temp_allocator);
-	return igSliderFloat4(str0, v, v_min, v_max, str4, power);
+	return igSliderFloat4(str0, v, v_min, v_max, str4, flags);
 }
 
 // AUTO_GENERATED for 'igSliderInt'
-swr_igSliderInt :: proc(label: string, v: ^i32, v_min: i32, v_max: i32, format: string) -> bool {
+swr_igSliderInt :: proc(label: string, v: ^i32, v_min: i32, v_max: i32, format: string, flags: Slider_Flags) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
 	str4 := strings.clone_to_cstring(format, context.temp_allocator);
-	return igSliderInt(str0, v, v_min, v_max, str4);
+	return igSliderInt(str0, v, v_min, v_max, str4, flags);
 }
 
 // AUTO_GENERATED for 'igSliderInt2'
-swr_igSliderInt2 :: proc(label: string, v: [2]i32, v_min: i32, v_max: i32, format: string) -> bool {
+swr_igSliderInt2 :: proc(label: string, v: [2]i32, v_min: i32, v_max: i32, format: string, flags: Slider_Flags) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
 	str4 := strings.clone_to_cstring(format, context.temp_allocator);
-	return igSliderInt2(str0, v, v_min, v_max, str4);
+	return igSliderInt2(str0, v, v_min, v_max, str4, flags);
 }
 
 // AUTO_GENERATED for 'igSliderInt3'
-swr_igSliderInt3 :: proc(label: string, v: [3]i32, v_min: i32, v_max: i32, format: string) -> bool {
+swr_igSliderInt3 :: proc(label: string, v: [3]i32, v_min: i32, v_max: i32, format: string, flags: Slider_Flags) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
 	str4 := strings.clone_to_cstring(format, context.temp_allocator);
-	return igSliderInt3(str0, v, v_min, v_max, str4);
+	return igSliderInt3(str0, v, v_min, v_max, str4, flags);
 }
 
 // AUTO_GENERATED for 'igSliderInt4'
-swr_igSliderInt4 :: proc(label: string, v: [4]i32, v_min: i32, v_max: i32, format: string) -> bool {
+swr_igSliderInt4 :: proc(label: string, v: [4]i32, v_min: i32, v_max: i32, format: string, flags: Slider_Flags) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
 	str4 := strings.clone_to_cstring(format, context.temp_allocator);
-	return igSliderInt4(str0, v, v_min, v_max, str4);
+	return igSliderInt4(str0, v, v_min, v_max, str4, flags);
 }
 
 // AUTO_GENERATED for 'igSliderScalar'
-swr_igSliderScalar :: proc(label: string, data_type: Data_Type, p_data: rawptr, p_min: rawptr, p_max: rawptr, format: string, power: f32) -> bool {
+swr_igSliderScalar :: proc(label: string, data_type: Data_Type, p_data: rawptr, p_min: rawptr, p_max: rawptr, format: string, flags: Slider_Flags) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
 	str5 := strings.clone_to_cstring(format, context.temp_allocator);
-	return igSliderScalar(str0, data_type, p_data, p_min, p_max, str5, power);
+	return igSliderScalar(str0, data_type, p_data, p_min, p_max, str5, flags);
 }
 
 // AUTO_GENERATED for 'igSliderScalarN'
-swr_igSliderScalarN :: proc(label: string, data_type: Data_Type, p_data: rawptr, components: i32, p_min: rawptr, p_max: rawptr, format: string, power: f32) -> bool {
+swr_igSliderScalarN :: proc(label: string, data_type: Data_Type, p_data: rawptr, components: i32, p_min: rawptr, p_max: rawptr, format: string, flags: Slider_Flags) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
 	str6 := strings.clone_to_cstring(format, context.temp_allocator);
-	return igSliderScalarN(str0, data_type, p_data, components, p_min, p_max, str6, power);
+	return igSliderScalarN(str0, data_type, p_data, components, p_min, p_max, str6, flags);
 }
 
 // AUTO_GENERATED for 'igSmallButton'
 swr_igSmallButton :: proc(label: string) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
 	return igSmallButton(str0);
-}
-
-// AUTO_GENERATED for 'igTabItemCalcSize'
-swr_igTabItemCalcSize :: proc(pOut: ^Vec2, label: string, has_close_button: bool) {
-	str1 := strings.clone_to_cstring(label, context.temp_allocator);
-	igTabItemCalcSize(pOut, str1, has_close_button);
-}
-
-// AUTO_GENERATED for 'igTabItemEx'
-swr_igTabItemEx :: proc(tab_bar: ^Tab_Bar, label: string, p_open: ^bool, flags: Tab_Item_Flags) -> bool {
-	str1 := strings.clone_to_cstring(label, context.temp_allocator);
-	return igTabItemEx(tab_bar, str1, p_open, flags);
-}
-
-// AUTO_GENERATED for 'igTabItemLabelAndCloseButton'
-swr_igTabItemLabelAndCloseButton :: proc(draw_list: ^Draw_List, bb: Rect, flags: Tab_Item_Flags, frame_padding: Vec2, label: string, tab_id: ImID, close_button_id: ImID, is_contents_visible: bool) -> bool {
-	str4 := strings.clone_to_cstring(label, context.temp_allocator);
-	return igTabItemLabelAndCloseButton(draw_list, bb, flags, frame_padding, str4, tab_id, close_button_id, is_contents_visible);
-}
-
-// AUTO_GENERATED for 'igTempInputScalar'
-swr_igTempInputScalar :: proc(bb: Rect, id: ImID, label: string, data_type: Data_Type, p_data: rawptr, format: string, p_clamp_min: rawptr, p_clamp_max: rawptr) -> bool {
-	str2 := strings.clone_to_cstring(label, context.temp_allocator);
-	str5 := strings.clone_to_cstring(format, context.temp_allocator);
-	return igTempInputScalar(bb, id, str2, data_type, p_data, str5, p_clamp_min, p_clamp_max);
-}
-
-// AUTO_GENERATED for 'igTempInputText'
-swr_igTempInputText :: proc(bb: Rect, id: ImID, label: string, buf: string, buf_size: i32, flags: Input_Text_Flags) -> bool {
-	str2 := strings.clone_to_cstring(label, context.temp_allocator);
-	str3 := strings.clone_to_cstring(buf, context.temp_allocator);
-	return igTempInputText(bb, id, str2, str3, buf_size, flags);
 }
 
 // PREDEFINED FOR 'igText'
@@ -1243,14 +869,6 @@ wrapper_text_disabled :: proc(fmt_: string, args: ..any) {
     fmt_str := fmt.tprintf("{}\x00", fmt_);
     str := transmute([]byte)fmt.tprintf(fmt_str, ..args);
     igTextDisabled(cstring(&str[0]), nil);
-}
-
-// PREDEFINED FOR 'igTextEx'
-wrapper_text_ex :: proc(text: string, flags := Text_Flags(0)) {
-    t := strings.clone_to_cstring(text, context.temp_allocator);
-    ptr := transmute(^u8)t;
-    end_ptr := mem.ptr_offset(ptr, len(t));
-    igTextEx(cstring(ptr), cstring(end_ptr), flags);
 }
 
 // PREDEFINED FOR 'igTextUnformatted'
@@ -1287,13 +905,6 @@ swr_igTreeNodePtr :: proc(ptr_id: rawptr, fmt_: string, args: ..any) -> bool {
 	return igTreeNodePtr(ptr_id, str1, args);
 }
 
-// AUTO_GENERATED for 'igTreeNodeBehavior'
-swr_igTreeNodeBehavior :: proc(id: ImID, flags: Tree_Node_Flags, label: string, label_end: string) -> bool {
-	str2 := strings.clone_to_cstring(label, context.temp_allocator);
-	str3 := strings.clone_to_cstring(label_end, context.temp_allocator);
-	return igTreeNodeBehavior(id, flags, str2, str3);
-}
-
 // AUTO_GENERATED for 'igTreeNodeExStr'
 swr_igTreeNodeExStr :: proc(label: string, flags: Tree_Node_Flags) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
@@ -1320,24 +931,24 @@ swr_igTreePushStr :: proc(str_id: string) {
 }
 
 // AUTO_GENERATED for 'igVSliderFloat'
-swr_igVSliderFloat :: proc(label: string, size: Vec2, v: ^f32, v_min: f32, v_max: f32, format: string, power: f32) -> bool {
+swr_igVSliderFloat :: proc(label: string, size: Vec2, v: ^f32, v_min: f32, v_max: f32, format: string, flags: Slider_Flags) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
 	str5 := strings.clone_to_cstring(format, context.temp_allocator);
-	return igVSliderFloat(str0, size, v, v_min, v_max, str5, power);
+	return igVSliderFloat(str0, size, v, v_min, v_max, str5, flags);
 }
 
 // AUTO_GENERATED for 'igVSliderInt'
-swr_igVSliderInt :: proc(label: string, size: Vec2, v: ^i32, v_min: i32, v_max: i32, format: string) -> bool {
+swr_igVSliderInt :: proc(label: string, size: Vec2, v: ^i32, v_min: i32, v_max: i32, format: string, flags: Slider_Flags) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
 	str5 := strings.clone_to_cstring(format, context.temp_allocator);
-	return igVSliderInt(str0, size, v, v_min, v_max, str5);
+	return igVSliderInt(str0, size, v, v_min, v_max, str5, flags);
 }
 
 // AUTO_GENERATED for 'igVSliderScalar'
-swr_igVSliderScalar :: proc(label: string, size: Vec2, data_type: Data_Type, p_data: rawptr, p_min: rawptr, p_max: rawptr, format: string, power: f32) -> bool {
+swr_igVSliderScalar :: proc(label: string, size: Vec2, data_type: Data_Type, p_data: rawptr, p_min: rawptr, p_max: rawptr, format: string, flags: Slider_Flags) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
 	str6 := strings.clone_to_cstring(format, context.temp_allocator);
-	return igVSliderScalar(str0, size, data_type, p_data, p_min, p_max, str6, power);
+	return igVSliderScalar(str0, size, data_type, p_data, p_min, p_max, str6, flags);
 }
 
 // AUTO_GENERATED for 'igValueBool'

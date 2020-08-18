@@ -133,7 +133,6 @@ text_test_window :: proc() {
     imgui.text("NORMAL TEXT: {}", 1);
     imgui.text_colored(imgui.Vec4{1, 0, 0, 1}, "COLORED TEXT: {}", 2);
     imgui.text_disabled("DISABLED TEXT: {}", 3);
-    imgui.text_ex("EXTENDED TEXT", .NoWidthForLargeClippedText);
     imgui.text_unformatted("UNFORMATTED TEXT");
     imgui.text_wrapped("WRAPPED TEXT: {}", 4);
     imgui.end();
