@@ -326,9 +326,9 @@ gather_foreign_proc_groups :: proc(groups : ^[dynamic]Foreign_Func_Group, obj: j
 
         for ov in overloads {
             ov_obj := ov.value.(json.Object);
-            if is_vector(ov_obj)       do continue;
-            if is_internal(ov_obj)     do continue;
-            if is_ctor_dtor(ov_obj)    do continue;
+            if is_vector(ov_obj)            do continue;
+            if is_function_internal(ov_obj) do continue;
+            if is_ctor_dtor(ov_obj)         do continue;
 
             f, ok := convert_json_to_foreign_func(ov_obj);
             if ok == false do continue;
@@ -397,10 +397,10 @@ is_nonUDT :: proc(obj: json.Object) -> bool {
 }
 
 @(private="file")
-is_internal :: proc(obj: json.Object) -> bool {
+is_function_internal :: proc(obj: json.Object) -> bool {
     v, ok := obj["location"];
     if ok == false do return false;
-    return get_value_string(v) == "internal";
+    return strings.has_prefix(get_value_string(v), "imgui_internal");
 }
 
 @(private="file")
@@ -449,6 +449,7 @@ parse_default :: proc(obj: json.Object, param_name: string) -> string {
             str := get_value_string(def);
             switch str {
                 case "((void*)0)": return "nil";
+                case "NULL": return "nil";
                 case "FLT_MAX": return "max(f32)";
                 case "(((ImU32)(255)<<24)|((ImU32)(0)<<16)|((ImU32)(0)<<8)|((ImU32)(255)<<0))": return "";
                 case "(((ImU32)(255)<<24)|((ImU32)(255)<<16)|((ImU32)(255)<<8)|((ImU32)(255)<<0))": return "";

@@ -1,7 +1,7 @@
 package imgui;
 
-color_hsv     :: inline proc(pOut: ^Color, self: ^Color, h: f32, s: f32, v: f32, a := f32(1.0)) do ImColor_HSV(pOut, self, h, s, v, a);
-color_set_hsv :: inline proc(self: ^Color, h: f32, s: f32, v: f32, a := f32(1.0))        do ImColor_SetHSV(self, h, s, v, a);
+color_hsv     :: inline proc(pOut: ^Color, h: f32, s: f32, v: f32, a := f32(1.0)) do ImColor_HSV(pOut, h, s, v, a);
+color_set_hsv :: inline proc(self: ^Color, h: f32, s: f32, v: f32, a := f32(1.0)) do ImColor_SetHSV(self, h, s, v, a);
 
 draw_data_clear                :: inline proc(self: ^Draw_Data)                 do ImDrawData_Clear(self);
 draw_data_de_index_all_buffers :: inline proc(self: ^Draw_Data)                 do ImDrawData_DeIndexAllBuffers(self);
@@ -19,8 +19,8 @@ draw_list_add_circle                   :: inline proc(self: ^Draw_List, center: 
 draw_list_add_circle_filled            :: inline proc(self: ^Draw_List, center: Vec2, radius: f32, col: u32, num_segments := i32(0))                                                                                     do ImDrawList_AddCircleFilled(self, center, radius, col, num_segments);
 draw_list_add_convex_poly_filled       :: inline proc(self: ^Draw_List, points: ^Vec2, num_points: i32, col: u32)                                                                                                        do ImDrawList_AddConvexPolyFilled(self, points, num_points, col);
 draw_list_add_draw_cmd                 :: inline proc(self: ^Draw_List)                                                                                                                                                  do ImDrawList_AddDrawCmd(self);
-draw_list_add_image                    :: inline proc(self: ^Draw_List, user_texture_id: Texture_ID, p_min: Vec2, p_max: Vec2, uv_min := Vec2(Vec2 {0,0}), uv_max := Vec2(Vec2 {1,1}), col: u32)                         do ImDrawList_AddImage(self, user_texture_id, p_min, p_max, uv_min, uv_max, col);
-draw_list_add_image_quad               :: inline proc(self: ^Draw_List, user_texture_id: Texture_ID, p1: Vec2, p2: Vec2, p3: Vec2, p4: Vec2, uv1 := Vec2(Vec2 {0,0}), uv2 := Vec2(Vec2 {1,0}), uv3 := Vec2(Vec2 {1,1}), uv4 := Vec2(Vec2 {0,1}), col: u32) do ImDrawList_AddImageQuad(self, user_texture_id, p1, p2, p3, p4, uv1, uv2, uv3, uv4, col);
+draw_list_add_image                    :: inline proc(self: ^Draw_List, user_texture_id: Texture_ID, p_min: Vec2, p_max: Vec2, uv_min := Vec2(Vec2 {0,0}), uv_max := Vec2(Vec2 {1,1}), col := u32(4294967295))           do ImDrawList_AddImage(self, user_texture_id, p_min, p_max, uv_min, uv_max, col);
+draw_list_add_image_quad               :: inline proc(self: ^Draw_List, user_texture_id: Texture_ID, p1: Vec2, p2: Vec2, p3: Vec2, p4: Vec2, uv1 := Vec2(Vec2 {0,0}), uv2 := Vec2(Vec2 {1,0}), uv3 := Vec2(Vec2 {1,1}), uv4 := Vec2(Vec2 {0,1}), col := u32(4294967295)) do ImDrawList_AddImageQuad(self, user_texture_id, p1, p2, p3, p4, uv1, uv2, uv3, uv4, col);
 draw_list_add_image_rounded            :: inline proc(self: ^Draw_List, user_texture_id: Texture_ID, p_min: Vec2, p_max: Vec2, uv_min: Vec2, uv_max: Vec2, col: u32, rounding: f32, rounding_corners := Draw_Corner_Flags(Draw_Corner_Flags.All)) do ImDrawList_AddImageRounded(self, user_texture_id, p_min, p_max, uv_min, uv_max, col, rounding, rounding_corners);
 draw_list_add_line                     :: inline proc(self: ^Draw_List, p1: Vec2, p2: Vec2, col: u32, thickness := f32(1.0))                                                                                             do ImDrawList_AddLine(self, p1, p2, col, thickness);
 draw_list_add_ngon                     :: inline proc(self: ^Draw_List, center: Vec2, radius: f32, col: u32, num_segments: i32, thickness := f32(1.0))                                                                   do ImDrawList_AddNgon(self, center, radius, col, num_segments, thickness);
@@ -138,9 +138,11 @@ io_add_input_character_utf16 :: inline proc(self: ^IO, c: Wchar16)   do ImGuiIO_
 io_add_input_characters_utf8 :: inline proc(self: ^IO, str: string)  do swr_ImGuiIO_AddInputCharactersUTF8(self, str);
 io_clear_input_characters    :: inline proc(self: ^IO)               do ImGuiIO_ClearInputCharacters(self);
 
-input_text_callback_data_delete_chars  :: inline proc(self: ^Input_Text_Callback_Data, pos: i32, bytes_count: i32)                 do ImGuiInputTextCallbackData_DeleteChars(self, pos, bytes_count);
-input_text_callback_data_has_selection :: inline proc(self: ^Input_Text_Callback_Data) -> bool                                     do return ImGuiInputTextCallbackData_HasSelection(self);
-input_text_callback_data_insert_chars  :: inline proc(self: ^Input_Text_Callback_Data, pos: i32, text: string, text_end := "")     do swr_ImGuiInputTextCallbackData_InsertChars(self, pos, text, text_end);
+input_text_callback_data_clear_selection :: inline proc(self: ^Input_Text_Callback_Data)                                             do ImGuiInputTextCallbackData_ClearSelection(self);
+input_text_callback_data_delete_chars    :: inline proc(self: ^Input_Text_Callback_Data, pos: i32, bytes_count: i32)                 do ImGuiInputTextCallbackData_DeleteChars(self, pos, bytes_count);
+input_text_callback_data_has_selection   :: inline proc(self: ^Input_Text_Callback_Data) -> bool                                     do return ImGuiInputTextCallbackData_HasSelection(self);
+input_text_callback_data_insert_chars    :: inline proc(self: ^Input_Text_Callback_Data, pos: i32, text: string, text_end := "")     do swr_ImGuiInputTextCallbackData_InsertChars(self, pos, text, text_end);
+input_text_callback_data_select_all      :: inline proc(self: ^Input_Text_Callback_Data)                                             do ImGuiInputTextCallbackData_SelectAll(self);
 
 list_clipper_begin :: inline proc(self: ^List_Clipper, items_count: i32, items_height := f32(-1.0)) do ImGuiListClipper_Begin(self, items_count, items_height);
 list_clipper_end   :: inline proc(self: ^List_Clipper)                                      do ImGuiListClipper_End(self);
@@ -466,7 +468,7 @@ new_frame                              :: inline proc()                         
 new_line                               :: inline proc()                                                                                                                                                                      do igNewLine();
 next_column                            :: inline proc()                                                                                                                                                                      do igNextColumn();
 open_popup                             :: inline proc(str_id: string, popup_flags := Popup_Flags(0))                                                                                                                         do swr_igOpenPopup(str_id, popup_flags);
-open_popup_context_item                :: inline proc(str_id := "", popup_flags := Popup_Flags(1)) -> bool                                                                                                                   do return swr_igOpenPopupContextItem(str_id, popup_flags);
+open_popup_on_item_click               :: inline proc(str_id := "", popup_flags := Popup_Flags(1))                                                                                                                           do swr_igOpenPopupOnItemClick(str_id, popup_flags);
 
 plot_histogram :: proc {
 	plot_histogram_float_ptr,
@@ -658,6 +660,7 @@ spacing                                :: inline proc()                         
 style_colors_classic                   :: inline proc(dst : ^Style = nil)                                                                                                                                                    do igStyleColorsClassic(dst);
 style_colors_dark                      :: inline proc(dst : ^Style = nil)                                                                                                                                                    do igStyleColorsDark(dst);
 style_colors_light                     :: inline proc(dst : ^Style = nil)                                                                                                                                                    do igStyleColorsLight(dst);
+tab_item_button                        :: inline proc(label: string, flags := Tab_Item_Flags(0)) -> bool                                                                                                                     do return swr_igTabItemButton(label, flags);
 text                                   :: inline proc(fmt_: string, args: ..any)                                                                                                                                             do wrapper_text(fmt_, ..args);
 text_colored                           :: inline proc(col: Vec4, fmt_: string, args: ..any)                                                                                                                                  do wrapper_text_colored(col, fmt_, ..args);
 text_disabled                          :: inline proc(fmt_: string, args: ..any)                                                                                                                                             do wrapper_text_disabled(fmt_, ..args);

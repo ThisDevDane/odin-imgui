@@ -240,6 +240,7 @@ Input_Text_Flags :: enum i32 {
 	NoUndoRedo          = 1 << 16,
 	CharsScientific     = 1 << 17,
 	CallbackResize      = 1 << 18,
+	CallbackEdit        = 1 << 19,
 	Multiline           = 1 << 20,
 	NoMarkEdited        = 1 << 21,
 }
@@ -350,7 +351,7 @@ Selectable_Flags :: enum i32 {
 
 Slider_Flags :: enum i32 {
 	None            = 0,
-	ClampOnInput    = 1 << 4,
+	AlwaysClamp     = 1 << 4,
 	Logarithmic     = 1 << 5,
 	NoRoundToFormat = 1 << 6,
 	NoInput         = 1 << 7,
@@ -405,6 +406,9 @@ Tab_Item_Flags :: enum i32 {
 	NoCloseWithMiddleMouseButton = 1 << 2,
 	NoPushId                     = 1 << 3,
 	NoTooltip                    = 1 << 4,
+	NoReorder                    = 1 << 5,
+	Leading                      = 1 << 6,
+	Trailing                     = 1 << 7,
 }
 
 Tree_Node_Flags :: enum i32 {

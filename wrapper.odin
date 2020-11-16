@@ -603,10 +603,10 @@ swr_igOpenPopup :: proc(str_id: string, popup_flags: Popup_Flags) {
 	igOpenPopup(str0, popup_flags);
 }
 
-// AUTO_GENERATED for 'igOpenPopupContextItem'
-swr_igOpenPopupContextItem :: proc(str_id: string, popup_flags: Popup_Flags) -> bool {
+// AUTO_GENERATED for 'igOpenPopupOnItemClick'
+swr_igOpenPopupOnItemClick :: proc(str_id: string, popup_flags: Popup_Flags) {
 	str0 := strings.clone_to_cstring(str_id, context.temp_allocator);
-	return igOpenPopupContextItem(str0, popup_flags);
+	igOpenPopupOnItemClick(str0, popup_flags);
 }
 
 // AUTO_GENERATED for 'igPlotHistogramFloatPtr'
@@ -848,6 +848,12 @@ swr_igSliderScalarN :: proc(label: string, data_type: Data_Type, p_data: rawptr,
 swr_igSmallButton :: proc(label: string) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
 	return igSmallButton(str0);
+}
+
+// AUTO_GENERATED for 'igTabItemButton'
+swr_igTabItemButton :: proc(label: string, flags: Tab_Item_Flags) -> bool {
+	str0 := strings.clone_to_cstring(label, context.temp_allocator);
+	return igTabItemButton(str0, flags);
 }
 
 // PREDEFINED FOR 'igText'

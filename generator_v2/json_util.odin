@@ -11,7 +11,7 @@ get_optional_string :: proc(obj: json.Object, key: string) -> string {
 
 get_optional_int :: proc(obj: json.Object, key: string) -> int {
     v, ok := obj[key];
-    return ok ? int(v.value.(json.Integer)) : 0;
+    return ok ? int(v.value.(json.Float)) : 0;
 }
 
 get_optional_bool :: proc(obj: json.Object, key: string) -> bool {

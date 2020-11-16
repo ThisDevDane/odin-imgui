@@ -8,7 +8,7 @@ when ODIN_DEBUG {
 
 @(default_calling_convention="c")
 foreign cimgui {
-	ImColor_HSV    :: proc(pOut: ^Color, self: ^Color, h: f32, s: f32, v: f32, a: f32) ---;
+	ImColor_HSV    :: proc(pOut: ^Color, h: f32, s: f32, v: f32, a: f32) ---;
 	ImColor_SetHSV :: proc(self: ^Color, h: f32, s: f32, v: f32, a: f32) ---;
 
 	ImDrawData_Clear             :: proc(self: ^Draw_Data) ---;
@@ -140,9 +140,11 @@ foreign cimgui {
 	ImGuiIO_AddInputCharactersUTF8 :: proc(self: ^IO, str: cstring) ---;
 	ImGuiIO_ClearInputCharacters   :: proc(self: ^IO) ---;
 
-	ImGuiInputTextCallbackData_DeleteChars  :: proc(self: ^Input_Text_Callback_Data, pos: i32, bytes_count: i32) ---;
-	ImGuiInputTextCallbackData_HasSelection :: proc(self: ^Input_Text_Callback_Data) -> bool ---;
-	ImGuiInputTextCallbackData_InsertChars  :: proc(self: ^Input_Text_Callback_Data, pos: i32, text: cstring, text_end: cstring) ---;
+	ImGuiInputTextCallbackData_ClearSelection :: proc(self: ^Input_Text_Callback_Data) ---;
+	ImGuiInputTextCallbackData_DeleteChars    :: proc(self: ^Input_Text_Callback_Data, pos: i32, bytes_count: i32) ---;
+	ImGuiInputTextCallbackData_HasSelection   :: proc(self: ^Input_Text_Callback_Data) -> bool ---;
+	ImGuiInputTextCallbackData_InsertChars    :: proc(self: ^Input_Text_Callback_Data, pos: i32, text: cstring, text_end: cstring) ---;
+	ImGuiInputTextCallbackData_SelectAll      :: proc(self: ^Input_Text_Callback_Data) ---;
 
 	ImGuiListClipper_Begin :: proc(self: ^List_Clipper, items_count: i32, items_height: f32) ---;
 	ImGuiListClipper_End   :: proc(self: ^List_Clipper) ---;
@@ -401,7 +403,7 @@ foreign cimgui {
 	igNewLine                          :: proc() ---;
 	igNextColumn                       :: proc() ---;
 	igOpenPopup                        :: proc(str_id: cstring, popup_flags: Popup_Flags) ---;
-	igOpenPopupContextItem             :: proc(str_id: cstring, popup_flags: Popup_Flags) -> bool ---;
+	igOpenPopupOnItemClick             :: proc(str_id: cstring, popup_flags: Popup_Flags) ---;
 	igPlotHistogramFloatPtr            :: proc(label: cstring, values: ^f32, values_count: i32, values_offset: i32, overlay_text: cstring, scale_min: f32, scale_max: f32, graph_size: Vec2, stride: i32) ---;
 	igPlotHistogramFnFloatPtr          :: proc(label: cstring, values_getter: Value_Getter_Proc, data: rawptr, values_count: i32, values_offset: i32, overlay_text: cstring, scale_min: f32, scale_max: f32, graph_size: Vec2) ---
 	igPlotLinesFloatPtr                :: proc(label: cstring, values: ^f32, values_count: i32, values_offset: i32, overlay_text: cstring, scale_min: f32, scale_max: f32, graph_size: Vec2, stride: i32) ---;
@@ -505,6 +507,7 @@ foreign cimgui {
 	igStyleColorsClassic               :: proc(dst: ^Style) ---;
 	igStyleColorsDark                  :: proc(dst: ^Style) ---;
 	igStyleColorsLight                 :: proc(dst: ^Style) ---;
+	igTabItemButton                    :: proc(label: cstring, flags: Tab_Item_Flags) -> bool ---;
 	igText                             :: proc(fmt_: cstring, #c_vararg args: ..any) ---;
 	igTextColored                      :: proc(col: Vec4, fmt_: cstring, #c_vararg args: ..any) ---;
 	igTextDisabled                     :: proc(fmt_: cstring, #c_vararg args: ..any) ---;

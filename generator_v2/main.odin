@@ -64,7 +64,7 @@ output_enums :: proc(json_path: string, output_path: string) {
         blacklist : map[string]bool;
         for k, v in obj["locations"].value.(json.Object) {
             location := get_value_string(v);
-            if location == "internal" do blacklist[k] = true;
+            if strings.has_prefix(location, "imgui_internal") do blacklist[k] = true;
         }
 
         for k, v in obj["enums"].value.(json.Object) {
@@ -224,7 +224,8 @@ output_structs :: proc(json_path: string, output_path: string, predefined_entite
         blacklist : map[string]bool;
         for k, v in obj["locations"].value.(json.Object) {
             location := get_value_string(v);
-            if location == "internal" do blacklist[k] = true;
+            if strings.has_prefix(location, "imgui_internal") do blacklist[k] = true;
+            if strings.has_prefix(location, "imstb_textedit") do blacklist[k] = true;
         }
 
         for k, v in obj["structs"].value.(json.Object) {
