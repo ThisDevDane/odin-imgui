@@ -19,7 +19,7 @@ DIST_DIR = ./dist
 ODIN_OUTPUT_DIR = ./output
 EXTERNAL_LIB_DIR = ./output/external
 
-CIMGUI_SRC= ./cimgui/cimgui.cpp ./cimgui/imgui/imgui.cpp ./cimgui/imgui/imgui_draw.cpp ./cimgui/imgui/imgui_demo.cpp ./cimgui/imgui/imgui_widgets.cpp
+CIMGUI_SRC= ./cimgui/cimgui.cpp ./cimgui/imgui/imgui.cpp ./cimgui/imgui/imgui_draw.cpp ./cimgui/imgui/imgui_demo.cpp ./cimgui/imgui/imgui_widgets.cpp ./cimgui/imgui/imgui_tables.cpp
 CIMGUI_OBJS=cimgui.obj imgui.obj imgui_draw.obj imgui_demo.obj imgui_widgets.obj
 CIMGUI_FLAGS = /c /nologo /DCIMGUI_NO_EXPORT
 CIMGUI_LIB_ARCHIVE = $(DIST_DIR)/cimgui-binaries.zip

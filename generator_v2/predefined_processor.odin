@@ -45,7 +45,7 @@ Wrapper_Func :: struct {
 };
 
 output_predefined_copies :: proc(output_path: string, predefined_entities: []Predefined_Entity) {
-    log.info("Outputting predefined copies...");
+    log.info(#location());
 
     sb := strings.make_builder();
     defer strings.destroy_builder(&sb);
@@ -74,10 +74,9 @@ output_predefined_copies :: proc(output_path: string, predefined_entities: []Pre
 } 
 
 process_predefined :: proc(odin_file_path: string) -> []Predefined_Entity {
-    log.info("Processing predfined declerations...");
+    log.info("Processing predefined declerations...");
 
     res : [dynamic]Predefined_Entity;
-
     predefined_file := ast.File {
         fullpath = odin_file_path
     };
@@ -109,7 +108,6 @@ process_predefined :: proc(odin_file_path: string) -> []Predefined_Entity {
     for x in predefined_file.decls {
         if decl, ok := x.derived.(ast.Value_Decl); ok {
             if len(decl.attributes) < 1 do continue;
-
             decl_name := decl.names[0].derived.(ast.Ident).name;
 
             for attr in decl.attributes {

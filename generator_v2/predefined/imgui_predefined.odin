@@ -24,9 +24,9 @@ package predefined;
 // // Predefined structs
 
 @output_copy
-Draw_List_Shared_Data :: opaque struct {};
+Draw_List_Shared_Data :: struct {};
 @output_copy
-Context :: opaque struct {};
+Context :: struct {};
 
 @output_copy
 Im_Vector :: struct(T : typeid) {

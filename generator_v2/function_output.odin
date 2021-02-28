@@ -247,7 +247,7 @@ write_header :: proc(sb: ^strings.Builder, wrapper_map: ^Wrapper_Map, g: Foreign
     fmt.sbprintf(sb, "{} ", name);
     right_pad(sb, len(name), g.longest_func_name);
 
-    fmt.sbprintf(sb, ":: inline proc(");
+    fmt.sbprintf(sb, ":: #force_inline proc(");
 
     sbu := strings.make_builder();
     defer strings.destroy_builder(&sbu);
@@ -410,6 +410,8 @@ convert_json_to_foreign_func :: proc(ov_obj: json.Object) -> (Foreign_Func, bool
     f.link_name = get_value_string(ov_obj["ov_cimguiname"]);
     f.return_type = get_optional_string(ov_obj, "ret");
 
+    log.infof("Converting {}", f.link_name);
+
     for arg in ov_obj["argsT"].value.(json.Array) {
         param := Foreign_Func_Param{};
         arg_obj := arg.value.(json.Object);
@@ -486,6 +488,10 @@ parse_default :: proc(obj: json.Object, param_name: string) -> string {
                     }
 
                     if _, ok := strconv.parse_bool(str); ok {
+                        return str;
+                    }
+
+                    if _, ok := strconv.parse_f64(str); ok {
                         return str;
                     }
 
