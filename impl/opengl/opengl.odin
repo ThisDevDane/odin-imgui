@@ -218,8 +218,8 @@ restore_opengl_state :: proc(state: OpenGL_Backup_State) {
     if state.last_enable_scissor_test do gl.Enable(gl.SCISSOR_TEST) else do gl.Disable(gl.SCISSOR_TEST);
 
     gl.PolygonMode(gl.FRONT_AND_BACK, u32(state.last_polygon_mode[0]));
-    gl.Viewport(state.last_viewport[0],   state.last_viewport[1],    state.last_viewport[2],    state.last_viewport[2]);
-    gl.Scissor(state.last_scissor_box[0], state.last_scissor_box[1], state.last_scissor_box[2], state.last_scissor_box[2]);
+    gl.Viewport(state.last_viewport[0],   state.last_viewport[1],    state.last_viewport[2],    state.last_viewport[3]);
+    gl.Scissor(state.last_scissor_box[0], state.last_scissor_box[1], state.last_scissor_box[2], state.last_scissor_box[3]);
 }
 
 @(private="package")
