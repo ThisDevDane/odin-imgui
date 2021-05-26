@@ -54,7 +54,7 @@ output_enums :: proc(json_path: string, output_path: string) {
 
     Enum_Field :: struct {
         name:  string,
-        value: union{string, int, []string}
+        value: union{string, int, []string},
     };
 
     definitions : [dynamic]Enum_Defintion;

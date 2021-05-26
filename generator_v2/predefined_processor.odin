@@ -12,7 +12,7 @@ Predefined_Entity :: union {
     Output_Copy,
     Foreign_Overwrite,
     Wrapper_Func,
-    Struct_Overwrite
+    Struct_Overwrite,
 }
 
 Struct_Overwrite :: struct {
@@ -78,10 +78,10 @@ process_predefined :: proc(odin_file_path: string) -> []Predefined_Entity {
 
     res : [dynamic]Predefined_Entity;
     predefined_file := ast.File {
-        fullpath = odin_file_path
+        fullpath = odin_file_path,
     };
     src, _ := os.read_entire_file(predefined_file.fullpath);
-    predefined_file.src = src;
+    predefined_file.src = string(src);
     defer delete(src);
 
     err_log : parser.Error_Handler : proc(pos: tokenizer.Pos, msg: string, args: ..any) {

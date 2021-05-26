@@ -6,8 +6,7 @@ LINK = lib
 
 PROGRAM_NAME = odin-imgui-gen
 
-FLAGS = --out=$(EXE_NAME) --llvm-api
-# FLAGS = --out=$(EXE_NAME)
+FLAGS = --out=$(EXE_NAME)
 
 GENERATOR_SRC = ./generator_v2
 EXE_NAME = $(PROGRAM_NAME).exe
@@ -20,7 +19,7 @@ ODIN_OUTPUT_DIR = ./output
 EXTERNAL_LIB_DIR = ./output/external
 
 CIMGUI_SRC= ./cimgui/cimgui.cpp ./cimgui/imgui/imgui.cpp ./cimgui/imgui/imgui_draw.cpp ./cimgui/imgui/imgui_demo.cpp ./cimgui/imgui/imgui_widgets.cpp ./cimgui/imgui/imgui_tables.cpp
-CIMGUI_OBJS=cimgui.obj imgui.obj imgui_draw.obj imgui_demo.obj imgui_widgets.obj
+CIMGUI_OBJS=cimgui.obj imgui.obj imgui_draw.obj imgui_demo.obj imgui_widgets.obj imgui_tables.obj
 CIMGUI_FLAGS = /c /nologo /DCIMGUI_NO_EXPORT
 CIMGUI_LIB_ARCHIVE = $(DIST_DIR)/cimgui-binaries.zip
 
@@ -36,7 +35,7 @@ all: cimgui build_debug
 
 sdl_opengl:
 	@echo "[SDL OpenGL Example]"
-	$(OC) run $(EXAMPLES_DIR)/sdl_opengl --debug --llvm-api
+	$(OC) run $(EXAMPLES_DIR)/sdl_opengl --debug
 
 generate: build_debug
 	@echo "[Generate]"

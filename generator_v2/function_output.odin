@@ -410,8 +410,6 @@ convert_json_to_foreign_func :: proc(ov_obj: json.Object) -> (Foreign_Func, bool
     f.link_name = get_value_string(ov_obj["ov_cimguiname"]);
     f.return_type = get_optional_string(ov_obj, "ret");
 
-    log.infof("Converting {}", f.link_name);
-
     for arg in ov_obj["argsT"].value.(json.Array) {
         param := Foreign_Func_Param{};
         arg_obj := arg.value.(json.Object);
@@ -453,6 +451,7 @@ parse_default :: proc(obj: json.Object, param_name: string) -> string {
                 case "((void*)0)": return "nil";
                 case "NULL": return "nil";
                 case "FLT_MAX": return "max(f32)";
+                case "FLT_MIN": return "min(f32)";
                 case "(((ImU32)(255)<<24)|((ImU32)(0)<<16)|((ImU32)(0)<<8)|((ImU32)(255)<<0))": return "";
                 case "(((ImU32)(255)<<24)|((ImU32)(255)<<16)|((ImU32)(255)<<8)|((ImU32)(255)<<0))": return "";
                 case: {
@@ -469,6 +468,9 @@ parse_default :: proc(obj: json.Object, param_name: string) -> string {
                         init := str[idx:];
                         init, _ = strings.replace_all(init, "(", "{");
                         init, _ = strings.replace_all(init, ")", "}");
+                        init, _ = strings.replace_all(init, "f", "");
+                        init, _ = strings.replace_all(init, "FLT_MIN", "min(f32)");
+                        
                         return fmt.aprint(clean_type(type), init);
                     }
 

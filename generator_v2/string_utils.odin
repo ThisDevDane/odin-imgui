@@ -40,10 +40,12 @@ type_map := map[string]string {
     "size_t"         = "uint",
     "bool"           = "bool",
 
+
     "float&" = "^f32",
-    "ImU32" = "u32",
-    "ImS8"  = "i8",
-    "ImU8"  = "u8",
+    "ImU32"  = "u32",
+    "ImS8"   = "i8",
+    "ImU8"   = "u8",
+    "ImS16"  = "i16",
     "ImU64"  = "u64",
 
     "ImTextureID" = "Texture_ID",

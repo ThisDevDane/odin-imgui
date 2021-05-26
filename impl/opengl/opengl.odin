@@ -151,8 +151,7 @@ imgui_setup_render_state :: proc(data: ^imgui.Draw_Data, state: OpenGL_State) {
     r := data.display_pos.x + data.display_size.x;
     t := data.display_pos.y;
     b := data.display_pos.y + data.display_size.y;
-    ortho_projection := [4][4]f32
-    {
+    ortho_projection := [4][4]f32 {
         { 2.0/(r-l),   0.0,          0.0, 0.0 },
         { 0.0,         2.0/(t-b),    0.0, 0.0 },
         { 0.0,         0.0,         -1.0, 0.0 },
