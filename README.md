@@ -1,6 +1,6 @@
 # odin-imgui
 
-This is an odin wrapper for [dear imgui v1.80](https://github.com/ocornut/imgui) (Generated from the auto-generated [cimgui](https://github.com/cimgui/cimgui.git)).
+This is an odin wrapper for [dear imgui v1.82](https://github.com/ocornut/imgui) (Generated from the auto-generated [cimgui](https://github.com/cimgui/cimgui.git)).
 
 It contains generated wrappers as well as handwritten ones to make it better fit with the odin language.
 It will also contain extra utility functions that are not present in cimgui.
