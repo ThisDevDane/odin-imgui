@@ -18,6 +18,10 @@ Alloc_Func :: #type proc "c" (size: i64, user_data: rawptr) -> rawptr;
 
 Free_Func :: #type proc "c" (ptr: rawptr, user_data: rawptr);
 
+Mem_Alloc_Func :: #type proc "c" (size: i64, user_data: rawptr) -> rawptr;
+
+Mem_Free_Func :: #type proc "c" (ptr: rawptr, user_data: rawptr);
+
 Items_Getter_Proc :: #type proc "c" (data: rawptr, idx: i32, out_text: ^cstring) -> bool;
 
 Value_Getter_Proc :: #type proc "c" (data: rawptr, idx: i32) -> f32;
@@ -28,9 +32,11 @@ Input_Text_Callback :: #type proc "c" (data: ^Input_Text_Callback_Data) -> int;
 
 Size_Callback :: #type proc "c" (data: ^Size_Callback_Data);
 
-Draw_List_Shared_Data :: opaque struct {};
+Draw_List_Shared_Data :: struct {};
 
-Context :: opaque struct {};
+Context :: struct {};
+
+Font_Builder_Io :: struct {};
 
 Im_Vector :: struct(T : typeid) {
     size:     i32, 

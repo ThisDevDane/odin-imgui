@@ -6,18 +6,18 @@ import "core:mem";
 
 
 
-// AUTO_GENERATED for 'ImDrawList_AddTextVec2'
-swr_ImDrawList_AddTextVec2 :: proc(self: ^Draw_List, pos: Vec2, col: u32, text_begin: string, text_end: string) {
+// AUTO_GENERATED for 'ImDrawList_AddText_Vec2'
+swr_ImDrawList_AddText_Vec2 :: proc(self: ^Draw_List, pos: Vec2, col: u32, text_begin: string, text_end: string) {
 	str3 := strings.clone_to_cstring(text_begin, context.temp_allocator);
 	str4 := strings.clone_to_cstring(text_end, context.temp_allocator);
-	ImDrawList_AddTextVec2(self, pos, col, str3, str4);
+	ImDrawList_AddText_Vec2(self, pos, col, str3, str4);
 }
 
-// AUTO_GENERATED for 'ImDrawList_AddTextFontPtr'
-swr_ImDrawList_AddTextFontPtr :: proc(self: ^Draw_List, font: ^ImFont, font_size: f32, pos: Vec2, col: u32, text_begin: string, text_end: string, wrap_width: f32, cpu_fine_clip_rect: ^Vec4) {
+// AUTO_GENERATED for 'ImDrawList_AddText_FontPtr'
+swr_ImDrawList_AddText_FontPtr :: proc(self: ^Draw_List, font: ^ImFont, font_size: f32, pos: Vec2, col: u32, text_begin: string, text_end: string, wrap_width: f32, cpu_fine_clip_rect: ^Vec4) {
 	str5 := strings.clone_to_cstring(text_begin, context.temp_allocator);
 	str6 := strings.clone_to_cstring(text_end, context.temp_allocator);
-	ImDrawList_AddTextFontPtr(self, font, font_size, pos, col, str5, str6, wrap_width, cpu_fine_clip_rect);
+	ImDrawList_AddText_FontPtr(self, font, font_size, pos, col, str5, str6, wrap_width, cpu_fine_clip_rect);
 }
 
 
@@ -119,6 +119,7 @@ swr_ImGuiTextFilter_PassFilter :: proc(self: ^Text_Filter, text: string, text_en
 
 
 
+
 // AUTO_GENERATED for 'igAcceptDragDropPayload'
 swr_igAcceptDragDropPayload :: proc(type: string, flags: Drag_Drop_Flags) -> ^Payload {
 	str0 := strings.clone_to_cstring(type, context.temp_allocator);
@@ -137,10 +138,10 @@ swr_igBegin :: proc(name: string, p_open: ^bool, flags: Window_Flags) -> bool {
 	return igBegin(str0, p_open, flags);
 }
 
-// AUTO_GENERATED for 'igBeginChildStr'
-swr_igBeginChildStr :: proc(str_id: string, size: Vec2, border: bool, flags: Window_Flags) -> bool {
+// AUTO_GENERATED for 'igBeginChild_Str'
+swr_igBeginChild_Str :: proc(str_id: string, size: Vec2, border: bool, flags: Window_Flags) -> bool {
 	str0 := strings.clone_to_cstring(str_id, context.temp_allocator);
-	return igBeginChildStr(str0, size, border, flags);
+	return igBeginChild_Str(str0, size, border, flags);
 }
 
 // AUTO_GENERATED for 'igBeginCombo'
@@ -148,6 +149,12 @@ swr_igBeginCombo :: proc(label: string, preview_value: string, flags: Combo_Flag
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
 	str1 := strings.clone_to_cstring(preview_value, context.temp_allocator);
 	return igBeginCombo(str0, str1, flags);
+}
+
+// AUTO_GENERATED for 'igBeginListBox'
+swr_igBeginListBox :: proc(label: string, size: Vec2) -> bool {
+	str0 := strings.clone_to_cstring(label, context.temp_allocator);
+	return igBeginListBox(str0, size);
 }
 
 // AUTO_GENERATED for 'igBeginMenu'
@@ -198,6 +205,12 @@ swr_igBeginTabItem :: proc(label: string, p_open: ^bool, flags: Tab_Item_Flags) 
 	return igBeginTabItem(str0, p_open, flags);
 }
 
+// AUTO_GENERATED for 'igBeginTable'
+swr_igBeginTable :: proc(str_id: string, column: i32, flags: Table_Flags, outer_size: Vec2, inner_width: f32) -> bool {
+	str0 := strings.clone_to_cstring(str_id, context.temp_allocator);
+	return igBeginTable(str0, column, flags, outer_size, inner_width);
+}
+
 // AUTO_GENERATED for 'igBulletText'
 swr_igBulletText :: proc(fmt_: string, args: ..any) {
 	str0 := strings.clone_to_cstring(fmt_, context.temp_allocator);
@@ -223,22 +236,28 @@ swr_igCheckbox :: proc(label: string, v: ^bool) -> bool {
 	return igCheckbox(str0, v);
 }
 
-// AUTO_GENERATED for 'igCheckboxFlags'
-swr_igCheckboxFlags :: proc(label: string, flags: ^u32, flags_value: u32) -> bool {
+// AUTO_GENERATED for 'igCheckboxFlags_IntPtr'
+swr_igCheckboxFlags_IntPtr :: proc(label: string, flags: ^i32, flags_value: i32) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
-	return igCheckboxFlags(str0, flags, flags_value);
+	return igCheckboxFlags_IntPtr(str0, flags, flags_value);
 }
 
-// AUTO_GENERATED for 'igCollapsingHeaderTreeNodeFlags'
-swr_igCollapsingHeaderTreeNodeFlags :: proc(label: string, flags: Tree_Node_Flags) -> bool {
+// AUTO_GENERATED for 'igCheckboxFlags_UintPtr'
+swr_igCheckboxFlags_UintPtr :: proc(label: string, flags: ^u32, flags_value: u32) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
-	return igCollapsingHeaderTreeNodeFlags(str0, flags);
+	return igCheckboxFlags_UintPtr(str0, flags, flags_value);
 }
 
-// AUTO_GENERATED for 'igCollapsingHeaderBoolPtr'
-swr_igCollapsingHeaderBoolPtr :: proc(label: string, p_open: ^bool, flags: Tree_Node_Flags) -> bool {
+// AUTO_GENERATED for 'igCollapsingHeader_TreeNodeFlags'
+swr_igCollapsingHeader_TreeNodeFlags :: proc(label: string, flags: Tree_Node_Flags) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
-	return igCollapsingHeaderBoolPtr(str0, p_open, flags);
+	return igCollapsingHeader_TreeNodeFlags(str0, flags);
+}
+
+// AUTO_GENERATED for 'igCollapsingHeader_BoolPtr'
+swr_igCollapsingHeader_BoolPtr :: proc(label: string, p_visible: ^bool, flags: Tree_Node_Flags) -> bool {
+	str0 := strings.clone_to_cstring(label, context.temp_allocator);
+	return igCollapsingHeader_BoolPtr(str0, p_visible, flags);
 }
 
 // AUTO_GENERATED for 'igColorButton'
@@ -277,7 +296,7 @@ swr_igColumns :: proc(count: i32, id: string, border: bool) {
 	igColumns(count, str1, border);
 }
 
-// PREDEFINED FOR 'igComboStr_arr'
+// PREDEFINED FOR 'igCombo_Str_arr'
 wrapper_combo_str_arr :: proc(label: string, current_item: ^i32, items: []string, popup_max_height_in_items := i32(0)) -> bool {
     l := strings.clone_to_cstring(label, context.temp_allocator);
 
@@ -286,20 +305,20 @@ wrapper_combo_str_arr :: proc(label: string, current_item: ^i32, items: []string
         data[idx] = strings.clone_to_cstring(item, context.temp_allocator);
     }
 
-    return igComboStr_arr(l, current_item, &data[0], i32(len(items)), popup_max_height_in_items);
+    return igCombo_Str_arr(l, current_item, &data[0], i32(len(items)), popup_max_height_in_items);
 }
 
-// AUTO_GENERATED for 'igComboStr'
-swr_igComboStr :: proc(label: string, current_item: ^i32, items_separated_by_zeros: string, popup_max_height_in_items: i32) -> bool {
+// AUTO_GENERATED for 'igCombo_Str'
+swr_igCombo_Str :: proc(label: string, current_item: ^i32, items_separated_by_zeros: string, popup_max_height_in_items: i32) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
 	str2 := strings.clone_to_cstring(items_separated_by_zeros, context.temp_allocator);
-	return igComboStr(str0, current_item, str2, popup_max_height_in_items);
+	return igCombo_Str(str0, current_item, str2, popup_max_height_in_items);
 }
 
-// PREDEFINED FOR 'igComboFnBoolPtr'
+// PREDEFINED FOR 'igCombo_FnBoolPtr'
 wrapper_combo_fn_bool_ptr :: proc(label: string, current_item: ^i32, items_getter: Items_Getter_Proc, data: rawptr, items_count: i32, popup_max_height_in_items := i32(0)) -> bool {
     l := strings.clone_to_cstring(label, context.temp_allocator);
-    return igComboFnBoolPtr(l, current_item, items_getter, data, items_count, popup_max_height_in_items);
+    return igCombo_FnBoolPtr(l, current_item, items_getter, data, items_count, popup_max_height_in_items);
 }
 
 // AUTO_GENERATED for 'igDebugCheckVersionAndDataLayout'
@@ -394,17 +413,17 @@ swr_igDragScalarN :: proc(label: string, data_type: Data_Type, p_data: rawptr, c
 	return igDragScalarN(str0, data_type, p_data, components, v_speed, p_min, p_max, str7, flags);
 }
 
-// AUTO_GENERATED for 'igGetIDStr'
-swr_igGetIDStr :: proc(str_id: string) -> ImID {
+// AUTO_GENERATED for 'igGetID_Str'
+swr_igGetID_Str :: proc(str_id: string) -> ImID {
 	str0 := strings.clone_to_cstring(str_id, context.temp_allocator);
-	return igGetIDStr(str0);
+	return igGetID_Str(str0);
 }
 
-// AUTO_GENERATED for 'igGetIDStrStr'
-swr_igGetIDStrStr :: proc(str_id_begin: string, str_id_end: string) -> ImID {
+// AUTO_GENERATED for 'igGetID_StrStr'
+swr_igGetID_StrStr :: proc(str_id_begin: string, str_id_end: string) -> ImID {
 	str0 := strings.clone_to_cstring(str_id_begin, context.temp_allocator);
 	str1 := strings.clone_to_cstring(str_id_end, context.temp_allocator);
-	return igGetIDStrStr(str0, str1);
+	return igGetID_StrStr(str0, str1);
 }
 
 // PREDEFINED FOR 'igGetWindowPos'
@@ -495,7 +514,7 @@ swr_igInputScalarN :: proc(label: string, data_type: Data_Type, p_data: rawptr, 
 }
 
 // PREDEFINED FOR 'igInputText'
-wrapper_input_text :: inline proc(label: string, buf: []u8, flags := Input_Text_Flags(0), callback : Input_Text_Callback = nil, user_data : rawptr = nil) -> bool {
+wrapper_input_text :: #force_inline proc(label: string, buf: []u8, flags := Input_Text_Flags(0), callback : Input_Text_Callback = nil, user_data : rawptr = nil) -> bool {
     l := strings.clone_to_cstring(label, context.temp_allocator);
     return igInputText(l, cstring(&buf[0]), uint(len(buf)), flags, callback, user_data);
 }
@@ -521,10 +540,10 @@ swr_igInvisibleButton :: proc(str_id: string, size: Vec2, flags: Button_Flags) -
 	return igInvisibleButton(str0, size, flags);
 }
 
-// AUTO_GENERATED for 'igIsPopupOpenStr'
-swr_igIsPopupOpenStr :: proc(str_id: string, flags: Popup_Flags) -> bool {
+// AUTO_GENERATED for 'igIsPopupOpen_Str'
+swr_igIsPopupOpen_Str :: proc(str_id: string, flags: Popup_Flags) -> bool {
 	str0 := strings.clone_to_cstring(str_id, context.temp_allocator);
-	return igIsPopupOpenStr(str0, flags);
+	return igIsPopupOpen_Str(str0, flags);
 }
 
 // AUTO_GENERATED for 'igLabelText'
@@ -534,29 +553,17 @@ swr_igLabelText :: proc(label: string, fmt_: string, args: ..any) {
 	igLabelText(str0, str1, args);
 }
 
-// AUTO_GENERATED for 'igListBoxStr_arr'
-swr_igListBoxStr_arr :: proc(label: string, current_item: ^i32, items: string, items_count: i32, height_in_items: i32) -> bool {
+// AUTO_GENERATED for 'igListBox_Str_arr'
+swr_igListBox_Str_arr :: proc(label: string, current_item: ^i32, items: string, items_count: i32, height_in_items: i32) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
 	str2 := strings.clone_to_cstring(items, context.temp_allocator);
-	return igListBoxStr_arr(str0, current_item, str2, items_count, height_in_items);
+	return igListBox_Str_arr(str0, current_item, str2, items_count, height_in_items);
 }
 
-// PREDEFINED FOR 'igListBoxFnBoolPtr'
+// PREDEFINED FOR 'igListBox_FnBoolPtr'
 wrapper_list_box_fn_bool_ptr :: proc(label: string, current_item: ^i32, items_getter: Items_Getter_Proc, data: rawptr, items_count: i32, height_in_items := i32(0))-> bool {
     l := strings.clone_to_cstring(label, context.temp_allocator);
-    return igListBoxFnBoolPtr(l, current_item, items_getter, data, items_count, height_in_items);
-}
-
-// AUTO_GENERATED for 'igListBoxHeaderVec2'
-swr_igListBoxHeaderVec2 :: proc(label: string, size: Vec2) -> bool {
-	str0 := strings.clone_to_cstring(label, context.temp_allocator);
-	return igListBoxHeaderVec2(str0, size);
-}
-
-// AUTO_GENERATED for 'igListBoxHeaderInt'
-swr_igListBoxHeaderInt :: proc(label: string, items_count: i32, height_in_items: i32) -> bool {
-	str0 := strings.clone_to_cstring(label, context.temp_allocator);
-	return igListBoxHeaderInt(str0, items_count, height_in_items);
+    return igListBox_FnBoolPtr(l, current_item, items_getter, data, items_count, height_in_items);
 }
 
 // AUTO_GENERATED for 'igLoadIniSettingsFromDisk'
@@ -583,18 +590,18 @@ swr_igLogToFile :: proc(auto_open_depth: i32, filename: string) {
 	igLogToFile(auto_open_depth, str1);
 }
 
-// AUTO_GENERATED for 'igMenuItemBool'
-swr_igMenuItemBool :: proc(label: string, shortcut: string, selected: bool, enabled: bool) -> bool {
+// AUTO_GENERATED for 'igMenuItem_Bool'
+swr_igMenuItem_Bool :: proc(label: string, shortcut: string, selected: bool, enabled: bool) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
 	str1 := strings.clone_to_cstring(shortcut, context.temp_allocator);
-	return igMenuItemBool(str0, str1, selected, enabled);
+	return igMenuItem_Bool(str0, str1, selected, enabled);
 }
 
-// AUTO_GENERATED for 'igMenuItemBoolPtr'
-swr_igMenuItemBoolPtr :: proc(label: string, shortcut: string, p_selected: ^bool, enabled: bool) -> bool {
+// AUTO_GENERATED for 'igMenuItem_BoolPtr'
+swr_igMenuItem_BoolPtr :: proc(label: string, shortcut: string, p_selected: ^bool, enabled: bool) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
 	str1 := strings.clone_to_cstring(shortcut, context.temp_allocator);
-	return igMenuItemBoolPtr(str0, str1, p_selected, enabled);
+	return igMenuItem_BoolPtr(str0, str1, p_selected, enabled);
 }
 
 // AUTO_GENERATED for 'igOpenPopup'
@@ -609,14 +616,14 @@ swr_igOpenPopupOnItemClick :: proc(str_id: string, popup_flags: Popup_Flags) {
 	igOpenPopupOnItemClick(str0, popup_flags);
 }
 
-// AUTO_GENERATED for 'igPlotHistogramFloatPtr'
-swr_igPlotHistogramFloatPtr :: proc(label: string, values: ^f32, values_count: i32, values_offset: i32, overlay_text: string, scale_min: f32, scale_max: f32, graph_size: Vec2, stride: i32) {
+// AUTO_GENERATED for 'igPlotHistogram_FloatPtr'
+swr_igPlotHistogram_FloatPtr :: proc(label: string, values: ^f32, values_count: i32, values_offset: i32, overlay_text: string, scale_min: f32, scale_max: f32, graph_size: Vec2, stride: i32) {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
 	str4 := strings.clone_to_cstring(overlay_text, context.temp_allocator);
-	igPlotHistogramFloatPtr(str0, values, values_count, values_offset, str4, scale_min, scale_max, graph_size, stride);
+	igPlotHistogram_FloatPtr(str0, values, values_count, values_offset, str4, scale_min, scale_max, graph_size, stride);
 }
 
-// PREDEFINED FOR 'igPlotHistogramFnFloatPtr'
+// PREDEFINED FOR 'igPlotHistogram_FnFloatPtr'
 wrapper_plot_histogram_fn_float_ptr :: proc(label: string,
                                       values_getter: Value_Getter_Proc,
                                       data: rawptr,
@@ -628,17 +635,17 @@ wrapper_plot_histogram_fn_float_ptr :: proc(label: string,
                                       graph_size: Vec2) {
     l := strings.clone_to_cstring(label, context.temp_allocator);
     overlay := strings.clone_to_cstring(overlay_text, context.temp_allocator);
-    igPlotHistogramFnFloatPtr(l, values_getter, data, values_count, values_offset, overlay, scale_min, scale_max, graph_size);
+    igPlotHistogram_FnFloatPtr(l, values_getter, data, values_count, values_offset, overlay, scale_min, scale_max, graph_size);
 }
 
-// AUTO_GENERATED for 'igPlotLinesFloatPtr'
-swr_igPlotLinesFloatPtr :: proc(label: string, values: ^f32, values_count: i32, values_offset: i32, overlay_text: string, scale_min: f32, scale_max: f32, graph_size: Vec2, stride: i32) {
+// AUTO_GENERATED for 'igPlotLines_FloatPtr'
+swr_igPlotLines_FloatPtr :: proc(label: string, values: ^f32, values_count: i32, values_offset: i32, overlay_text: string, scale_min: f32, scale_max: f32, graph_size: Vec2, stride: i32) {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
 	str4 := strings.clone_to_cstring(overlay_text, context.temp_allocator);
-	igPlotLinesFloatPtr(str0, values, values_count, values_offset, str4, scale_min, scale_max, graph_size, stride);
+	igPlotLines_FloatPtr(str0, values, values_count, values_offset, str4, scale_min, scale_max, graph_size, stride);
 }
 
-// PREDEFINED FOR 'igPlotLinesFnFloatPtr'
+// PREDEFINED FOR 'igPlotLines_FnFloatPtr'
 wrapper_plot_lines_fn_float_ptr :: proc(label: string, 
                                   values_getter: Value_Getter_Proc, 
                                   data: rawptr, 
@@ -650,7 +657,7 @@ wrapper_plot_lines_fn_float_ptr :: proc(label: string,
                                   graph_size: Vec2) {
     l := strings.clone_to_cstring(label, context.temp_allocator);
     overlay := strings.clone_to_cstring(overlay_text, context.temp_allocator);
-    igPlotLinesFnFloatPtr(l, values_getter, data, values_count, values_offset, overlay, scale_min, scale_max, graph_size);
+    igPlotLines_FnFloatPtr(l, values_getter, data, values_count, values_offset, overlay, scale_min, scale_max, graph_size);
 }
 
 // AUTO_GENERATED for 'igProgressBar'
@@ -659,29 +666,29 @@ swr_igProgressBar :: proc(fraction: f32, size_arg: Vec2, overlay: string) {
 	igProgressBar(fraction, size_arg, str2);
 }
 
-// AUTO_GENERATED for 'igPushIDStr'
-swr_igPushIDStr :: proc(str_id: string) {
+// AUTO_GENERATED for 'igPushID_Str'
+swr_igPushID_Str :: proc(str_id: string) {
 	str0 := strings.clone_to_cstring(str_id, context.temp_allocator);
-	igPushIDStr(str0);
+	igPushID_Str(str0);
 }
 
-// AUTO_GENERATED for 'igPushIDStrStr'
-swr_igPushIDStrStr :: proc(str_id_begin: string, str_id_end: string) {
+// AUTO_GENERATED for 'igPushID_StrStr'
+swr_igPushID_StrStr :: proc(str_id_begin: string, str_id_end: string) {
 	str0 := strings.clone_to_cstring(str_id_begin, context.temp_allocator);
 	str1 := strings.clone_to_cstring(str_id_end, context.temp_allocator);
-	igPushIDStrStr(str0, str1);
+	igPushID_StrStr(str0, str1);
 }
 
-// AUTO_GENERATED for 'igRadioButtonBool'
-swr_igRadioButtonBool :: proc(label: string, active: bool) -> bool {
+// AUTO_GENERATED for 'igRadioButton_Bool'
+swr_igRadioButton_Bool :: proc(label: string, active: bool) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
-	return igRadioButtonBool(str0, active);
+	return igRadioButton_Bool(str0, active);
 }
 
-// AUTO_GENERATED for 'igRadioButtonIntPtr'
-swr_igRadioButtonIntPtr :: proc(label: string, v: ^i32, v_button: i32) -> bool {
+// AUTO_GENERATED for 'igRadioButton_IntPtr'
+swr_igRadioButton_IntPtr :: proc(label: string, v: ^i32, v_button: i32) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
-	return igRadioButtonIntPtr(str0, v, v_button);
+	return igRadioButton_IntPtr(str0, v, v_button);
 }
 
 // AUTO_GENERATED for 'igSaveIniSettingsToDisk'
@@ -690,20 +697,20 @@ swr_igSaveIniSettingsToDisk :: proc(ini_filename: string) {
 	igSaveIniSettingsToDisk(str0);
 }
 
-// AUTO_GENERATED for 'igSelectableBool'
-swr_igSelectableBool :: proc(label: string, selected: bool, flags: Selectable_Flags, size: Vec2) -> bool {
+// AUTO_GENERATED for 'igSelectable_Bool'
+swr_igSelectable_Bool :: proc(label: string, selected: bool, flags: Selectable_Flags, size: Vec2) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
-	return igSelectableBool(str0, selected, flags, size);
+	return igSelectable_Bool(str0, selected, flags, size);
 }
 
-// AUTO_GENERATED for 'igSelectableBoolPtr'
-swr_igSelectableBoolPtr :: proc(label: string, p_selected: ^bool, flags: Selectable_Flags, size: Vec2) -> bool {
+// AUTO_GENERATED for 'igSelectable_BoolPtr'
+swr_igSelectable_BoolPtr :: proc(label: string, p_selected: ^bool, flags: Selectable_Flags, size: Vec2) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
-	return igSelectableBoolPtr(str0, p_selected, flags, size);
+	return igSelectable_BoolPtr(str0, p_selected, flags, size);
 }
 
 // PREDEFINED FOR 'igSetAllocatorFunctions'
-wrapper_set_allocator_functions :: inline proc(alloc_func: Alloc_Func, free_func: Free_Func) {
+wrapper_set_allocator_functions :: #force_inline proc(alloc_func: Alloc_Func, free_func: Free_Func) {
     igSetAllocatorFunctions(alloc_func, free_func);
 }
 
@@ -731,28 +738,28 @@ swr_igSetTooltip :: proc(fmt_: string, args: ..any) {
 	igSetTooltip(str0, args);
 }
 
-// AUTO_GENERATED for 'igSetWindowCollapsedStr'
-swr_igSetWindowCollapsedStr :: proc(name: string, collapsed: bool, cond: Cond) {
+// AUTO_GENERATED for 'igSetWindowCollapsed_Str'
+swr_igSetWindowCollapsed_Str :: proc(name: string, collapsed: bool, cond: Cond) {
 	str0 := strings.clone_to_cstring(name, context.temp_allocator);
-	igSetWindowCollapsedStr(str0, collapsed, cond);
+	igSetWindowCollapsed_Str(str0, collapsed, cond);
 }
 
-// AUTO_GENERATED for 'igSetWindowFocusStr'
-swr_igSetWindowFocusStr :: proc(name: string) {
+// AUTO_GENERATED for 'igSetWindowFocus_Str'
+swr_igSetWindowFocus_Str :: proc(name: string) {
 	str0 := strings.clone_to_cstring(name, context.temp_allocator);
-	igSetWindowFocusStr(str0);
+	igSetWindowFocus_Str(str0);
 }
 
-// AUTO_GENERATED for 'igSetWindowPosStr'
-swr_igSetWindowPosStr :: proc(name: string, pos: Vec2, cond: Cond) {
+// AUTO_GENERATED for 'igSetWindowPos_Str'
+swr_igSetWindowPos_Str :: proc(name: string, pos: Vec2, cond: Cond) {
 	str0 := strings.clone_to_cstring(name, context.temp_allocator);
-	igSetWindowPosStr(str0, pos, cond);
+	igSetWindowPos_Str(str0, pos, cond);
 }
 
-// AUTO_GENERATED for 'igSetWindowSizeStr'
-swr_igSetWindowSizeStr :: proc(name: string, size: Vec2, cond: Cond) {
+// AUTO_GENERATED for 'igSetWindowSize_Str'
+swr_igSetWindowSize_Str :: proc(name: string, size: Vec2, cond: Cond) {
 	str0 := strings.clone_to_cstring(name, context.temp_allocator);
-	igSetWindowSizeStr(str0, size, cond);
+	igSetWindowSize_Str(str0, size, cond);
 }
 
 // AUTO_GENERATED for 'igShowFontSelector'
@@ -856,6 +863,18 @@ swr_igTabItemButton :: proc(label: string, flags: Tab_Item_Flags) -> bool {
 	return igTabItemButton(str0, flags);
 }
 
+// AUTO_GENERATED for 'igTableHeader'
+swr_igTableHeader :: proc(label: string) {
+	str0 := strings.clone_to_cstring(label, context.temp_allocator);
+	igTableHeader(str0);
+}
+
+// AUTO_GENERATED for 'igTableSetupColumn'
+swr_igTableSetupColumn :: proc(label: string, flags: Table_Column_Flags, init_width_or_weight: f32, user_id: ImID) {
+	str0 := strings.clone_to_cstring(label, context.temp_allocator);
+	igTableSetupColumn(str0, flags, init_width_or_weight, user_id);
+}
+
 // PREDEFINED FOR 'igText'
 wrapper_text :: proc(fmt_: string, args: ..any) {
     fmt_str := fmt.tprintf("{}\x00", fmt_);
@@ -892,48 +911,48 @@ wrapper_text_wrapped :: proc(fmt_: string, args: ..any) {
     igTextWrapped(cstring(&str[0]), nil);
 }
 
-// AUTO_GENERATED for 'igTreeNodeStr'
-swr_igTreeNodeStr :: proc(label: string) -> bool {
+// AUTO_GENERATED for 'igTreeNode_Str'
+swr_igTreeNode_Str :: proc(label: string) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
-	return igTreeNodeStr(str0);
+	return igTreeNode_Str(str0);
 }
 
-// AUTO_GENERATED for 'igTreeNodeStrStr'
-swr_igTreeNodeStrStr :: proc(str_id: string, fmt_: string, args: ..any) -> bool {
+// AUTO_GENERATED for 'igTreeNode_StrStr'
+swr_igTreeNode_StrStr :: proc(str_id: string, fmt_: string, args: ..any) -> bool {
 	str0 := strings.clone_to_cstring(str_id, context.temp_allocator);
 	str1 := strings.clone_to_cstring(fmt_, context.temp_allocator);
-	return igTreeNodeStrStr(str0, str1, args);
+	return igTreeNode_StrStr(str0, str1, args);
 }
 
-// AUTO_GENERATED for 'igTreeNodePtr'
-swr_igTreeNodePtr :: proc(ptr_id: rawptr, fmt_: string, args: ..any) -> bool {
+// AUTO_GENERATED for 'igTreeNode_Ptr'
+swr_igTreeNode_Ptr :: proc(ptr_id: rawptr, fmt_: string, args: ..any) -> bool {
 	str1 := strings.clone_to_cstring(fmt_, context.temp_allocator);
-	return igTreeNodePtr(ptr_id, str1, args);
+	return igTreeNode_Ptr(ptr_id, str1, args);
 }
 
-// AUTO_GENERATED for 'igTreeNodeExStr'
-swr_igTreeNodeExStr :: proc(label: string, flags: Tree_Node_Flags) -> bool {
+// AUTO_GENERATED for 'igTreeNodeEx_Str'
+swr_igTreeNodeEx_Str :: proc(label: string, flags: Tree_Node_Flags) -> bool {
 	str0 := strings.clone_to_cstring(label, context.temp_allocator);
-	return igTreeNodeExStr(str0, flags);
+	return igTreeNodeEx_Str(str0, flags);
 }
 
-// AUTO_GENERATED for 'igTreeNodeExStrStr'
-swr_igTreeNodeExStrStr :: proc(str_id: string, flags: Tree_Node_Flags, fmt_: string, args: ..any) -> bool {
+// AUTO_GENERATED for 'igTreeNodeEx_StrStr'
+swr_igTreeNodeEx_StrStr :: proc(str_id: string, flags: Tree_Node_Flags, fmt_: string, args: ..any) -> bool {
 	str0 := strings.clone_to_cstring(str_id, context.temp_allocator);
 	str2 := strings.clone_to_cstring(fmt_, context.temp_allocator);
-	return igTreeNodeExStrStr(str0, flags, str2, args);
+	return igTreeNodeEx_StrStr(str0, flags, str2, args);
 }
 
-// AUTO_GENERATED for 'igTreeNodeExPtr'
-swr_igTreeNodeExPtr :: proc(ptr_id: rawptr, flags: Tree_Node_Flags, fmt_: string, args: ..any) -> bool {
+// AUTO_GENERATED for 'igTreeNodeEx_Ptr'
+swr_igTreeNodeEx_Ptr :: proc(ptr_id: rawptr, flags: Tree_Node_Flags, fmt_: string, args: ..any) -> bool {
 	str2 := strings.clone_to_cstring(fmt_, context.temp_allocator);
-	return igTreeNodeExPtr(ptr_id, flags, str2, args);
+	return igTreeNodeEx_Ptr(ptr_id, flags, str2, args);
 }
 
-// AUTO_GENERATED for 'igTreePushStr'
-swr_igTreePushStr :: proc(str_id: string) {
+// AUTO_GENERATED for 'igTreePush_Str'
+swr_igTreePush_Str :: proc(str_id: string) {
 	str0 := strings.clone_to_cstring(str_id, context.temp_allocator);
-	igTreePushStr(str0);
+	igTreePush_Str(str0);
 }
 
 // AUTO_GENERATED for 'igVSliderFloat'
@@ -957,29 +976,29 @@ swr_igVSliderScalar :: proc(label: string, size: Vec2, data_type: Data_Type, p_d
 	return igVSliderScalar(str0, size, data_type, p_data, p_min, p_max, str6, flags);
 }
 
-// AUTO_GENERATED for 'igValueBool'
-swr_igValueBool :: proc(prefix: string, b: bool) {
+// AUTO_GENERATED for 'igValue_Bool'
+swr_igValue_Bool :: proc(prefix: string, b: bool) {
 	str0 := strings.clone_to_cstring(prefix, context.temp_allocator);
-	igValueBool(str0, b);
+	igValue_Bool(str0, b);
 }
 
-// AUTO_GENERATED for 'igValueInt'
-swr_igValueInt :: proc(prefix: string, v: i32) {
+// AUTO_GENERATED for 'igValue_Int'
+swr_igValue_Int :: proc(prefix: string, v: i32) {
 	str0 := strings.clone_to_cstring(prefix, context.temp_allocator);
-	igValueInt(str0, v);
+	igValue_Int(str0, v);
 }
 
-// AUTO_GENERATED for 'igValueUint'
-swr_igValueUint :: proc(prefix: string, v: u32) {
+// AUTO_GENERATED for 'igValue_Uint'
+swr_igValue_Uint :: proc(prefix: string, v: u32) {
 	str0 := strings.clone_to_cstring(prefix, context.temp_allocator);
-	igValueUint(str0, v);
+	igValue_Uint(str0, v);
 }
 
-// AUTO_GENERATED for 'igValueFloat'
-swr_igValueFloat :: proc(prefix: string, v: f32, float_format: string) {
+// AUTO_GENERATED for 'igValue_Float'
+swr_igValue_Float :: proc(prefix: string, v: f32, float_format: string) {
 	str0 := strings.clone_to_cstring(prefix, context.temp_allocator);
 	str2 := strings.clone_to_cstring(float_format, context.temp_allocator);
-	igValueFloat(str0, v, str2);
+	igValue_Float(str0, v, str2);
 }
 
 

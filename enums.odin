@@ -1,16 +1,20 @@
 package imgui;
 
-Draw_Corner_Flags :: enum i32 {
-	None     = 0,
-	TopLeft  = 1 << 0,
-	TopRight = 1 << 1,
-	BotLeft  = 1 << 2,
-	BotRight = 1 << 3,
-	Top      = TopLeft | TopRight,
-	Bot      = BotLeft | BotRight,
-	Left     = TopLeft | BotLeft,
-	Right    = TopRight | BotRight,
-	All      = 0xF,
+Draw_Flags :: enum i32 {
+	None                    = 0,
+	Closed                  = 1 << 0,
+	RoundCornersTopLeft     = 1 << 4,
+	RoundCornersTopRight    = 1 << 5,
+	RoundCornersBottomLeft  = 1 << 6,
+	RoundCornersBottomRight = 1 << 7,
+	RoundCornersNone        = 1 << 8,
+	RoundCornersTop         = RoundCornersTopLeft | RoundCornersTopRight,
+	RoundCornersBottom      = RoundCornersBottomLeft | RoundCornersBottomRight,
+	RoundCornersLeft        = RoundCornersBottomLeft | RoundCornersTopLeft,
+	RoundCornersRight       = RoundCornersBottomRight | RoundCornersTopRight,
+	RoundCornersAll         = RoundCornersTopLeft | RoundCornersTopRight | RoundCornersBottomLeft | RoundCornersBottomRight,
+	RoundCornersDefault     = RoundCornersAll,
+	RoundCornersMask        = RoundCornersAll | RoundCornersNone,
 }
 
 Draw_List_Flags :: enum i32 {
@@ -88,13 +92,18 @@ Col :: enum i32 {
 	PlotLinesHovered      = 39,
 	PlotHistogram         = 40,
 	PlotHistogramHovered  = 41,
-	TextSelectedBg        = 42,
-	DragDropTarget        = 43,
-	NavHighlight          = 44,
-	NavWindowingHighlight = 45,
-	NavWindowingDimBg     = 46,
-	ModalWindowDimBg      = 47,
-	Count                 = 48,
+	TableHeaderBg         = 42,
+	TableBorderStrong     = 43,
+	TableBorderLight      = 44,
+	TableRowBg            = 45,
+	TableRowBgAlt         = 46,
+	TextSelectedBg        = 47,
+	DragDropTarget        = 48,
+	NavHighlight          = 49,
+	NavWindowingHighlight = 50,
+	NavWindowingDimBg     = 51,
+	ModalWindowDimBg      = 52,
+	Count                 = 53,
 }
 
 Color_Edit_Flags :: enum i32 {
@@ -234,7 +243,7 @@ Input_Text_Flags :: enum i32 {
 	AllowTabInput       = 1 << 10,
 	CtrlEnterForNewLine = 1 << 11,
 	NoHorizontalScroll  = 1 << 12,
-	AlwaysInsertMode    = 1 << 13,
+	AlwaysOverwrite     = 1 << 13,
 	ReadOnly            = 1 << 14,
 	Password            = 1 << 15,
 	NoUndoRedo          = 1 << 16,
@@ -358,6 +367,12 @@ Slider_Flags :: enum i32 {
 	InvalidMask     = 0x7000000F,
 }
 
+Sort_Direction :: enum i32 {
+	None       = 0,
+	Ascending  = 1,
+	Descending = 2,
+}
+
 Style_Var :: enum i32 {
 	Alpha               = 0,
 	WindowPadding       = 1,
@@ -375,14 +390,15 @@ Style_Var :: enum i32 {
 	ItemSpacing         = 13,
 	ItemInnerSpacing    = 14,
 	IndentSpacing       = 15,
-	ScrollbarSize       = 16,
-	ScrollbarRounding   = 17,
-	GrabMinSize         = 18,
-	GrabRounding        = 19,
-	TabRounding         = 20,
-	ButtonTextAlign     = 21,
-	SelectableTextAlign = 22,
-	Count               = 23,
+	CellPadding         = 16,
+	ScrollbarSize       = 17,
+	ScrollbarRounding   = 18,
+	GrabMinSize         = 19,
+	GrabRounding        = 20,
+	TabRounding         = 21,
+	ButtonTextAlign     = 22,
+	SelectableTextAlign = 23,
+	Count               = 24,
 }
 
 Tab_Bar_Flags :: enum i32 {
@@ -411,6 +427,85 @@ Tab_Item_Flags :: enum i32 {
 	Trailing                     = 1 << 7,
 }
 
+Table_Bg_Target :: enum i32 {
+	None   = 0,
+	RowBg0 = 1,
+	RowBg1 = 2,
+	CellBg = 3,
+}
+
+Table_Column_Flags :: enum i32 {
+	None                 = 0,
+	DefaultHide          = 1 << 0,
+	DefaultSort          = 1 << 1,
+	WidthStretch         = 1 << 2,
+	WidthFixed           = 1 << 3,
+	NoResize             = 1 << 4,
+	NoReorder            = 1 << 5,
+	NoHide               = 1 << 6,
+	NoClip               = 1 << 7,
+	NoSort               = 1 << 8,
+	NoSortAscending      = 1 << 9,
+	NoSortDescending     = 1 << 10,
+	NoHeaderWidth        = 1 << 11,
+	PreferSortAscending  = 1 << 12,
+	PreferSortDescending = 1 << 13,
+	IndentEnable         = 1 << 14,
+	IndentDisable        = 1 << 15,
+	IsEnabled            = 1 << 20,
+	IsVisible            = 1 << 21,
+	IsSorted             = 1 << 22,
+	IsHovered            = 1 << 23,
+	WidthMask            = WidthStretch | WidthFixed,
+	IndentMask           = IndentEnable | IndentDisable,
+	StatusMask           = IsEnabled | IsVisible | IsSorted | IsHovered,
+	NoDirectResize       = 1 << 30,
+}
+
+Table_Flags :: enum i32 {
+	None                       = 0,
+	Resizable                  = 1 << 0,
+	Reorderable                = 1 << 1,
+	Hideable                   = 1 << 2,
+	Sortable                   = 1 << 3,
+	NoSavedSettings            = 1 << 4,
+	ContextMenuInBody          = 1 << 5,
+	RowBg                      = 1 << 6,
+	BordersInnerH              = 1 << 7,
+	BordersOuterH              = 1 << 8,
+	BordersInnerV              = 1 << 9,
+	BordersOuterV              = 1 << 10,
+	BordersH                   = BordersInnerH | BordersOuterH,
+	BordersV                   = BordersInnerV | BordersOuterV,
+	BordersInner               = BordersInnerV | BordersInnerH,
+	BordersOuter               = BordersOuterV | BordersOuterH,
+	Borders                    = BordersInner | BordersOuter,
+	NoBordersInBody            = 1 << 11,
+	NoBordersInBodyUntilResize = 1 << 12,
+	SizingFixedFit             = 1 << 13,
+	SizingFixedSame            = 2 << 13,
+	SizingStretchProp          = 3 << 13,
+	SizingStretchSame          = 4 << 13,
+	NoHostExtendX              = 1 << 16,
+	NoHostExtendY              = 1 << 17,
+	NoKeepColumnsVisible       = 1 << 18,
+	PreciseWidths              = 1 << 19,
+	NoClip                     = 1 << 20,
+	PadOuterX                  = 1 << 21,
+	NoPadOuterX                = 1 << 22,
+	NoPadInnerX                = 1 << 23,
+	ScrollX                    = 1 << 24,
+	ScrollY                    = 1 << 25,
+	SortMulti                  = 1 << 26,
+	SortTristate               = 1 << 27,
+	SizingMask                 = SizingFixedFit | SizingFixedSame | SizingStretchProp | SizingStretchSame,
+}
+
+Table_Row_Flags :: enum i32 {
+	None    = 0,
+	Headers = 1 << 0,
+}
+
 Tree_Node_Flags :: enum i32 {
 	None                 = 0,
 	Selected             = 1 << 0,
@@ -428,6 +523,13 @@ Tree_Node_Flags :: enum i32 {
 	SpanFullWidth        = 1 << 12,
 	NavLeftJumpsBackHere = 1 << 13,
 	CollapsingHeader     = Framed | NoTreePushOnOpen | NoAutoOpenOnLog,
+}
+
+Viewport_Flags :: enum i32 {
+	None              = 0,
+	IsPlatformWindow  = 1 << 0,
+	IsPlatformMonitor = 1 << 1,
+	OwnedByApp        = 1 << 2,
 }
 
 Window_Flags :: enum i32 {
