@@ -6,6 +6,7 @@ import glfw "shared:odin-glfw"
 
 import imgui "../..";
 
+@private
 state: GLFW_State;
 
 GLFW_State :: struct {
