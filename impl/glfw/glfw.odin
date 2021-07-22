@@ -135,10 +135,10 @@ update_mouse :: proc() {
 
 update_display_size :: proc() {
     w, h := glfw.get_window_size(state.window);
+    io := imgui.get_io();
+    io.display_size = { f32(w), f32(h) };
     if w > 0 && h > 0 {
-        io := imgui.get_io();
         display_w, display_h := glfw.get_framebuffer_size(state.window);
-        io.display_size = { f32(w), f32(h) };
         io.display_framebuffer_scale = { f32(display_w) / f32(w), f32(display_h) / f32(h) };
     }
 }
