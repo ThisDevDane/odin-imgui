@@ -155,14 +155,14 @@ get_clipboard_text :: proc "c" (user_data: rawptr) -> cstring
 {
     context = runtime.default_context();
     s := glfw.get_clipboard_string(glfw.Window_Handle(user_data));
-    return strings.unsafe_string_to_cstring(s);
+    return s;
 }
 
 @private
 set_clipboard_text :: proc "c" (user_data: rawptr, text: cstring)
 {
     context = runtime.default_context();
-    glfw.set_clipboard_string(glfw.Window_Handle(user_data), string(text));
+    glfw.set_clipboard_string(glfw.Window_Handle(user_data), text);
 }
 
 @private
