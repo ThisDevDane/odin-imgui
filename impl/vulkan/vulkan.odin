@@ -8,6 +8,7 @@ import "core:mem"
 import "core:os"
 import "core:log"
 
+@(private="package")
 Vulkan_Buffer :: struct {
 	buffer: vk.Buffer,
 	memory: vk.DeviceMemory,
@@ -16,6 +17,7 @@ Vulkan_Buffer :: struct {
 	offset: uintptr,
 }
 
+@(private="package")
 Vulkan_Frame_Data :: struct {
 	vertices, indices: Vulkan_Buffer,
 }
@@ -55,6 +57,7 @@ Vulkan_Info :: struct {
 	compatible_renderpass: vk.RenderPass,
 }
 
+@(private="package")
 vk_assert :: proc(result: vk.Result) {
 	if result == .SUCCESS do return
 
@@ -352,28 +355,6 @@ setup_state :: proc(using vulkan_state: ^Vulkan_State, info: Vulkan_Info) {
 	}, nil, &pipeline))
 }
 
-create_shader_module :: proc(
-	using vulkan_state: ^Vulkan_State,
-	filename: string) -> vk.ShaderModule {
-	data, success := os.read_entire_file(filename)
-	defer delete(data)
-	assert(success, "Could not open shader file")
-
-	// Vulkan requires that the length of the shader data is four byte aligned.
-	// While there may not be any such requirement for spirv files, it seems to
-	// be the case for glslc.
-	assert(len(data) % 4 == 0)
-
-	shader_module: vk.ShaderModule
-	vk_assert(vk.CreateShaderModule(device, &vk.ShaderModuleCreateInfo {
-		sType    = .SHADER_MODULE_CREATE_INFO,
-		codeSize = len(data),
-		pCode    = cast(^u32)raw_data(data),
-	}, nil, &shader_module))
-
-	return shader_module
-}
-
 cleanup_state :: proc(using vulkan_state: ^Vulkan_State) {
 	vk.DestroyPipeline(device, pipeline, nil)
 	vk.DestroyPipelineLayout(device, pipeline_layout, nil)
@@ -477,6 +458,30 @@ imgui_render :: proc(command_buffer: vk.CommandBuffer, data: ^imgui.Draw_Data, u
 	unmap_buffer(vulkan_state, &frame_data.indices)
 }
 
+@(private="package")
+create_shader_module :: proc(
+	using vulkan_state: ^Vulkan_State,
+	filename: string) -> vk.ShaderModule {
+	data, success := os.read_entire_file(filename)
+	defer delete(data)
+	assert(success, "Could not open shader file")
+
+	// Vulkan requires that the length of the shader data is four byte aligned.
+	// While there may not be any such requirement for spirv files, it seems to
+	// be the case for glslc.
+	assert(len(data) % 4 == 0)
+
+	shader_module: vk.ShaderModule
+	vk_assert(vk.CreateShaderModule(device, &vk.ShaderModuleCreateInfo {
+		sType    = .SHADER_MODULE_CREATE_INFO,
+		codeSize = len(data),
+		pCode    = cast(^u32)raw_data(data),
+	}, nil, &shader_module))
+
+	return shader_module
+}
+
+@(private="package")
 ensure_buffer_size :: proc(
 	using vulkan_state: ^Vulkan_State,
 	buffer: ^Vulkan_Buffer,
@@ -496,6 +501,7 @@ ensure_buffer_size :: proc(
 	buffer.buffer, buffer.memory = create_buffer(vulkan_state, data_size, usage_flags, { .DEVICE_LOCAL, .HOST_COHERENT })
 }
 
+@(private="package")
 map_buffer :: proc(
 	using vulkan_state: ^Vulkan_State,
 	buffer: ^Vulkan_Buffer) {
@@ -504,6 +510,7 @@ map_buffer :: proc(
 	vk.MapMemory(device, buffer.memory, 0, buffer.size, {}, &buffer.ptr)
 }
 
+@(private="package")
 unmap_buffer :: proc(
 	using vulkan_state: ^Vulkan_State,
 	buffer: ^Vulkan_Buffer) {
@@ -512,6 +519,7 @@ unmap_buffer :: proc(
 	buffer.ptr = nil
 }
 
+@(private="package")
 write_data_get_offset :: proc(
 	using vulkan_state: ^Vulkan_State,
 	buffer: ^Vulkan_Buffer,
@@ -527,7 +535,8 @@ write_data_get_offset :: proc(
 	return cast(int)(old_offset / size_of(T))
 }
 
-find_type :: proc(
+@(private="package")
+find_memory_type :: proc(
 	using vulkan_state: ^Vulkan_State,
 	supported_memory_indices: u32,
 	properties: vk.MemoryPropertyFlags) -> u32 {
@@ -541,6 +550,7 @@ find_type :: proc(
 	log.panicf("Couldn't choose memory type!")
 }
 
+@(private="package")
 allocate_memory :: proc(
 	using vulkan_state: ^Vulkan_State,
 	size: vk.DeviceSize,
@@ -550,7 +560,7 @@ allocate_memory :: proc(
 	memory_info := vk.MemoryAllocateInfo {
 		sType           = .MEMORY_ALLOCATE_INFO,
 		allocationSize  = size,
-		memoryTypeIndex = find_type(vulkan_state, memory_requirements.memoryTypeBits, properties),
+		memoryTypeIndex = find_memory_type(vulkan_state, memory_requirements.memoryTypeBits, properties),
 	}
 
 	memory: vk.DeviceMemory
@@ -559,6 +569,7 @@ allocate_memory :: proc(
 	return memory
 }
 
+@(private="package")
 allocate_buffer_backing_memory :: proc(
 	using vulkan_state: ^Vulkan_State,
 	buffer: vk.Buffer,
@@ -573,6 +584,7 @@ allocate_buffer_backing_memory :: proc(
 	return memory
 }
 
+@(private="package")
 allocate_image_backing_memory :: proc(
 	using vulkan_state: ^Vulkan_State,
 	image: vk.Image,
@@ -587,6 +599,7 @@ allocate_image_backing_memory :: proc(
 	return memory
 }
 
+@(private="package")
 create_buffer :: proc(
 	using vulkan_state: ^Vulkan_State,
 	size: vk.DeviceSize,
@@ -605,6 +618,7 @@ create_buffer :: proc(
 	return
 }
 
+@(private="package")
 image_transition_layout :: proc(
 	using vulkan_state: ^Vulkan_State,
 	image: vk.Image,
