@@ -5,7 +5,6 @@ import vk "vendor:vulkan"
 import imgui "../.."
 
 import "core:mem"
-import "core:os"
 import "core:log"
 
 @(private="package")
@@ -222,8 +221,11 @@ setup_state :: proc(using vulkan_state: ^Vulkan_State, info: Vulkan_Info) {
 	frame_datas_count = info.max_frames_in_flight
 	assert(frame_datas_count < len(frame_datas))
 
-	vertex_module   := create_shader_module(vulkan_state, "engine_assets/shaders/imgui.vert.spv")
-	fragment_module := create_shader_module(vulkan_state, "engine_assets/shaders/imgui.frag.spv")
+	vertex_shader := VERTEX_SHADER_SOURCE
+	fragment_shader := FRAGMENT_SHADER_SOURCE
+
+	vertex_module   := create_shader_module(vulkan_state, vertex_shader[:])
+	fragment_module := create_shader_module(vulkan_state, fragment_shader[:])
 	defer vk.DestroyShaderModule(device, vertex_module, nil)
 	defer vk.DestroyShaderModule(device, fragment_module, nil)
 
@@ -458,21 +460,13 @@ imgui_render :: proc(command_buffer: vk.CommandBuffer, data: ^imgui.Draw_Data, u
 @(private="package")
 create_shader_module :: proc(
 	using vulkan_state: ^Vulkan_State,
-	filename: string) -> vk.ShaderModule {
-	data, success := os.read_entire_file(filename)
-	defer delete(data)
-	assert(success, "Could not open shader file")
-
-	// Vulkan requires that the length of the shader data is four byte aligned.
-	// While there may not be any such requirement for spirv files, it seems to
-	// be the case for glslc.
-	assert(len(data) % 4 == 0)
+	shader_data: []u32) -> vk.ShaderModule {
 
 	shader_module: vk.ShaderModule
 	vk_assert(vk.CreateShaderModule(device, &vk.ShaderModuleCreateInfo {
 		sType    = .SHADER_MODULE_CREATE_INFO,
-		codeSize = len(data),
-		pCode    = cast(^u32)raw_data(data),
+		codeSize = len(shader_data) * 4, // Vulkan needs the size in bytes
+		pCode    = raw_data(shader_data),
 	}, nil, &shader_module))
 
 	return shader_module
@@ -653,3 +647,24 @@ image_transition_layout :: proc(
 
 	vk.CmdPipelineBarrier(temp_command_buffer, src_stage, dst_stage, {}, 0, nil, 0, nil, 1, &barrier)
 }
+
+// imgui.frag
+// Compiled with
+
+/*
+#version 450
+
+layout(location = 0) in vec2 Frag_UV;
+layout(location = 1) in vec4 Frag_Color;
+
+layout(set = 0, binding = 0) uniform sampler2D Texture;
+
+layout (location = 0) out vec4 Out_Color;
+
+void main()
+{
+    Out_Color = Frag_Color * texture(Texture, Frag_UV.st);
+    Out_Color.rgb = pow(Out_Color.rgb, vec3(2.2));
+}
+*/
+
