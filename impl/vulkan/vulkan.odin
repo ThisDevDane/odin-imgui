@@ -22,7 +22,6 @@ Vulkan_Frame_Data :: struct {
 	vertices, indices: Vulkan_Buffer,
 }
 
-// Note: Using slightly different conventions in this file, as to match odin_cimgui
 Vulkan_State :: struct {
 	device:            vk.Device,
 	physical_device:   vk.PhysicalDevice,
@@ -88,7 +87,6 @@ setup_state :: proc(using vulkan_state: ^Vulkan_State, info: Vulkan_Info) {
 	}, nil, &temp_pool))
 	defer vk.DestroyCommandPool(device, temp_pool, nil)
 
-	// temp_command_buffer: vk.CommandBuffer
 	vk_assert(vk.AllocateCommandBuffers(device, &vk.CommandBufferAllocateInfo {
 		sType              = .COMMAND_BUFFER_ALLOCATE_INFO,
 		commandPool        = temp_pool,
@@ -244,7 +242,6 @@ setup_state :: proc(using vulkan_state: ^Vulkan_State, info: Vulkan_Info) {
 		},
 	}
 
-	// Pipeline
 	binding_description := vk.VertexInputBindingDescription {
 		binding = 0,
 		stride = size_of(imgui.Draw_Vert),
