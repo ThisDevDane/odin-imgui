@@ -53,6 +53,7 @@ Vulkan_Info :: struct {
 
 	max_frames_in_flight: int,
 	compatible_renderpass: vk.RenderPass,
+	use_srgb: bool, // If true, will apply gamma correction.
 }
 
 @(private="package")
@@ -229,6 +230,8 @@ setup_state :: proc(using vulkan_state: ^Vulkan_State, info: Vulkan_Info) {
 	defer vk.DestroyShaderModule(device, vertex_module, nil)
 	defer vk.DestroyShaderModule(device, fragment_module, nil)
 
+	use_srgb_b32 := b32(info.use_srgb)
+
 	modules := []vk.PipelineShaderStageCreateInfo {
 		vk.PipelineShaderStageCreateInfo {
 			sType = .PIPELINE_SHADER_STAGE_CREATE_INFO,
@@ -241,6 +244,16 @@ setup_state :: proc(using vulkan_state: ^Vulkan_State, info: Vulkan_Info) {
 			stage = {.FRAGMENT},
 			module = fragment_module,
 			pName = "main",
+			pSpecializationInfo = &vk.SpecializationInfo {
+				mapEntryCount = 1,
+				pMapEntries   = &vk.SpecializationMapEntry {
+					constantID = 0, // Whether we expect to draw to SRGB
+					offset = 0,
+					size = 4,
+				},
+				dataSize = size_of(b32),
+				pData    = &use_srgb_b32,
+			},
 		},
 	}
 
