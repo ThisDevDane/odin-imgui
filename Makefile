@@ -69,7 +69,7 @@ cimgui:
 	@echo "[Build CIMGUI]"
 	@mkdir -p $(EXTERNAL_LIB_DIR)
 
-	$(CC) $(CIMGUI_FLAGS) /MTd /Zi /Fd:$(EXTERNAL_LIB_DIR)/cimgui_debug.pdb $(CIMGUI_SRC)
+	$(CC) $(CIMGUI_FLAGS) /Zi /Fd:$(EXTERNAL_LIB_DIR)/cimgui_debug.pdb $(CIMGUI_SRC)
 	$(LINK) /nologo $(CIMGUI_OBJS) /out:$(EXTERNAL_LIB_DIR)/cimgui_debug.lib
 	rm *.obj
 	
