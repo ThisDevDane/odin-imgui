@@ -4,8 +4,8 @@ import "core:log"
 import "core:runtime"
 import "core:strings"
 
-import gl   "shared:odin-gl"
-import glfw "shared:odin-glfw"
+import gl   "vendor:OpenGL"
+import "vendor:glfw"
 
 DESIRED_GL_MAJOR_VERSION :: 4;
 DESIRED_GL_MINOR_VERSION :: 5;
@@ -19,41 +19,41 @@ show_demo_window := false;
 main :: proc() {
     context.logger = get_logger();
 
-    if !glfw.init() {
-        desc, err := glfw.get_error();
+    if !bool(glfw.Init()) {
+        desc, err := glfw.GetError();
         log.error("GLFW init failed:", err, desc);
         return;
     }
-    defer glfw.terminate();
+    defer glfw.Terminate();
 
-    glfw.window_hint(.CONTEXT_VERSION_MAJOR, DESIRED_GL_MAJOR_VERSION);
-    glfw.window_hint(.CONTEXT_VERSION_MINOR, DESIRED_GL_MINOR_VERSION);
-    glfw.window_hint(.OPENGL_PROFILE, int(glfw.OPENGL_CORE_PROFILE));
-    glfw.window_hint(.DOUBLEBUFFER, 1);
-    glfw.window_hint(.DEPTH_BITS, 24);
-    glfw.window_hint(.STENCIL_BITS, 8);
-    window := glfw.create_window(1280, 720, "odin-imgui GLFW+OpenGL example", nil, nil);
+    glfw.WindowHint(glfw.CONTEXT_VERSION_MAJOR, DESIRED_GL_MAJOR_VERSION);
+    glfw.WindowHint(glfw.CONTEXT_VERSION_MINOR, DESIRED_GL_MINOR_VERSION);
+    glfw.WindowHint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE);
+    glfw.WindowHint(glfw.DOUBLEBUFFER, 1);
+    glfw.WindowHint(glfw.DEPTH_BITS, 24);
+    glfw.WindowHint(glfw.STENCIL_BITS, 8);
+    window := glfw.CreateWindow(1280, 720, "odin-imgui GLFW+OpenGL example", nil, nil);
     if window == nil {
-        desc, err := glfw.get_error();
+        desc, err := glfw.GetError();
         log.error("GLFW window creation failed:", err, desc);
         return;
     }
-    defer glfw.destroy_window(window);
+    defer glfw.DestroyWindow(window);
 
-    glfw.set_error_callback(error_callback);
-    glfw.set_key_callback(window, key_callback);
+    glfw.SetErrorCallback(error_callback);
+    glfw.SetKeyCallback(window, key_callback);
 
-    glfw.make_context_current(window);
-    glfw.swap_interval(1);
+    glfw.MakeContextCurrent(window);
+    glfw.SwapInterval(1);
 
-    gl.load_up_to(DESIRED_GL_MAJOR_VERSION, DESIRED_GL_MINOR_VERSION, glfw.set_proc_address);
+    gl.load_up_to(DESIRED_GL_MAJOR_VERSION, DESIRED_GL_MINOR_VERSION, glfw.gl_set_proc_address);
     gl.ClearColor(0.25, 0.25, 0.25, 1);
 
     imgui_state := init_imgui_state(window);
     io := imgui.get_io();
 
     running := true;
-    for !glfw.window_should_close(window) {
+    for !glfw.WindowShouldClose(window) {
 
         imgui_new_frame();
         imgui.new_frame();
@@ -73,8 +73,8 @@ main :: proc() {
         gl.Clear(gl.COLOR_BUFFER_BIT);
         imgl.imgui_render(imgui.get_draw_data(), imgui_state.opengl_state);
 
-        glfw.swap_buffers(window);
-        glfw.poll_events();
+        glfw.SwapBuffers(window);
+        glfw.PollEvents();
     }
 }
 
@@ -87,14 +87,14 @@ get_logger :: proc() -> log.Logger {
     return log.create_console_logger(opt = logger_opts);
 }
 
-key_callback :: proc "c" (window: glfw.Window_Handle, key, scancode, action, mods: i32) {
+key_callback :: proc "c" (window: glfw.WindowHandle, key, scancode, action, mods: i32) {
     context = runtime.default_context();
 
-    if glfw.Key_State(action) == .PRESS {
-        #partial switch glfw.Key(key) {
-        case .KEY_ESCAPE:
-            glfw.set_window_should_close(window, true);
-        case .KEY_TAB:
+    if action == glfw.PRESS {
+        switch key {
+        case glfw.KEY_ESCAPE:
+            glfw.SetWindowShouldClose(window, true);
+        case glfw.KEY_TAB:
             io := imgui.get_io();
             if io.want_capture_keyboard == false {
                 show_demo_window = true;
@@ -195,7 +195,7 @@ Imgui_State :: struct {
     opengl_state: imgl.OpenGL_State,
 }
 
-init_imgui_state :: proc(window: glfw.Window_Handle) -> Imgui_State {
+init_imgui_state :: proc(window: glfw.WindowHandle) -> Imgui_State {
     res := Imgui_State{};
 
     imgui.create_context();
