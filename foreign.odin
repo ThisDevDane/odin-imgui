@@ -5,7 +5,7 @@ when ODIN_DEBUG {
 	when ODIN_OS == .Windows {
 		foreign import cimgui "external/cimgui_debug.lib";
 	} else when ODIN_OS == .Linux {
-		foreign import cimgui "external/cimgui.so";
+		foreign import cimgui "external/cimgui.a";
 	}
 
 } else {
@@ -13,7 +13,7 @@ when ODIN_DEBUG {
 	when ODIN_OS == .Windows {
 		foreign import cimgui "external/cimgui.lib";
 	} else when ODIN_OS == .Linux {
-		foreign import cimgui "external/cimgui.so";
+		foreign import cimgui "external/cimgui.a";
 	}
 
 }
