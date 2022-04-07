@@ -229,7 +229,7 @@ compile_shader :: proc(kind: u32, shader_src: string) -> u32 {
     gl.CompileShader(h);
     ok: i32;
     gl.GetShaderiv(h, gl.COMPILE_STATUS, &ok);
-    if ok != 1 {
+    if bool(ok) != gl.TRUE {
         log.errorf("Unable to compile shader: {}", h);
         return 0;
     }
@@ -249,7 +249,7 @@ setup_imgui_shaders :: proc() -> u32 {
     
     ok: i32;
     gl.GetProgramiv(program_h, gl.LINK_STATUS, &ok);
-    if ok != 1 {
+    if bool(ok) != gl.TRUE {
         log.errorf("Error linking program: {}", program_h);
     }
 
