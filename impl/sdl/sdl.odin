@@ -83,7 +83,7 @@ process_event :: proc(e: sdl.Event, state: ^SDL_State) {
             io.key_ctrl  = i32(transmute(u16)(sdl.GetModState())) & i32(sdl.Keycode.LCTRL | sdl.Keycode.RCTRL)   != 0;
             io.key_alt   = i32(transmute(u16)(sdl.GetModState())) & i32(sdl.Keycode.LALT | sdl.Keycode.RALT)     != 0;
 
-            when ODIN_OS == "windows" {
+            when ODIN_OS == .Windows {
                 io.key_super = false;
             } else {
                 io.key_super = sdl.get_mod_state() & (sdl.Keymod.LGui|sdl.Keymod.RGui) != nil;

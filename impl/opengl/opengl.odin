@@ -211,10 +211,16 @@ restore_opengl_state :: proc(state: OpenGL_Backup_State) {
                          u32(state.last_blend_src_alpha), 
                          u32(state.last_blend_dst_alpha));
 
-    if state.last_enabled_blend       do gl.Enable(gl.BLEND)        else do gl.Disable(gl.BLEND);
-    if state.last_enable_cull_face    do gl.Enable(gl.CULL_FACE)    else do gl.Disable(gl.CULL_FACE);
-    if state.last_enable_depth_test   do gl.Enable(gl.DEPTH_TEST)   else do gl.Disable(gl.DEPTH_TEST);
-    if state.last_enable_scissor_test do gl.Enable(gl.SCISSOR_TEST) else do gl.Disable(gl.SCISSOR_TEST);
+	if state.last_enabled_blend{
+		gl.Enable(gl.BLEND)
+	}else{
+		gl.Disable(gl.BLEND)
+	}
+
+    if state.last_enabled_blend       { gl.Enable(gl.BLEND)}        else{  gl.Disable(gl.BLEND)}
+    if state.last_enable_cull_face    {gl.Enable(gl.CULL_FACE)    }else {gl.Disable(gl.CULL_FACE)}
+    if state.last_enable_depth_test   {gl.Enable(gl.DEPTH_TEST)}   else { gl.Disable(gl.DEPTH_TEST)}
+    if state.last_enable_scissor_test {gl.Enable(gl.SCISSOR_TEST)} else {gl.Disable(gl.SCISSOR_TEST)}
 
     gl.PolygonMode(gl.FRONT_AND_BACK, u32(state.last_polygon_mode[0]));
     gl.Viewport(state.last_viewport[0],   state.last_viewport[1],    state.last_viewport[2],    state.last_viewport[3]);
