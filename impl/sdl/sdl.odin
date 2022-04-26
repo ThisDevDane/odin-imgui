@@ -95,8 +95,7 @@ process_event :: proc(e: sdl.Event, state: ^SDL_State) {
             when ODIN_OS == .Windows{
                 io.key_super = false;
             } else {
-                io.key_super = sdl.GetModState() == sdl.KMOD_GUI//i32(transmute(u16)(sdl.GetModState())) & i32(sdl.Keycode.LGUI | sdl.Keycode.RGUI) != 0;
-                //io.key_super = i32(transmute(u16)(sdl.GetModState())) & i32(sdl.Keycode.LGUI | sdl.Keycode.RGUI) != 0;
+                io.key_super = (sdl.KeymodFlag.LGUI in mod_state) | (sdl.KeymodFlag.RGUI in mod_state)//i32(transmute(u16)(sdl.GetModState())) & i32(sdl.Keycode.LGUI | sdl.Keycode.RGUI) != 0;
             }
 			
 			fmt.println(io.key_super)
