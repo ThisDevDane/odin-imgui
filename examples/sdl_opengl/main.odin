@@ -25,13 +25,13 @@ main :: proc() {
 
     log.info("Starting SDL Example...");
     init_err := sdl.init(.Video);
-    defer sdl.quit();
+    //defer sdl.quit();
     if init_err == 0 {
         log.info("Setting up the window...");
         window := sdl.create_window("odin-imgui SDL+OpenGL example", 100, 100, 1280, 720, .Open_GL|.Mouse_Focus|.Shown|.Resizable);
         if window == nil {
-            log.debugf("Error during window creation: %s", sdl.get_error());
-            sdl.quit();
+            //log.debugf("Error during window creation: %s", sdl.get_error());
+            //sdl.quit();
             return;
         }
         defer sdl.destroy_window(window);
@@ -68,14 +68,14 @@ main :: proc() {
                 imsdl.process_event(e, &imgui_state.sdl_state);
                 #partial switch e.type {
                     case .Quit:
-                        log.info("Got SDL_QUIT event!");
-                        running = false;
+//                        log.info("Got SDL_QUIT event!");
+//                        running = false;
 
                     case .Key_Down:
-                        if is_key_down(e, .Escape) {
-                            qe := sdl.Event{};
-                            qe.type = .Quit;
-                            sdl.push_event(&qe);
+//                        if is_key_down(e, .Escape) {
+//                            qe := sdl.Event{};
+//                            qe.type = .Quit;
+//                            sdl.push_event(&qe);
                         }
                         if is_key_down(e, .Tab) {
                             io := imgui.get_io();
