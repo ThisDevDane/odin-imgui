@@ -67,7 +67,12 @@ process_event :: proc(e: sdl.Event, state: ^SDL_State) {
 
         case .TEXTINPUT: {
             text := e.text;
+			//kimgui.io_add_input_characters_utf8(io,text.text)
             imgui.ImGuiIO_AddInputCharactersUTF8(io, cstring(&text.text[0]));
+			fmt.println(io.input_queue_characters)
+			fmt.println(u32(text.text[0]))
+			//fmt.println(text)
+			//return
         }
 
         case .MOUSEBUTTONDOWN: {
@@ -86,8 +91,11 @@ process_event :: proc(e: sdl.Event, state: ^SDL_State) {
             when ODIN_OS == .Windows{
                 io.key_super = false;
             } else {
-                io.key_super = i32(transmute(u16)(sdl.GetModState())) & i32(sdl.Keycode.LGUI|sdl.Keycode.RGUI) != 0;
+                io.key_super = sdl.GetModState() == sdl.KMOD_GUI//i32(transmute(u16)(sdl.GetModState())) & i32(sdl.Keycode.LGUI | sdl.Keycode.RGUI) != 0;
+                //io.key_super = i32(transmute(u16)(sdl.GetModState())) & i32(sdl.Keycode.LGUI | sdl.Keycode.RGUI) != 0;
             }
+			
+			fmt.println(io.key_super)
         }
     }
 }

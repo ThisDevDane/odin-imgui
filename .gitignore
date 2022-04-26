@@ -10,3 +10,4 @@ output/*
 *.obj
 
 imgui.ini
+.DS_Store
