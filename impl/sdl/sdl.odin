@@ -77,16 +77,25 @@ process_event :: proc(e: sdl.Event, state: ^SDL_State) {
         }
 
         case .KEYDOWN, .KEYUP: {
+
             sc := e.key.keysym.scancode;
             io.keys_down[sc] = e.type == .KEYDOWN;
-            io.key_shift = i32(transmute(u16)(sdl.GetModState())) & i32(sdl.Keycode.LSHIFT | sdl.Keycode.RSHIFT) != 0;
-            io.key_ctrl  = i32(transmute(u16)(sdl.GetModState())) & i32(sdl.Keycode.LCTRL | sdl.Keycode.RCTRL)   != 0;
-            io.key_alt   = i32(transmute(u16)(sdl.GetModState())) & i32(sdl.Keycode.LALT | sdl.Keycode.RALT)     != 0;
+			mod_state := sdl.GetModState()
+            //io.key_shift = i32(transmute(u16)(sdl.GetModState())) & i32(sdl.Keycode.LSHIFT | sdl.Keycode.RSHIFT) != 0;
+			io.key_ctrl = (sdl.KeymodFlag.LCTRL in mod_state) | (sdl.KeymodFlag.RCTRL in mod_state)
+			io.key_shift = (sdl.KeymodFlag.LSHIFT in mod_state) | (sdl.KeymodFlag.RSHIFT in mod_state)
+			io.key_alt = (sdl.KeymodFlag.LALT in mod_state) | (sdl.KeymodFlag.RALT in mod_state)
+            //io.key_ctrl  = (sdl.Keymod{sdl.KeymodFlag.LCTRL, sdl.KeymodFlag.RCTRL} >= mod_state)//i32(transmute(u16)(sdl.GetModState())) & i32(sdl.Keycode.LCTRL | sdl.Keycode.RCTRL)   != 0;
 
+            //io.key_alt   = i32(transmute(u16)(sdl.GetModState())) & i32(sdl.Keycode.LALT | sdl.Keycode.RALT)     != 0;
+			fmt.println(mod_state)
+			fmt.println(io.key_ctrl)
+			fmt.println(io.key_alt)
+			fmt.println(io.key_shift)
             when ODIN_OS == .Windows {
                 io.key_super = false;
             } else {
-                io.key_super = sdl.get_mod_state() & (sdl.Keymod.LGui|sdl.Keymod.RGui) != nil;
+                io.key_super = sdl.get_mod_state() & (sdl.Keymod.LGUI | sdl.Keymod.RGUI) != nil;
             }
         }
     }
