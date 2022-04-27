@@ -4,7 +4,7 @@ import "core:runtime";
 import "core:fmt";
 
 import sdl "vendor:sdl2";
-
+import win32 "core:sys/windows"
 import imgui "../..";
 
 SDL_State :: struct {
@@ -13,7 +13,7 @@ SDL_State :: struct {
     cursor_handles: [imgui.Mouse_Cursor.Count]^sdl.Cursor,
 }
 
-setup_state :: proc(using state: ^SDL_State) {
+setup_state :: proc(using state: ^SDL_State,window : ^sdl.Window) {
     io := imgui.get_io();
     io.backend_platform_name = "SDL";
     io.backend_flags |= .HasMouseCursors;
@@ -43,7 +43,7 @@ setup_state :: proc(using state: ^SDL_State) {
 
     io.get_clipboard_text_fn = get_clipboard_text;
     io.set_clipboard_text_fn = set_clipboard_text;
-    
+
     cursor_handles[imgui.Mouse_Cursor.Arrow]      = sdl.CreateSystemCursor(sdl.SystemCursor.ARROW);
     cursor_handles[imgui.Mouse_Cursor.TextInput]  = sdl.CreateSystemCursor(sdl.SystemCursor.IBEAM);
     cursor_handles[imgui.Mouse_Cursor.ResizeAll]  = sdl.CreateSystemCursor(sdl.SystemCursor.SIZEALL);
