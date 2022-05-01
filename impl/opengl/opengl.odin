@@ -266,7 +266,7 @@ setup_imgui_shaders :: proc() -> u32 {
     ok: i32;
     gl.GetProgramiv(program_h, gl.LINK_STATUS, &ok);
 
-    if ok != 1/*i32(gl.TRUE)*/ {
+    if ok != 1{
         log.errorf("Error linking program: {}", program_h);
     }
 
