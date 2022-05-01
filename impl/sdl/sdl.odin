@@ -144,7 +144,7 @@ update_mouse :: proc(state: ^SDL_State, window: ^sdl.Window) {
 update_display_size :: proc(window: ^sdl.Window) {
     w, h, display_h, display_w: i32;
     sdl.GetWindowSize(window, &w, &h);
-    if sdl.GetWindowFlags(window) & u32(sdl.WindowFlags.MINIMIZED) == 0 {
+    if sdl.GetWindowFlags(window) & u32(sdl.WindowFlags.MINIMIZED) == 1 {
         w = 0;
         h = 0;
     }
