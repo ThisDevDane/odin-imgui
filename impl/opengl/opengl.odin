@@ -65,11 +65,12 @@ setup_state :: proc(using state: ^OpenGL_State) {
 
     gl.GenBuffers(1, &vbo_handle);
     gl.GenBuffers(1, &elements_handle);
-
-    // Font stuff
+	// Font stuff
     pixels: ^u8;
     width, height: i32;
     font_tex_h: u32;
+    imgui.font_atlas_get_tex_data_as_rgba32(io.fonts, &pixels, &width, &height);
+    // Font stuff
     gl.GenTextures(1, &font_tex_h);
     gl.BindTexture(gl.TEXTURE_2D, font_tex_h);
     gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
@@ -172,9 +173,9 @@ imgui_setup_render_state :: proc(data: ^imgui.Draw_Data, state: OpenGL_State) {
     gl.EnableVertexAttribArray(u32(state.attrib_vtx_pos));
     gl.EnableVertexAttribArray(u32(state.attrib_vtx_uv));
     gl.EnableVertexAttribArray(u32(state.attrib_vtx_color));
-    gl.VertexAttribPointer(u32(state.attrib_vtx_pos),   2, gl.FLOAT,         gl.FALSE, size_of(imgui.Draw_Vert), uintptr(rawptr(offset_of(imgui.Draw_Vert, pos))));
-    gl.VertexAttribPointer(u32(state.attrib_vtx_uv),    2, gl.FLOAT,         gl.FALSE, size_of(imgui.Draw_Vert), uintptr(rawptr(offset_of(imgui.Draw_Vert, uv))));
-    gl.VertexAttribPointer(u32(state.attrib_vtx_color), 4, gl.UNSIGNED_BYTE, gl.TRUE,  size_of(imgui.Draw_Vert), uintptr(rawptr(offset_of(imgui.Draw_Vert, col))));
+    gl.VertexAttribPointer(u32(state.attrib_vtx_pos),   2, gl.FLOAT,         gl.FALSE, size_of(imgui.Draw_Vert), offset_of(imgui.Draw_Vert, pos));
+    gl.VertexAttribPointer(u32(state.attrib_vtx_uv),    2, gl.FLOAT,         gl.FALSE, size_of(imgui.Draw_Vert), offset_of(imgui.Draw_Vert, uv));
+    gl.VertexAttribPointer(u32(state.attrib_vtx_color), 4, gl.UNSIGNED_BYTE, gl.TRUE,  size_of(imgui.Draw_Vert), offset_of(imgui.Draw_Vert, col));
 }
 
 backup_opengl_state :: proc(state: ^OpenGL_Backup_State) {
