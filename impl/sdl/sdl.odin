@@ -4,7 +4,7 @@ import "core:runtime";
 import "core:fmt";
 
 import sdl "vendor:sdl2";
-
+import win32 "core:sys/windows"
 import imgui "../..";
 
 SDL_State :: struct {
@@ -13,7 +13,7 @@ SDL_State :: struct {
     cursor_handles: [imgui.Mouse_Cursor.Count]^sdl.Cursor,
 }
 
-setup_state :: proc(using state: ^SDL_State) {
+setup_state :: proc(using state: ^SDL_State,window : ^sdl.Window) {
     io := imgui.get_io();
     io.backend_platform_name = "SDL";
     io.backend_flags |= .HasMouseCursors;
@@ -43,7 +43,7 @@ setup_state :: proc(using state: ^SDL_State) {
 
     io.get_clipboard_text_fn = get_clipboard_text;
     io.set_clipboard_text_fn = set_clipboard_text;
-    
+
     cursor_handles[imgui.Mouse_Cursor.Arrow]      = sdl.CreateSystemCursor(sdl.SystemCursor.ARROW);
     cursor_handles[imgui.Mouse_Cursor.TextInput]  = sdl.CreateSystemCursor(sdl.SystemCursor.IBEAM);
     cursor_handles[imgui.Mouse_Cursor.ResizeAll]  = sdl.CreateSystemCursor(sdl.SystemCursor.SIZEALL);
@@ -67,7 +67,12 @@ process_event :: proc(e: sdl.Event, state: ^SDL_State) {
 
         case .TEXTINPUT: {
             text := e.text;
+			//kimgui.io_add_input_characters_utf8(io,text.text)
             imgui.ImGuiIO_AddInputCharactersUTF8(io, cstring(&text.text[0]));
+			fmt.println(io.input_queue_characters)
+			fmt.println(u32(text.text[0]))
+			//fmt.println(text)
+			//return
         }
 
         case .MOUSEBUTTONDOWN: {
@@ -81,22 +86,17 @@ process_event :: proc(e: sdl.Event, state: ^SDL_State) {
             sc := e.key.keysym.scancode;
             io.keys_down[sc] = e.type == .KEYDOWN;
 			mod_state := sdl.GetModState()
-            //io.key_shift = i32(transmute(u16)(sdl.GetModState())) & i32(sdl.Keycode.LSHIFT | sdl.Keycode.RSHIFT) != 0;
 			io.key_ctrl = (sdl.KeymodFlag.LCTRL in mod_state) | (sdl.KeymodFlag.RCTRL in mod_state)
 			io.key_shift = (sdl.KeymodFlag.LSHIFT in mod_state) | (sdl.KeymodFlag.RSHIFT in mod_state)
 			io.key_alt = (sdl.KeymodFlag.LALT in mod_state) | (sdl.KeymodFlag.RALT in mod_state)
-            //io.key_ctrl  = (sdl.Keymod{sdl.KeymodFlag.LCTRL, sdl.KeymodFlag.RCTRL} >= mod_state)//i32(transmute(u16)(sdl.GetModState())) & i32(sdl.Keycode.LCTRL | sdl.Keycode.RCTRL)   != 0;
 
-            //io.key_alt   = i32(transmute(u16)(sdl.GetModState())) & i32(sdl.Keycode.LALT | sdl.Keycode.RALT)     != 0;
-			fmt.println(mod_state)
-			fmt.println(io.key_ctrl)
-			fmt.println(io.key_alt)
-			fmt.println(io.key_shift)
-            when ODIN_OS == .Windows {
+            when ODIN_OS == .Windows{
                 io.key_super = false;
             } else {
-                io.key_super = sdl.get_mod_state() & (sdl.Keymod.LGUI | sdl.Keymod.RGUI) != nil;
+                io.key_super = (sdl.KeymodFlag.LGUI in mod_state) | (sdl.KeymodFlag.RGUI in mod_state)//i32(transmute(u16)(sdl.GetModState())) & i32(sdl.Keycode.LGUI | sdl.Keycode.RGUI) != 0;
             }
+			
+			fmt.println(io.key_super)
         }
     }
 }
