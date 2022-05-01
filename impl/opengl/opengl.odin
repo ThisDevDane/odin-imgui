@@ -69,10 +69,6 @@ setup_state :: proc(using state: ^OpenGL_State) {
     // Font stuff
     pixels: ^u8;
     width, height: i32;
-	//imgui.font_atlas_add_font_from_file_ttf(io.fonts,"Hiragino Kaku Gothic Std W8.otf",8,nil,imgui.font_atlas_get_glyph_ranges_japanese(io.fonts))
-	//imgui.font_atlas_add_font_from_file_ttf(io.fonts,"BIZ-UDGothicR.ttc",13,nil,imgui.font_atlas_get_glyph_ranges_japanese(io.fonts))
-	imgui.font_atlas_add_font_from_file_ttf(io.fonts,"NotoSerifJP-Regular.otf",18,nil,imgui.font_atlas_get_glyph_ranges_japanese(io.fonts))
-    imgui.font_atlas_get_tex_data_as_rgba32(io.fonts, &pixels, &width, &height);
     font_tex_h: u32;
     gl.GenTextures(1, &font_tex_h);
     gl.BindTexture(gl.TEXTURE_2D, font_tex_h);
