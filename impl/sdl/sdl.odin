@@ -44,15 +44,15 @@ setup_state :: proc(using state: ^SDL_State,window : ^sdl.Window) {
     io.get_clipboard_text_fn = get_clipboard_text;
     io.set_clipboard_text_fn = set_clipboard_text;
 
-    cursor_handles[imgui.Mouse_Cursor.Arrow]      = sdl.CreateSystemCursor(sdl.SystemCursor.ARROW);
-    cursor_handles[imgui.Mouse_Cursor.TextInput]  = sdl.CreateSystemCursor(sdl.SystemCursor.IBEAM);
-    cursor_handles[imgui.Mouse_Cursor.ResizeAll]  = sdl.CreateSystemCursor(sdl.SystemCursor.SIZEALL);
-    cursor_handles[imgui.Mouse_Cursor.ResizeNs]   = sdl.CreateSystemCursor(sdl.SystemCursor.SIZENS);
-    cursor_handles[imgui.Mouse_Cursor.ResizeEw]   = sdl.CreateSystemCursor(sdl.SystemCursor.SIZEWE);
-    cursor_handles[imgui.Mouse_Cursor.ResizeNesw] = sdl.CreateSystemCursor(sdl.SystemCursor.SIZENESW);
-    cursor_handles[imgui.Mouse_Cursor.ResizeNwse] = sdl.CreateSystemCursor(sdl.SystemCursor.SIZENWSE);
-    cursor_handles[imgui.Mouse_Cursor.Hand]       = sdl.CreateSystemCursor(sdl.SystemCursor.HAND);
-    cursor_handles[imgui.Mouse_Cursor.NotAllowed] = sdl.CreateSystemCursor(sdl.SystemCursor.NO);
+    cursor_handles[imgui.Mouse_Cursor.Arrow]      = sdl.CreateSystemCursor(.ARROW);
+    cursor_handles[imgui.Mouse_Cursor.TextInput]  = sdl.CreateSystemCursor(.IBEAM);
+    cursor_handles[imgui.Mouse_Cursor.ResizeAll]  = sdl.CreateSystemCursor(.SIZEALL);
+    cursor_handles[imgui.Mouse_Cursor.ResizeNs]   = sdl.CreateSystemCursor(.SIZENS);
+    cursor_handles[imgui.Mouse_Cursor.ResizeEw]   = sdl.CreateSystemCursor(.SIZEWE);
+    cursor_handles[imgui.Mouse_Cursor.ResizeNesw] = sdl.CreateSystemCursor(.SIZENESW);
+    cursor_handles[imgui.Mouse_Cursor.ResizeNwse] = sdl.CreateSystemCursor(.SIZENWSE);
+    cursor_handles[imgui.Mouse_Cursor.Hand]       = sdl.CreateSystemCursor(.HAND);
+    cursor_handles[imgui.Mouse_Cursor.NotAllowed] = sdl.CreateSystemCursor(.NO);
 } 
 
 process_event :: proc(e: sdl.Event, state: ^SDL_State) {
