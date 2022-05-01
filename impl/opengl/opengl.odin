@@ -69,7 +69,9 @@ setup_state :: proc(using state: ^OpenGL_State) {
     // Font stuff
     pixels: ^u8;
     width, height: i32;
-	imgui.font_atlas_add_font_from_file_ttf(io.fonts,"NotoSerifJP-Regular.otf",13,nil,imgui.font_atlas_get_glyph_ranges_japanese(io.fonts))
+	//imgui.font_atlas_add_font_from_file_ttf(io.fonts,"Hiragino Kaku Gothic Std W8.otf",8,nil,imgui.font_atlas_get_glyph_ranges_japanese(io.fonts))
+	//imgui.font_atlas_add_font_from_file_ttf(io.fonts,"BIZ-UDGothicR.ttc",13,nil,imgui.font_atlas_get_glyph_ranges_japanese(io.fonts))
+	imgui.font_atlas_add_font_from_file_ttf(io.fonts,"NotoSerifJP-Regular.otf",18,nil,imgui.font_atlas_get_glyph_ranges_japanese(io.fonts))
     imgui.font_atlas_get_tex_data_as_rgba32(io.fonts, &pixels, &width, &height);
     font_tex_h: u32;
     gl.GenTextures(1, &font_tex_h);
@@ -237,7 +239,7 @@ compile_shader :: proc(kind: u32, shader_src: string) -> u32 {
     ok: c.int;
     gl.GetShaderiv(h, gl.COMPILE_STATUS,&ok);
 
-	if ok != 1/*gl.TRUE*/ {
+	if ok != 1{
 		log_length : c.int
 		gl.GetShaderiv(h, gl.INFO_LOG_LENGTH, &log_length)
 		log_bytes := make([]byte, log_length); defer delete(log_bytes)
