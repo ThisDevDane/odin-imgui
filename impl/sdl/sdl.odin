@@ -113,9 +113,9 @@ update_mouse :: proc(state: ^SDL_State, window: ^sdl.Window) {
     io := imgui.get_io();
     mx, my: i32;
     buttons := sdl.GetMouseState(&mx, &my);
-    io.mouse_down[0] = state.mouse_down[0] || (buttons & u32(sdl.BUTTON_LEFT))   != 0;
-    io.mouse_down[1] = state.mouse_down[1] || (buttons & u32(sdl.BUTTON_RIGHT))  != 0;
-    io.mouse_down[2] = state.mouse_down[2] || (buttons & u32(sdl.BUTTON_MIDDLE)) != 0;
+    io.mouse_down[0] = state.mouse_down[0] || (buttons & u32(sdl.BUTTON_LMASK))   != 0;
+    io.mouse_down[1] = state.mouse_down[1] || (buttons & u32(sdl.BUTTON_RMASK))  != 0;
+    io.mouse_down[2] = state.mouse_down[2] || (buttons & u32(sdl.BUTTON_MMASK)) != 0;
     state.mouse_down[0] = false;
     state.mouse_down[1] = false;
     state.mouse_down[2] = false;
