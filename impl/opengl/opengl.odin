@@ -69,6 +69,7 @@ setup_state :: proc(using state: ^OpenGL_State) {
     pixels: ^u8;
     width, height: i32;
     font_tex_h: u32;
+    imgui.font_atlas_get_tex_data_as_rgba32(io.fonts, &pixels, &width, &height);
     // Font stuff
     gl.GenTextures(1, &font_tex_h);
     gl.BindTexture(gl.TEXTURE_2D, font_tex_h);
