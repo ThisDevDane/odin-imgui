@@ -5,7 +5,6 @@ import "core:log";
 import "core:strings";
 
 import gl  "vendor:OpenGL";
-
 import imgui "../..";
 
 OpenGL_State :: struct {
@@ -76,6 +75,33 @@ setup_state :: proc(using state: ^OpenGL_State) {
     gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
     io.fonts.tex_id = imgui.Texture_ID(uintptr(font_tex_h));
+}
+
+// This is a basic helper function for loading in fonts.
+imgui_load_font_from_file :: proc(font_path: string, font_size: f32 = 16.0, default := false, font_cfg: ^imgui.Font_Config = nil, glyph_ranges: ^imgui.Wchar = nil) -> ^imgui.ImFont {
+	io := imgui.get_io()
+	font_atlas := io.fonts
+
+	font := imgui.font_atlas_add_font_from_file_ttf(font_atlas, font_path, f32(font_size), font_cfg, glyph_ranges)
+	imgui.font_atlas_build(font_atlas)
+	
+    if default {
+        io.font_default = font
+    }
+
+	pixels: ^u8
+	width, height: i32
+	imgui.font_atlas_get_tex_data_as_rgba32(io.fonts, &pixels, &width, &height)
+
+	texture_id: u32
+	gl.GenTextures(1, &texture_id)
+
+	gl.BindTexture(gl.TEXTURE_2D, texture_id)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, pixels)
+	font_atlas.tex_id = imgui.Texture_ID(cast(uintptr)texture_id)
+    return font
 }
 
 imgui_render :: proc(data: ^imgui.Draw_Data, state: OpenGL_State) {
