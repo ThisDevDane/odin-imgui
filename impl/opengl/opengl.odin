@@ -79,6 +79,33 @@ setup_state :: proc(using state: ^OpenGL_State) {
     io.fonts.tex_id = imgui.Texture_ID(uintptr(font_tex_h));
 }
 
+// This is a basic helper function for loading in fonts.
+imgui_load_font_from_file :: proc(font_path: string, font_size: f32 = 16.0, default := false, font_cfg: ^imgui.Font_Config = nil, glyph_ranges: ^imgui.Wchar = nil) -> ^imgui.ImFont {
+	io := imgui.get_io()
+	font_atlas := io.fonts
+
+	font := imgui.font_atlas_add_font_from_file_ttf(font_atlas, font_path, f32(font_size), font_cfg, glyph_ranges)
+	imgui.font_atlas_build(font_atlas)
+	
+    if default {
+        io.font_default = font
+    }
+
+	pixels: ^u8
+	width, height: i32
+	imgui.font_atlas_get_tex_data_as_rgba32(io.fonts, &pixels, &width, &height)
+
+	texture_id: u32
+	gl.GenTextures(1, &texture_id)
+
+	gl.BindTexture(gl.TEXTURE_2D, texture_id)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, pixels)
+	font_atlas.tex_id = imgui.Texture_ID(cast(uintptr)texture_id)
+    return font
+}
+
 imgui_render :: proc(data: ^imgui.Draw_Data, state: OpenGL_State) {
     state := state;
     fb_width  := data.display_size.x * data.framebuffer_scale.x;
@@ -173,9 +200,10 @@ imgui_setup_render_state :: proc(data: ^imgui.Draw_Data, state: OpenGL_State) {
     gl.EnableVertexAttribArray(u32(state.attrib_vtx_pos));
     gl.EnableVertexAttribArray(u32(state.attrib_vtx_uv));
     gl.EnableVertexAttribArray(u32(state.attrib_vtx_color));
-    gl.VertexAttribPointer(u32(state.attrib_vtx_pos),   2, gl.FLOAT,         gl.FALSE, size_of(imgui.Draw_Vert), offset_of(imgui.Draw_Vert, pos));
-    gl.VertexAttribPointer(u32(state.attrib_vtx_uv),    2, gl.FLOAT,         gl.FALSE, size_of(imgui.Draw_Vert), offset_of(imgui.Draw_Vert, uv));
-    gl.VertexAttribPointer(u32(state.attrib_vtx_color), 4, gl.UNSIGNED_BYTE, gl.TRUE,  size_of(imgui.Draw_Vert), offset_of(imgui.Draw_Vert, col));
+
+    gl.VertexAttribPointer(u32(state.attrib_vtx_pos),   2, gl.FLOAT,         gl.FALSE, size_of(imgui.Draw_Vert), (offset_of(imgui.Draw_Vert, pos)));
+    gl.VertexAttribPointer(u32(state.attrib_vtx_uv),    2, gl.FLOAT,         gl.FALSE, size_of(imgui.Draw_Vert), (offset_of(imgui.Draw_Vert, uv)));
+    gl.VertexAttribPointer(u32(state.attrib_vtx_color), 4, gl.UNSIGNED_BYTE, gl.TRUE,  size_of(imgui.Draw_Vert), (offset_of(imgui.Draw_Vert, col)));
 }
 
 backup_opengl_state :: proc(state: ^OpenGL_Backup_State) {
@@ -197,10 +225,11 @@ backup_opengl_state :: proc(state: ^OpenGL_Backup_State) {
     gl.GetIntegerv(gl.BLEND_EQUATION_RGB, &state.last_blend_equation_rgb);
     gl.GetIntegerv(gl.BLEND_EQUATION_ALPHA, &state.last_blend_equation_alpha);
 
-    state.last_enabled_blend = gl.IsEnabled(gl.BLEND) != false;
-    state.last_enable_cull_face = gl.IsEnabled(gl.CULL_FACE) != false;
-    state.last_enable_depth_test = gl.IsEnabled(gl.DEPTH_TEST) != false;
-    state.last_enable_scissor_test = gl.IsEnabled(gl.SCISSOR_TEST) != false;
+
+    state.last_enabled_blend = gl.IsEnabled(gl.BLEND) != gl.FALSE;
+    state.last_enable_cull_face = gl.IsEnabled(gl.CULL_FACE) != gl.FALSE;
+    state.last_enable_depth_test = gl.IsEnabled(gl.DEPTH_TEST) != gl.FALSE;
+    state.last_enable_scissor_test = gl.IsEnabled(gl.SCISSOR_TEST) != gl.FALSE;
 }
 
 restore_opengl_state :: proc(state: OpenGL_Backup_State) {
@@ -216,10 +245,11 @@ restore_opengl_state :: proc(state: OpenGL_Backup_State) {
                          u32(state.last_blend_src_alpha), 
                          u32(state.last_blend_dst_alpha));
 
-    if state.last_enabled_blend{        gl.Enable(gl.BLEND)}        else{ gl.Disable(gl.BLEND)}
-    if state.last_enable_cull_face    {gl.Enable(gl.CULL_FACE)}    else {gl.Disable(gl.CULL_FACE)}
-    if state.last_enable_depth_test   {gl.Enable(gl.DEPTH_TEST)   }else {gl.Disable(gl.DEPTH_TEST)}
-    if state.last_enable_scissor_test {gl.Enable(gl.SCISSOR_TEST)} else {gl.Disable(gl.SCISSOR_TEST)}
+
+    if state.last_enabled_blend       do gl.Enable(gl.BLEND);        else do gl.Disable(gl.BLEND);
+    if state.last_enable_cull_face    do gl.Enable(gl.CULL_FACE);    else do gl.Disable(gl.CULL_FACE); 
+    if state.last_enable_depth_test   do gl.Enable(gl.DEPTH_TEST);   else do gl.Disable(gl.DEPTH_TEST);
+    if state.last_enable_scissor_test do gl.Enable(gl.SCISSOR_TEST); else do gl.Disable(gl.SCISSOR_TEST);
 
     gl.PolygonMode(gl.FRONT_AND_BACK, u32(state.last_polygon_mode[0]));
     gl.Viewport(state.last_viewport[0],   state.last_viewport[1],    state.last_viewport[2],    state.last_viewport[3]);
@@ -246,6 +276,7 @@ compile_shader :: proc(kind: u32, shader_src: string) -> u32 {
 		return 0;
 	}
 
+
     return h;
 }
 
@@ -266,7 +297,7 @@ setup_imgui_shaders :: proc() -> u32 {
     ok: i32;
     gl.GetProgramiv(program_h, gl.LINK_STATUS, &ok);
 
-    if ok != 1{
+    if bool(ok) != gl.TRUE {
         log.errorf("Error linking program: {}", program_h);
     }
 
