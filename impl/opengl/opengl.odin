@@ -4,9 +4,11 @@ import "core:mem";
 import "core:log";
 import "core:strings";
 
-import gl  "shared:odin-gl";
+import gl  "vendor:OpenGL";
 
 import imgui "../..";
+import fmt "core:fmt"
+import "core:c"
 
 OpenGL_State :: struct {
     shader_program: u32,
@@ -63,19 +65,45 @@ setup_state :: proc(using state: ^OpenGL_State) {
 
     gl.GenBuffers(1, &vbo_handle);
     gl.GenBuffers(1, &elements_handle);
-
-    //////////////////////
-    // Font stuff
+	// Font stuff
     pixels: ^u8;
     width, height: i32;
-    imgui.font_atlas_get_tex_data_as_rgba32(io.fonts, &pixels, &width, &height);
     font_tex_h: u32;
+    imgui.font_atlas_get_tex_data_as_rgba32(io.fonts, &pixels, &width, &height);
+    // Font stuff
     gl.GenTextures(1, &font_tex_h);
     gl.BindTexture(gl.TEXTURE_2D, font_tex_h);
     gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
     io.fonts.tex_id = imgui.Texture_ID(uintptr(font_tex_h));
+}
+
+// This is a basic helper function for loading in fonts.
+imgui_load_font_from_file :: proc(font_path: string, font_size: f32 = 16.0, default := false, font_cfg: ^imgui.Font_Config = nil, glyph_ranges: ^imgui.Wchar = nil) -> ^imgui.ImFont {
+	io := imgui.get_io()
+	font_atlas := io.fonts
+
+	font := imgui.font_atlas_add_font_from_file_ttf(font_atlas, font_path, f32(font_size), font_cfg, glyph_ranges)
+	imgui.font_atlas_build(font_atlas)
+	
+    if default {
+        io.font_default = font
+    }
+
+	pixels: ^u8
+	width, height: i32
+	imgui.font_atlas_get_tex_data_as_rgba32(io.fonts, &pixels, &width, &height)
+
+	texture_id: u32
+	gl.GenTextures(1, &texture_id)
+
+	gl.BindTexture(gl.TEXTURE_2D, texture_id)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, pixels)
+	font_atlas.tex_id = imgui.Texture_ID(cast(uintptr)texture_id)
+    return font
 }
 
 imgui_render :: proc(data: ^imgui.Draw_Data, state: OpenGL_State) {
@@ -125,7 +153,11 @@ imgui_render :: proc(data: ^imgui.Draw_Data, state: OpenGL_State) {
                                i32(clip_rect.w - clip_rect.y));
                     gl.BindTexture(gl.TEXTURE_2D, u32(uintptr(cmd.texture_id)));
                     //glDrawElementsBaseVertex(GL_TRIANGLES, (GLsizei)pcmd->ElemCount, sizeof(ImDrawIdx) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, (void*)(intptr_t)(pcmd->IdxOffset * sizeof(ImDrawIdx)), (GLint)pcmd->VtxOffset);
-                    gl.DrawElementsBaseVertex(gl.TRIANGLES, i32(cmd.elem_count), gl.UNSIGNED_SHORT, rawptr(uintptr(cmd.idx_offset * size_of(imgui.Draw_Idx))), i32(cmd.vtx_offset));
+                    gl.DrawElementsBaseVertex(gl.TRIANGLES, 
+                        i32(cmd.elem_count), 
+                        gl.UNSIGNED_SHORT, 
+                        rawptr(uintptr(cmd.idx_offset * size_of(imgui.Draw_Idx))), 
+                        i32(cmd.vtx_offset));
                     gl.DrawElements(gl.TRIANGLES, 
                                     i32(cmd.elem_count), 
                                     gl.UNSIGNED_SHORT, 
@@ -168,9 +200,10 @@ imgui_setup_render_state :: proc(data: ^imgui.Draw_Data, state: OpenGL_State) {
     gl.EnableVertexAttribArray(u32(state.attrib_vtx_pos));
     gl.EnableVertexAttribArray(u32(state.attrib_vtx_uv));
     gl.EnableVertexAttribArray(u32(state.attrib_vtx_color));
-    gl.VertexAttribPointer(u32(state.attrib_vtx_pos),   2, gl.FLOAT,         gl.FALSE, size_of(imgui.Draw_Vert), rawptr(offset_of(imgui.Draw_Vert, pos)));
-    gl.VertexAttribPointer(u32(state.attrib_vtx_uv),    2, gl.FLOAT,         gl.FALSE, size_of(imgui.Draw_Vert), rawptr(offset_of(imgui.Draw_Vert, uv)));
-    gl.VertexAttribPointer(u32(state.attrib_vtx_color), 4, gl.UNSIGNED_BYTE, gl.TRUE,  size_of(imgui.Draw_Vert), rawptr(offset_of(imgui.Draw_Vert, col)));
+
+    gl.VertexAttribPointer(u32(state.attrib_vtx_pos),   2, gl.FLOAT,         gl.FALSE, size_of(imgui.Draw_Vert), (offset_of(imgui.Draw_Vert, pos)));
+    gl.VertexAttribPointer(u32(state.attrib_vtx_uv),    2, gl.FLOAT,         gl.FALSE, size_of(imgui.Draw_Vert), (offset_of(imgui.Draw_Vert, uv)));
+    gl.VertexAttribPointer(u32(state.attrib_vtx_color), 4, gl.UNSIGNED_BYTE, gl.TRUE,  size_of(imgui.Draw_Vert), (offset_of(imgui.Draw_Vert, col)));
 }
 
 backup_opengl_state :: proc(state: ^OpenGL_Backup_State) {
@@ -192,10 +225,11 @@ backup_opengl_state :: proc(state: ^OpenGL_Backup_State) {
     gl.GetIntegerv(gl.BLEND_EQUATION_RGB, &state.last_blend_equation_rgb);
     gl.GetIntegerv(gl.BLEND_EQUATION_ALPHA, &state.last_blend_equation_alpha);
 
-    state.last_enabled_blend = gl.IsEnabled(gl.BLEND) != 0;
-    state.last_enable_cull_face = gl.IsEnabled(gl.CULL_FACE) != 0;
-    state.last_enable_depth_test = gl.IsEnabled(gl.DEPTH_TEST) != 0;
-    state.last_enable_scissor_test = gl.IsEnabled(gl.SCISSOR_TEST) != 0;
+
+    state.last_enabled_blend = gl.IsEnabled(gl.BLEND) != gl.FALSE;
+    state.last_enable_cull_face = gl.IsEnabled(gl.CULL_FACE) != gl.FALSE;
+    state.last_enable_depth_test = gl.IsEnabled(gl.DEPTH_TEST) != gl.FALSE;
+    state.last_enable_scissor_test = gl.IsEnabled(gl.SCISSOR_TEST) != gl.FALSE;
 }
 
 restore_opengl_state :: proc(state: OpenGL_Backup_State) {
@@ -211,10 +245,11 @@ restore_opengl_state :: proc(state: OpenGL_Backup_State) {
                          u32(state.last_blend_src_alpha), 
                          u32(state.last_blend_dst_alpha));
 
-    if state.last_enabled_blend       do gl.Enable(gl.BLEND)        else do gl.Disable(gl.BLEND);
-    if state.last_enable_cull_face    do gl.Enable(gl.CULL_FACE)    else do gl.Disable(gl.CULL_FACE);
-    if state.last_enable_depth_test   do gl.Enable(gl.DEPTH_TEST)   else do gl.Disable(gl.DEPTH_TEST);
-    if state.last_enable_scissor_test do gl.Enable(gl.SCISSOR_TEST) else do gl.Disable(gl.SCISSOR_TEST);
+
+    if state.last_enabled_blend       do gl.Enable(gl.BLEND);        else do gl.Disable(gl.BLEND);
+    if state.last_enable_cull_face    do gl.Enable(gl.CULL_FACE);    else do gl.Disable(gl.CULL_FACE); 
+    if state.last_enable_depth_test   do gl.Enable(gl.DEPTH_TEST);   else do gl.Disable(gl.DEPTH_TEST);
+    if state.last_enable_scissor_test do gl.Enable(gl.SCISSOR_TEST); else do gl.Disable(gl.SCISSOR_TEST);
 
     gl.PolygonMode(gl.FRONT_AND_BACK, u32(state.last_polygon_mode[0]));
     gl.Viewport(state.last_viewport[0],   state.last_viewport[1],    state.last_viewport[2],    state.last_viewport[3]);
@@ -223,16 +258,24 @@ restore_opengl_state :: proc(state: OpenGL_Backup_State) {
 
 @(private="package")
 compile_shader :: proc(kind: u32, shader_src: string) -> u32 {
+    fmt.println(shader_src)
     h := gl.CreateShader(kind);
-    data := cast(^u8)strings.clone_to_cstring(shader_src, context.temp_allocator);
+    data := strings.clone_to_cstring(shader_src, context.temp_allocator);
     gl.ShaderSource(h, 1, &data, nil);
     gl.CompileShader(h);
-    ok: i32;
-    gl.GetShaderiv(h, gl.COMPILE_STATUS, &ok);
-    if ok != gl.TRUE {
-        log.errorf("Unable to compile shader: {}", h);
-        return 0;
-    }
+    ok: c.int;
+    gl.GetShaderiv(h, gl.COMPILE_STATUS,&ok);
+
+	if ok != 1{
+		log_length : c.int
+		gl.GetShaderiv(h, gl.INFO_LOG_LENGTH, &log_length)
+		log_bytes := make([]byte, log_length); defer delete(log_bytes)
+		gl.GetShaderInfoLog(h, log_length, &log_length, raw_data(log_bytes))
+		fmt.println(string(log_bytes))
+		log.errorf("Unable to compile shader: {}", h);
+		return 0;
+	}
+
 
     return h;
 }
@@ -243,13 +286,18 @@ setup_imgui_shaders :: proc() -> u32 {
     frag_h := compile_shader(gl.FRAGMENT_SHADER, frag_shader_src);
 
     program_h := gl.CreateProgram();
+    fmt.println(program_h)
+    fmt.println(frag_h)
+    fmt.println(vert_h)
     gl.AttachShader(program_h, frag_h);
+
     gl.AttachShader(program_h, vert_h);
     gl.LinkProgram(program_h);
     
     ok: i32;
     gl.GetProgramiv(program_h, gl.LINK_STATUS, &ok);
-    if ok != gl.TRUE {
+
+    if bool(ok) != gl.TRUE {
         log.errorf("Error linking program: {}", program_h);
     }
 
@@ -258,7 +306,7 @@ setup_imgui_shaders :: proc() -> u32 {
 
 @(private="package")
 frag_shader_src :: `
-#version 450
+#version 410
 in vec2 Frag_UV;
 in vec4 Frag_Color;
 uniform sampler2D Texture;
@@ -271,7 +319,7 @@ void main()
 
 @(private="package")
 vert_shader_src :: `
-#version 450
+#version 410
 layout (location = 0) in vec2 Position;
 layout (location = 1) in vec2 UV;
 layout (location = 2) in vec4 Color;

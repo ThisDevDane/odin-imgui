@@ -1,9 +1,17 @@
 package imgui;
 
 when ODIN_DEBUG {
-	foreign import cimgui "external/cimgui_debug.lib";
+	when ODIN_OS == .Windows {
+		foreign import cimgui "external/cimgui_debug.lib";
+	} else when ODIN_OS == .Linux || ODIN_OS == .Darwin {
+		foreign import cimgui "external/cimgui.a";
+	}
 } else {
-	foreign import cimgui "external/cimgui.lib";
+	when ODIN_OS == .Windows {
+		foreign import cimgui "external/cimgui.lib";
+	} else when ODIN_OS == .Linux  || ODIN_OS == .Darwin{
+		foreign import cimgui "external/cimgui.a";
+	}
 }
 
 @(default_calling_convention="c")

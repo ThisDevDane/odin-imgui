@@ -31,3 +31,15 @@ Implementations are reusable bits of code using popular odin libraries/bidings, 
 
 ## Building cimgui
 If you want to build cimgui yourself instead of using the binaries that exist in the repo, you can just call `make cimgui` from a command prompt that has `cl` and `link` in their path.
+
+If you need to build cimgui:
+```
+In the cimgui makefile change the compiler flags to:
+CXXFLAGS=-O2 -fno-exceptions -fno-rtti -fno-threadsafe-statics
+
+1. make
+2. make static
+
+Rename libcimgui.a to cimgui.a
+Move cimgui.a to odin-imgui external.
+```
