@@ -1,10 +1,8 @@
 package imgui_impl_sdl;
 
 import "core:runtime";
-import "core:fmt";
 
 import sdl "vendor:sdl2";
-import win32 "core:sys/windows"
 import imgui "../..";
 
 SDL_State :: struct {
@@ -67,12 +65,7 @@ process_event :: proc(e: sdl.Event, state: ^SDL_State) {
 
         case .TEXTINPUT: {
             text := e.text;
-			//kimgui.io_add_input_characters_utf8(io,text.text)
             imgui.ImGuiIO_AddInputCharactersUTF8(io, cstring(&text.text[0]));
-			fmt.println(io.input_queue_characters)
-			fmt.println(u32(text.text[0]))
-			//fmt.println(text)
-			//return
         }
 
         case .MOUSEBUTTONDOWN: {
@@ -95,8 +88,6 @@ process_event :: proc(e: sdl.Event, state: ^SDL_State) {
             } else {
                 io.key_super = (sdl.KeymodFlag.LGUI in mod_state) | (sdl.KeymodFlag.RGUI in mod_state)//i32(transmute(u16)(sdl.GetModState())) & i32(sdl.Keycode.LGUI | sdl.Keycode.RGUI) != 0;
             }
-			
-			fmt.println(io.key_super)
         }
     }
 }
