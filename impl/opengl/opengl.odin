@@ -4,7 +4,7 @@ import "core:mem";
 import "core:log";
 import "core:strings";
 
-import gl  "shared:odin-gl";
+import gl "vendor:OpenGL";
 
 import imgui "../..";
 
@@ -168,9 +168,9 @@ imgui_setup_render_state :: proc(data: ^imgui.Draw_Data, state: OpenGL_State) {
     gl.EnableVertexAttribArray(u32(state.attrib_vtx_pos));
     gl.EnableVertexAttribArray(u32(state.attrib_vtx_uv));
     gl.EnableVertexAttribArray(u32(state.attrib_vtx_color));
-    gl.VertexAttribPointer(u32(state.attrib_vtx_pos),   2, gl.FLOAT,         gl.FALSE, size_of(imgui.Draw_Vert), rawptr(offset_of(imgui.Draw_Vert, pos)));
-    gl.VertexAttribPointer(u32(state.attrib_vtx_uv),    2, gl.FLOAT,         gl.FALSE, size_of(imgui.Draw_Vert), rawptr(offset_of(imgui.Draw_Vert, uv)));
-    gl.VertexAttribPointer(u32(state.attrib_vtx_color), 4, gl.UNSIGNED_BYTE, gl.TRUE,  size_of(imgui.Draw_Vert), rawptr(offset_of(imgui.Draw_Vert, col)));
+    gl.VertexAttribPointer(u32(state.attrib_vtx_pos),   2, gl.FLOAT,         gl.FALSE, size_of(imgui.Draw_Vert), uintptr(offset_of(imgui.Draw_Vert, pos)));
+    gl.VertexAttribPointer(u32(state.attrib_vtx_uv),    2, gl.FLOAT,         gl.FALSE, size_of(imgui.Draw_Vert), uintptr(offset_of(imgui.Draw_Vert, uv)));
+    gl.VertexAttribPointer(u32(state.attrib_vtx_color), 4, gl.UNSIGNED_BYTE, gl.TRUE,  size_of(imgui.Draw_Vert), uintptr(offset_of(imgui.Draw_Vert, col)));
 }
 
 backup_opengl_state :: proc(state: ^OpenGL_Backup_State) {
@@ -192,10 +192,10 @@ backup_opengl_state :: proc(state: ^OpenGL_Backup_State) {
     gl.GetIntegerv(gl.BLEND_EQUATION_RGB, &state.last_blend_equation_rgb);
     gl.GetIntegerv(gl.BLEND_EQUATION_ALPHA, &state.last_blend_equation_alpha);
 
-    state.last_enabled_blend = gl.IsEnabled(gl.BLEND) != 0;
-    state.last_enable_cull_face = gl.IsEnabled(gl.CULL_FACE) != 0;
-    state.last_enable_depth_test = gl.IsEnabled(gl.DEPTH_TEST) != 0;
-    state.last_enable_scissor_test = gl.IsEnabled(gl.SCISSOR_TEST) != 0;
+    state.last_enabled_blend = gl.IsEnabled(gl.BLEND);
+    state.last_enable_cull_face = gl.IsEnabled(gl.CULL_FACE);
+    state.last_enable_depth_test = gl.IsEnabled(gl.DEPTH_TEST);
+    state.last_enable_scissor_test = gl.IsEnabled(gl.SCISSOR_TEST);
 }
 
 restore_opengl_state :: proc(state: OpenGL_Backup_State) {
@@ -211,10 +211,29 @@ restore_opengl_state :: proc(state: OpenGL_Backup_State) {
                          u32(state.last_blend_src_alpha), 
                          u32(state.last_blend_dst_alpha));
 
-    if state.last_enabled_blend       do gl.Enable(gl.BLEND)        else do gl.Disable(gl.BLEND);
-    if state.last_enable_cull_face    do gl.Enable(gl.CULL_FACE)    else do gl.Disable(gl.CULL_FACE);
-    if state.last_enable_depth_test   do gl.Enable(gl.DEPTH_TEST)   else do gl.Disable(gl.DEPTH_TEST);
-    if state.last_enable_scissor_test do gl.Enable(gl.SCISSOR_TEST) else do gl.Disable(gl.SCISSOR_TEST);
+    if state.last_enabled_blend {
+        gl.Enable(gl.BLEND)
+    } else {
+        gl.Disable(gl.BLEND)
+    }
+
+    if state.last_enable_cull_face {
+        gl.Enable(gl.CULL_FACE)
+    } else {
+        gl.Disable(gl.CULL_FACE)
+    }
+
+    if state.last_enable_depth_test {
+        gl.Enable(gl.DEPTH_TEST)
+    } else {
+        gl.Disable(gl.DEPTH_TEST)
+    }
+
+    if state.last_enable_scissor_test {
+        gl.Enable(gl.SCISSOR_TEST)
+    } else {
+        gl.Disable(gl.SCISSOR_TEST)
+    }
 
     gl.PolygonMode(gl.FRONT_AND_BACK, u32(state.last_polygon_mode[0]));
     gl.Viewport(state.last_viewport[0],   state.last_viewport[1],    state.last_viewport[2],    state.last_viewport[3]);
@@ -225,11 +244,11 @@ restore_opengl_state :: proc(state: OpenGL_Backup_State) {
 compile_shader :: proc(kind: u32, shader_src: string) -> u32 {
     h := gl.CreateShader(kind);
     data := cast(^u8)strings.clone_to_cstring(shader_src, context.temp_allocator);
-    gl.ShaderSource(h, 1, &data, nil);
+    gl.ShaderSource(h, 1, cast([^]cstring) &data, nil);
     gl.CompileShader(h);
     ok: i32;
     gl.GetShaderiv(h, gl.COMPILE_STATUS, &ok);
-    if ok != gl.TRUE {
+    if ok == 0 {
         log.errorf("Unable to compile shader: {}", h);
         return 0;
     }
@@ -246,10 +265,10 @@ setup_imgui_shaders :: proc() -> u32 {
     gl.AttachShader(program_h, frag_h);
     gl.AttachShader(program_h, vert_h);
     gl.LinkProgram(program_h);
-    
+
     ok: i32;
     gl.GetProgramiv(program_h, gl.LINK_STATUS, &ok);
-    if ok != gl.TRUE {
+    if ok == 0 {
         log.errorf("Error linking program: {}", program_h);
     }
 
