@@ -72,7 +72,7 @@ cimgui:
 	$(CC) $(CIMGUI_FLAGS) /MTd /Zi /Fd:$(EXTERNAL_LIB_DIR)/cimgui_debug.pdb $(CIMGUI_SRC)
 	$(LINK) /nologo $(CIMGUI_OBJS) /out:$(EXTERNAL_LIB_DIR)/cimgui_debug.lib
 	rm *.obj
-	
+
 	$(CC) $(CIMGUI_FLAGS) /MT /O2 $(CIMGUI_SRC)
 	$(LINK) /nologo $(CIMGUI_OBJS) /out:$(EXTERNAL_LIB_DIR)/cimgui.lib
 	rm *.obj
